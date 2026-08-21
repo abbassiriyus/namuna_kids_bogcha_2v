@@ -2,9 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const verifyToken = require('../middleware/verifyToken');
 
 // CREATE
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
   const { nomi } = req.body;
   try {
     const result = await db.query(
@@ -17,7 +18,7 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-router.get('/:taomId/ingredient', async (req, res) => {
+router.get('/:taomId/ingredient', verifyToken, async (req, res) => {
   const { taomId } = req.params;
   try {
     const result = await db.query(`
@@ -34,7 +35,7 @@ router.get('/:taomId/ingredient', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-router.post('/:taomId/ingredient', async (req, res) => {
+router.post('/:taomId/ingredient', verifyToken, async (req, res) => {
   const { taomId } = req.params;
   const { sklad_product_id, miqdor } = req.body;
 
@@ -57,43 +58,56 @@ router.post('/:taomId/ingredient', async (req, res) => {
 });
 
 // POST /taom/ishlatish
-router.post('/ishlatish', async (req, res) => {
+router.post('/ishlatish', verifyToken, async (req, res) => {
   const { taom_id, sana, bolalar_soni } = req.body;
 
+  if (!taom_id || !sana || !bolalar_soni || Number(bolalar_soni) <= 0) {
+    return res.status(400).json({ error: 'taom_id, sana va bolalar_soni (musbat son) kerak' });
+  }
+
+  const client = await db.connect();
   try {
+    await client.query('BEGIN');
+
     // 1. Ingredientlarni olish
-    const result = await db.query(`
-      SELECT sklad_product_id, miqdor 
-      FROM taom_ingredient 
+    const result = await client.query(`
+      SELECT sklad_product_id, miqdor
+      FROM taom_ingredient
       WHERE taom_id = $1
     `, [taom_id]);
 
     const ingredients = result.rows;
 
-    // 2. Har bir ingredient uchun hajm = miqdor * bolalar_soni
-    for (let ing of ingredients) {
-      const hajm = ing.miqdor * bolalar_soni;
+    if (ingredients.length > 0) {
+      // 2. Har bir ingredient uchun hajm = miqdor * bolalar_soni, bitta so'rovda
+      const description = `Taom ID: ${taom_id} bo‘yicha ${bolalar_soni} bola uchun`;
+      const params = [];
+      const values = ingredients.map(ing => {
+        const hajm = ing.miqdor * bolalar_soni;
+        params.push(hajm, ing.sklad_product_id, description, sana);
+        const n = params.length;
+        return `($${n - 3}, $${n - 2}, $${n - 1}, $${n})`;
+      }).join(',');
 
-      await db.query(`
+      await client.query(`
         INSERT INTO chiqim_ombor (hajm, sklad_product_id, description, chiqim_sana)
-        VALUES ($1, $2, $3, $4)
-      `, [
-        hajm,
-        ing.sklad_product_id,
-        `Taom ID: ${taom_id} bo‘yicha ${bolalar_soni} bola uchun`,
-        sana
-      ]);
+        VALUES ${values}
+      `, params);
     }
 
+    await client.query('COMMIT');
     res.status(200).json({ message: "Mahsulotlar chiqim_ombor jadvaliga saqlandi" });
   } catch (error) {
+    try { await client.query('ROLLBACK'); } catch (rollbackErr) { console.error('Rollback xatolik:', rollbackErr.message); }
     console.error("Server xatolik:", error);
     res.status(500).json({ error: "Chiqim yozishda xatolik" });
+  } finally {
+    client.release();
   }
 });
 
 // READ ALL
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM taom ORDER BY id');
     res.json(result.rows);
@@ -104,7 +118,7 @@ router.get('/', async (req, res) => {
 });
 
 // READ ONE
-router.get('/:id', async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await db.query('SELECT * FROM taom WHERE id = $1', [id]);
@@ -119,7 +133,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   const { nomi } = req.body;
   try {
@@ -138,7 +152,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await db.query('DELETE FROM taom WHERE id = $1 RETURNING *', [id]);

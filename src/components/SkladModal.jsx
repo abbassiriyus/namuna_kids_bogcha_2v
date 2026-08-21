@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css'; // qayta ishlatamiz
+import { getText } from '../i18n/translations';
 
 export default function SkladModal({ isOpen, onClose, onSave, initialData }) {
   const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ export default function SkladModal({ isOpen, onClose, onSave, initialData }) {
     <div className={styles.modal}>
       <div className={styles.modal__content}>
         <h3 className={styles.modal__title}>
-          {initialData ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot'}
+          {initialData ? getText('editProduct') : getText('newProduct')}
         </h3>
 
         <div className={styles.modal__form}>
@@ -45,14 +46,14 @@ export default function SkladModal({ isOpen, onClose, onSave, initialData }) {
             name="nomi"
             value={formData.nomi}
             onChange={handleChange}
-            placeholder="Mahsulot nomi (masalan, Kartoshka)"
+            placeholder={getText('productNamePlaceholder')}
           />
           <input
             name="hajm"
             type="number"
             value={formData.hajm}
             onChange={handleChange}
-            placeholder="Hajmi (masalan, 100)"
+            placeholder={getText('volumePlaceholder')}
           />
           <select name="hajm_birlik" value={formData.hajm_birlik} onChange={handleChange}>
             <option value="kg">kg</option>
@@ -67,8 +68,8 @@ export default function SkladModal({ isOpen, onClose, onSave, initialData }) {
         </div>
 
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> Saqlash</button>
-          <button onClick={onClose}><X size={16} /> Bekor qilish</button>
+          <button onClick={handleSubmit}><Check size={16} /> {getText('save')}</button>
+          <button onClick={onClose}><X size={16} /> {getText('cancel')}</button>
         </div>
       </div>
     </div>

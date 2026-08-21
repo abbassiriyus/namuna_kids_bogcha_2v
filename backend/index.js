@@ -26,6 +26,14 @@ const taomRoutes = require('./routes/taom');
 const taom_ingredientRoutes = require('./routes/taom_ingredient');
 const daromatTypeRoutes = require('./routes/daromat_type');
 const permissionRoutes = require('./routes/permissionRoutes');
+const bolaPrpRoutes = require('./routes/bolaPrpRoutes');
+const tarixRoutes = require('./routes/tarixRoutes');
+const bolaKunPrpRoutes = require('./routes/bolaKunPrpRoutes');
+const bolaPayControlRoutes = require('./routes/bolaPayControlRoutes');
+const bolaPayNewRoutes = require('./routes/bolaPayNewRoutes');
+const xodimOneDayRoutes = require('./routes/xodimOneDayRoutes');
+const xodimWorkdaysRoutes = require('./routes/xodimWorkdaysRoutes');
+const groupAdminRoutes = require('./routes/groupAdminRoutes');
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -34,6 +42,7 @@ app.use(cors({ origin: '*' }));
 app.use(fileUpload());
 app.use(express.json());
 app.use(express.static('./uploads'));
+app.use('/upload', express.static('./uploads'));
 
 // Routers
 app.use('/admin', adminRoutes);
@@ -61,6 +70,14 @@ app.use('/taom', taomRoutes);
 app.use('/taom_ingredient', taom_ingredientRoutes);
 app.use('/daromat_type', daromatTypeRoutes);
 app.use('/permissions', permissionRoutes);
+app.use('/bola_prp', bolaPrpRoutes);
+app.use('/tarix', tarixRoutes);
+app.use('/bola_kun_prp', bolaKunPrpRoutes);
+app.use('/bola_pay_control', bolaPayControlRoutes);
+app.use('/bola-pay-new', bolaPayNewRoutes);
+app.use('/xodim_one_day', xodimOneDayRoutes);
+app.use('/xodim_workdays', xodimWorkdaysRoutes);
+app.use('/group-admin', groupAdminRoutes);
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);

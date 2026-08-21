@@ -34,7 +34,7 @@ function AdminTable({
         delete_payments: true,
       }
     : {
-        view_payments: permissions.view_payments || true,
+        view_payments: permissions.view_payments || false,
         create_payments: permissions.create_payments || false,
         edit_payments: permissions.edit_payments || false,
         delete_payments: permissions.delete_payments || false,

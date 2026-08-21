@@ -2,9 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const verifyToken = require('../middleware/verifyToken');
 
 // CREATE
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
   const { sklad_product_id, miqdor,taom_id } = req.body;
   try {
     const result = await db.query(
@@ -21,7 +22,7 @@ router.post('/', async (req, res) => {
 });
 
 // READ ALL
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM taom_ingredient ORDER BY id');
     res.json(result.rows);
@@ -32,7 +33,7 @@ router.get('/', async (req, res) => {
 });
 
 // READ ONE
-router.get('/:id', async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await db.query('SELECT * FROM taom_ingredient WHERE id = $1', [id]);
@@ -47,7 +48,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   const { sklad_product_id, miqdor,taom_id } = req.body;
   try {
@@ -72,7 +73,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await db.query('DELETE FROM taom_ingredient WHERE id = $1 RETURNING *', [id]);

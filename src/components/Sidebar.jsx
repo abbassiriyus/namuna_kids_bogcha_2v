@@ -17,6 +17,22 @@ export default function Sidebar() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false); // Sidebar uchun mobil toggle
+  const [collapsed, setCollapsed] = useState(false); // Desktop uchun: faqat ikonka rejimi
+
+  useEffect(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('sidebar_collapsed') : null;
+    if (saved === '1') setCollapsed(true);
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sidebar_collapsed', next ? '1' : '0');
+      }
+      return next;
+    });
+  };
 
   const toggleLanguage = () => {
     // cycle: uz -> ru -> en -> uz
@@ -77,16 +93,16 @@ export default function Sidebar() {
     { name: getText('dashboard', lang), icon: (Icons.Home ? <Icons.Home size={20} /> : <span />), path: '/admin/dashboard', key: 'dashboard' },
     { name: getText('admins', lang), icon: (Icons.ShieldCheck ? <Icons.ShieldCheck size={20} /> : <span />), path: '/admin/adminlar', key: 'admins' },
     { name: getText('students', lang), icon: (Icons.Users ? <Icons.Users size={20} /> : <span />), path: '/admin/tarbiyalanuvchi', key: 'students' },
-    { name: getText('testStudent', lang), icon: (Icons.Users ? <Icons.Users size={20} /> : <span />), path: '/admin/sinov', key: 'prp' },
+    { name: getText('testStudent', lang), icon: (Icons.UserPlus ? <Icons.UserPlus size={20} /> : <span />), path: '/admin/sinov', key: 'prp' },
     { name: getText('groups', lang), icon: (Icons.PieChart ? <Icons.PieChart size={20} /> : <span />), path: '/admin/guruhlar', key: 'groups' },
-    { name: getText('attendance', lang), icon: (Icons.Calendar ? <Icons.Calendar size={20} /> : <span />), path: '/admin/sinovDavomat', key: 'sinovdavomat' },
-    { name: getText('attendance', lang), icon: (Icons.Calendar ? <Icons.Calendar size={20} /> : <span />), path: '/admin/DavomatPage', key: 'attendance' },
-    { name: getText('employeeAttendance', lang), icon: (Icons.Calendar ? <Icons.Calendar size={20} /> : <span />), path: '/admin/XodimDavomat', key: 'attendance' },
+    { name: getText('trialAttendance', lang), icon: (Icons.ClipboardCheck ? <Icons.ClipboardCheck size={20} /> : <span />), path: '/admin/sinovDavomat', key: 'sinovdavomat' },
+    { name: getText('attendance', lang), icon: (Icons.CalendarCheck ? <Icons.CalendarCheck size={20} /> : <span />), path: '/admin/DavomatPage', key: 'attendance' },
+    { name: getText('employeeAttendance', lang), icon: (Icons.Fingerprint ? <Icons.Fingerprint size={20} /> : <span />), path: '/admin/XodimDavomat', key: 'employees' },
     { name: getText('childDay', lang), icon: (Icons.Calendar ? <Icons.Calendar size={20} /> : <span />), path: '/admin/DarslarPage', key: 'lessons' },
     { name: getText('payments', lang), icon: (Icons.DollarSign ? <Icons.DollarSign size={20} /> : <span />), path: '/admin/tolovlar', key: 'payments' },
     { name: getText('employees', lang), icon: (Icons.Briefcase ? <Icons.Briefcase size={20} /> : <span />), path: '/admin/hodimlar', key: 'employees' },
     { name: getText('salaries', lang), icon: (Icons.FileText ? <Icons.FileText size={20} /> : <span />), path: '/admin/oyliklar', key: 'salaries' },
-    { name: getText('positions', lang), icon: (Icons.Briefcase ? <Icons.Briefcase size={20} /> : <span />), path: '/admin/lavozim', key: 'positions' },
+    { name: getText('positions', lang), icon: (Icons.IdCard ? <Icons.IdCard size={20} /> : <span />), path: '/admin/lavozim', key: 'positions' },
     { name: getText('menuMeals', lang), icon: (Icons.Utensils ? <Icons.Utensils size={20} /> : <span />), path: '/admin/taomnoma', key: 'meals' },
     { name: getText('expenses', lang), icon: (Icons.Wallet ? <Icons.Wallet size={20} /> : <span />), path: '/admin/qoshimcha' },
     { name: 'Tarix', icon: (Icons.Clock ? <Icons.Clock size={20} /> : <span />), path: '/admin/tarix', key: 'tarix' },
@@ -105,7 +121,7 @@ export default function Sidebar() {
   ];
 
   const renderSubmenu = (open, menuList) =>
-    open && (
+    open && !collapsed && (
       <ul className={styles.submenu}>
         {menuList.filter((m) => hasPermission(m.key)).map((sub, idx) => {
           const isSubActive = router.pathname === sub.path;
@@ -139,19 +155,27 @@ export default function Sidebar() {
         {Icons.Menu ? <Icons.Menu size={24} /> : <span />}
       </button>
 
-      <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+      <div className={`${styles.sidebar} ${isOpen ? styles.open : ''} ${collapsed ? styles.collapsed : ''}`}>
         <div className={styles.brandWrap}>
           <div className={styles.logo}>B</div>
-          <div>
+          <div className={styles.brandText}>
             <h2 className={styles.title}>{getText('appTitle', lang)}</h2>
             <span className={styles.subtitle}>{getText('panel', lang)}</span>
           </div>
+          <button
+            type="button"
+            className={styles.collapseBtn}
+            onClick={toggleCollapsed}
+            title={collapsed ? getText('expandSidebar', lang) : getText('collapseSidebar', lang)}
+          >
+            {Icons.ChevronLeft ? <Icons.ChevronLeft size={16} className={collapsed ? styles.rotated : ''} /> : <span />}
+          </button>
         </div>
 
         <div className={styles.userCardRow}>
           <div className={styles.userCard}>
             <span className={styles.userDot} />
-            <span>{getText('online', lang)}</span>
+            <span className={styles.label}>{getText('online', lang)}</span>
           </div>
           <button type="button" className={styles.langToggle} onClick={toggleLanguage}>
             {getText('toggleLang', lang)}
@@ -171,16 +195,18 @@ export default function Sidebar() {
                 className={`${styles.item} ${isActive ? styles.active : ''}`}
               >
                 <span className={styles.iconWrap}>{item.icon}</span>
-                <span>{item.name}</span>
+                <span className={styles.label}>{item.name}</span>
+                <span className={styles.tooltip}>{item.name}</span>
               </li>
             );
           })}
 
           {oshxonaMenu.some((m) => hasPermission(m.key)) && (
                     <>
-                      <li onClick={() => setOshxonaOpen(!oshxonaOpen)} className={styles.item}>
+                      <li onClick={() => !collapsed && setOshxonaOpen(!oshxonaOpen)} className={styles.item}>
                         <span className={styles.iconWrap}>{Icons.ChefHat ? <Icons.ChefHat size={20} /> : <span />}</span>
-                        <span>{getText('kitchen', lang)}</span>
+                        <span className={styles.label}>{getText('kitchen', lang)}</span>
+                        <span className={styles.tooltip}>{getText('kitchen', lang)}</span>
                         {oshxonaOpen ? (Icons.ChevronDown ? <Icons.ChevronDown size={16} className={styles.arrow} /> : <span />) : (Icons.ChevronRight ? <Icons.ChevronRight size={16} className={styles.arrow} /> : <span />)}
                       </li>
               {renderSubmenu(oshxonaOpen, oshxonaMenu)}
@@ -189,9 +215,10 @@ export default function Sidebar() {
 
           {maishiyMenu.some((m) => hasPermission(m.key)) && (
             <>
-              <li onClick={() => setMaishiyOpen(!maishiyOpen)} className={styles.item}>
+              <li onClick={() => !collapsed && setMaishiyOpen(!maishiyOpen)} className={styles.item}>
                 <span className={styles.iconWrap}>{Icons.Box ? <Icons.Box size={20} /> : <span />}</span>
-                <span>{getText('household', lang)}</span>
+                <span className={styles.label}>{getText('household', lang)}</span>
+                <span className={styles.tooltip}>{getText('household', lang)}</span>
                 {maishiyOpen ? (Icons.ChevronDown ? <Icons.ChevronDown size={16} className={styles.arrow} /> : <span />) : (Icons.ChevronRight ? <Icons.ChevronRight size={16} className={styles.arrow} /> : <span />)}
               </li>
               {renderSubmenu(maishiyOpen, maishiyMenu)}

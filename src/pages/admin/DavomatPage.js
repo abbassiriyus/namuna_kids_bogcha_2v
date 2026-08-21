@@ -188,22 +188,18 @@ useEffect(() => {
     setFilteredBolalar(result);
   };
 
+  // Filtrlash quyidagi useEffect orqali (selectedGuruh/searchQuery/filterUnmarkedOnly
+  // o'zgarganda) avtomatik ishlaydi — bu yerda qayta chaqirish shart emas.
   const handleGuruhChange = (e) => {
-    const selectedValue = e.target.value;
-    setSelectedGuruh(selectedValue);
-    filterBolalar(bolalar, selectedValue, searchQuery, filterUnmarkedOnly);
+    setSelectedGuruh(e.target.value);
   };
 
   const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    filterBolalar(bolalar, selectedGuruh, query, filterUnmarkedOnly);
+    setSearchQuery(e.target.value);
   };
 
   const toggleUnmarkedOnly = () => {
-    const newValue = !filterUnmarkedOnly;
-    setFilterUnmarkedOnly(newValue);
-    filterBolalar(bolalar, selectedGuruh, searchQuery, newValue);
+    setFilterUnmarkedOnly((prev) => !prev);
   };
 
   const openModal = (bola, dars) => {

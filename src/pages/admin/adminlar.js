@@ -33,6 +33,11 @@ export default function AdminTabs() {
 
   const [showAdminModal, setShowAdminModal] = useState(false);
 
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [groupModalAdmin, setGroupModalAdmin] = useState(null);
+  const [allGuruhlar, setAllGuruhlar] = useState([]);
+  const [assignedGroups, setAssignedGroups] = useState([]); // group_admin rows {id, group_id}
+
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [myPermissions, setMyPermissions] = useState({});
 
@@ -125,6 +130,39 @@ export default function AdminTabs() {
     setShowAdminModal(true);
   };
 
+  const openGroupModal = async (admin) => {
+    try {
+      const [guruhRes, assignedRes] = await Promise.all([
+        axios.get(`${url}/guruh`),
+        axios.get(`${url}/group-admin?admin_id=${admin.id}`),
+      ]);
+      setAllGuruhlar(guruhRes.data);
+      setAssignedGroups(assignedRes.data);
+      setGroupModalAdmin(admin);
+      setShowGroupModal(true);
+    } catch {
+      alert('Guruhlarni yuklashda xatolik');
+    }
+  };
+
+  const toggleGroupAssignment = async (groupId) => {
+    const existing = assignedGroups.find((g) => g.group_id === groupId);
+    try {
+      if (existing) {
+        await axios.delete(`${url}/group-admin/${existing.id}`);
+        setAssignedGroups((prev) => prev.filter((g) => g.id !== existing.id));
+      } else {
+        const res = await axios.post(`${url}/group-admin`, {
+          admin_id: groupModalAdmin.id,
+          group_id: groupId,
+        });
+        setAssignedGroups((prev) => [...prev, res.data]);
+      }
+    } catch {
+      alert('Guruh biriktirishda xatolik');
+    }
+  };
+
   const handleSaveAdmin = async (e) => {
     e.preventDefault();
     if (selectedAdmin) {
@@ -198,11 +236,43 @@ export default function AdminTabs() {
                       <Settings size={16} /> Ruxsat
                     </button>
                   )}
+                  {activeType === 2 && hasPermission('edit_admins') && (
+                    <button onClick={() => openGroupModal(a)} title="Guruhlar">
+                      <Settings size={16} /> Guruhlar
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {showGroupModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <h3>{groupModalAdmin?.username} — biriktirilgan guruhlar</h3>
+              <div className={styles.form}>
+                {allGuruhlar.length === 0 ? (
+                  <p>Guruhlar topilmadi</p>
+                ) : (
+                  allGuruhlar.map((g) => (
+                    <label key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <input
+                        type="checkbox"
+                        checked={assignedGroups.some((ag) => ag.group_id === g.id)}
+                        onChange={() => toggleGroupAssignment(g.id)}
+                      />
+                      {g.name}
+                    </label>
+                  ))
+                )}
+              </div>
+              <div className={styles.modalActions}>
+                <button type="button" onClick={() => setShowGroupModal(false)}><X size={16} /> Yopish</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showPermissionModal && (
           <div className={styles.modalOverlay}>

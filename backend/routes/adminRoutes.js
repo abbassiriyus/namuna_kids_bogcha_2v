@@ -21,10 +21,13 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
-// ✅ READ ALL admins
+// ✅ READ ALL admins (ixtiyoriy ?type= filtr bilan)
 router.get('/', verifyToken, async (req, res) => {
+  const { type } = req.query;
   try {
-    const result = await pool.query(`SELECT * FROM admin ORDER BY id DESC`);
+    const result = type
+      ? await pool.query(`SELECT * FROM admin WHERE type = $1 ORDER BY id DESC`, [type])
+      : await pool.query(`SELECT * FROM admin ORDER BY id DESC`);
     res.status(200).json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -70,42 +73,6 @@ router.put('/:id', verifyToken, async (req, res) => {
   }
 });
 
-
-// CREATE admin — is_active = true bo‘lsa, token qaytaradi
-router.post('/', verifyToken, async (req, res) => {
-  const { username, phone_number, type, description, password, is_active } = req.body;
-
-  try {
-    const result = await pool.query(
-      `INSERT INTO admin (username, phone_number, type, description, password, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *`,
-      [username, phone_number, type, description, password, is_active]
-    );
-
-    const newAdmin = result.rows[0];
-
-    // ✅ is_active true bo‘lsa, token yaratamiz
-    if (newAdmin.is_active) {
-      const token = jwt.sign(
-        {
-          id: newAdmin.id,
-          username: newAdmin.username,
-          type: newAdmin.type
-        },
-        SECRET_KEY,
-        { expiresIn: '7d' }
-      );
-
-      return res.status(201).json({ admin: newAdmin, token });
-    }
-
-    res.status(201).json({ admin: newAdmin });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = process.env.JWT_SECRET || 'mysecretkey';
 

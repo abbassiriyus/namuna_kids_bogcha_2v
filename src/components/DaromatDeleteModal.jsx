@@ -5,6 +5,7 @@ import { Save, X, Pencil, Trash2 } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
+import { getText } from '../i18n/translations';
 
 export default function DaromatDeleteModal({ open, onClose, bolaId, month, onDeleted }) {
   const [items, setItems] = useState([]);
@@ -85,10 +86,10 @@ export default function DaromatDeleteModal({ open, onClose, bolaId, month, onDel
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h3>Daromad yozuvlari ({month})</h3>
+        <h3>{getText('incomeRecords')} ({month})</h3>
 
         {items.length === 0 ? (
-          <p>Hech narsa topilmadi</p>
+          <p>{getText('noData')}</p>
         ) : (
           <ul style={{ maxHeight: '300px', overflowY: 'auto', padding: 0 }}>
             {items.map(item => (

@@ -19,11 +19,11 @@ router.get('/:id/hajm', verifyToken, async (req, res) => {
 
   try {
     const kirim = await pool.query(
-      `SELECT COALESCE(SUM(hajm), 0) AS kirim FROM kirim_maishiy WHERE sklad_maishiy_id = $1`,
+      `SELECT COALESCE(SUM(hajm), 0) AS kirim FROM kirim_maishiy WHERE sklad_product_id = $1`,
       [id]
     );
     const chiqim = await pool.query(
-      `SELECT COALESCE(SUM(hajm), 0) AS chiqim FROM chiqim_maishiy WHERE sklad_maishiy_id = $1`,
+      `SELECT COALESCE(SUM(hajm), 0) AS chiqim FROM chiqim_maishiy WHERE sklad_product_id = $1`,
       [id]
     );
 

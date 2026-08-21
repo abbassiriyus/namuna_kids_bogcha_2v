@@ -5,6 +5,7 @@ import axios from 'axios';
 import { X, Pencil, Trash2 } from 'lucide-react';
 import url from '../host/host';
 import styles from '../styles/BolaPaymentModal.module.css';
+import { getText } from '../i18n/translations';
 
 export default function BolaPaymentModal({ bola, onClose }) {
   const [payments, setPayments] = useState([]);
@@ -83,14 +84,14 @@ export default function BolaPaymentModal({ bola, onClose }) {
     <div className={styles.modalBackdrop}>
       <div className={styles.modalBox}>
         <div className={styles.modalHeader}>
-          <h2>{bola.username} — To‘lovlar</h2>
-          <button onClick={onClose} className={styles.closeBtn} title="Yopish"><X size={18} /></button>
+          <h2>{bola.username} — {getText('payments')}</h2>
+          <button onClick={onClose} className={styles.closeBtn} title={getText('close')}><X size={18} /></button>
         </div>
 
         <div className={styles.inputRow}>
           <input
             type="number"
-            placeholder="Miqdor"
+            placeholder={getText('amount')}
             value={miqdor}
             onChange={(e) => setMiqdor(e.target.value)}
             className={styles.input}
@@ -102,7 +103,7 @@ export default function BolaPaymentModal({ bola, onClose }) {
             className={styles.input}
           />
           <button onClick={handleSave} className={styles.addBtn}>
-            {editing ? 'Yangilash' : 'Qo‘shish'}
+            {editing ? getText('update') : getText('add')}
           </button>
           {editing && (
             <button onClick={() => {
@@ -110,7 +111,7 @@ export default function BolaPaymentModal({ bola, onClose }) {
               setSana('');
               setEditing(null);
             }} className={styles.cancelBtn}>
-              Bekor qilish
+              {getText('cancel')}
             </button>
           )}
         </div>
@@ -119,15 +120,15 @@ export default function BolaPaymentModal({ bola, onClose }) {
           <thead>
             <tr>
               <th>#</th>
-              <th>Miqdor</th>
-              <th>Sana</th>
-              <th>Amallar</th>
+              <th>{getText('amount')}</th>
+              <th>{getText('date')}</th>
+              <th>{getText('actions')}</th>
             </tr>
           </thead>
      <tbody>
   {payments.length === 0 ? (
     <tr>
-      <td colSpan="4" className={styles.empty}>To‘lovlar topilmadi</td>
+      <td colSpan="4" className={styles.empty}>{getText('noData')}</td>
     </tr>
   ) : (
     payments.map((p, idx) => (
@@ -138,12 +139,12 @@ export default function BolaPaymentModal({ bola, onClose }) {
         <td>
           {!p.readonly && (
             <>
-              <button onClick={() => handleEdit(p)} className={styles.editBtn} title="Tahrirlash"><Pencil size={16} /></button>
-              <button onClick={() => handleDelete(p.id)} className={styles.deleteBtn} title="O'chirish"><Trash2 size={16} /></button>
+              <button onClick={() => handleEdit(p)} className={styles.editBtn} title={getText('edit')}><Pencil size={16} /></button>
+              <button onClick={() => handleDelete(p.id)} className={styles.deleteBtn} title={getText('delete')}><Trash2 size={16} /></button>
             </>
           )}
           {p.readonly && (
-            <span className="text-gray-400 italic">Asosiy oylik</span>
+            <span className="text-gray-400 italic">{getText('mainSalary')}</span>
           )}
         </td>
       </tr>

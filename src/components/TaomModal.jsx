@@ -6,6 +6,7 @@ import { Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
+import { getText } from '../i18n/translations';
 
 export default function TaomModal({ open, setOpen, taom, onSaved }) {
   const [formData, setFormData] = useState(taom || {});
@@ -40,18 +41,18 @@ export default function TaomModal({ open, setOpen, taom, onSaved }) {
   return (
     <div className={styles.modal}>
       <div className={styles.modal__content}>
-        <h3 className={styles.modal__title}>{isEdit ? 'Taomni tahrirlash' : 'Yangi taom qo‘shish'}</h3>
+        <h3 className={styles.modal__title}>{isEdit ? getText('editMeal') : getText('addMeal')}</h3>
         <div className={styles.modal__form}>
           <input
             name="nomi"
             value={formData.nomi || ''}
             onChange={handleChange}
-            placeholder="Taom nomi"
+            placeholder={getText('mealName')}
           />
         </div>
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> Saqlash</button>
-          <button onClick={() => setOpen(false)}><X size={16} /> Bekor qilish</button>
+          <button onClick={handleSubmit}><Check size={16} /> {getText('save')}</button>
+          <button onClick={() => setOpen(false)}><X size={16} /> {getText('cancel')}</button>
         </div>
       </div>
     </div>

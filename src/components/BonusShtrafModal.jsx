@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import url from '../host/host';
+import { getText } from '../i18n/translations';
 
 export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }) {
   const [miqdor, setMiqdor] = useState('');
@@ -120,22 +121,22 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
           overflowY: 'auto',
         }}
       >
-        <h3>{bola.username} uchun Bonus/Shtraf</h3>
+        <h3>{bola.username} {getText('bonusShtrafTitle')}</h3>
         {error && <p style={{ color: 'red' }}>{error}</p>}
 
         <div style={{ marginBottom: '20px' }}>
-          <label>Miqdor (shtraf: +, bonus: -):</label>
+          <label>{getText('bonusShtrafAmountLabel')}:</label>
           <input
             type="number"
             value={miqdor}
             onChange={(e) => setMiqdor(e.target.value)}
-            placeholder="Masalan: 50000 yoki -50000"
+            placeholder={getText('amountExample')}
             style={{ width: '95%', padding: '8px', marginTop: '5px' }}
           />
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label>Sana:</label>
+          <label>{getText('date')}:</label>
           <input
             type="date"
             value={sana}
@@ -145,11 +146,11 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label>Izoh (ixtiyoriy):</label>
+          <label>{getText('comment')} ({getText('optional')}):</label>
           <textarea
             value={izoh}
             onChange={(e) => setIzoh(e.target.value)}
-            placeholder="Shtraf yoki bonus sababi"
+            placeholder={getText('reasonPlaceholder')}
             style={{ width: '95%', padding: '8px', marginTop: '5px', height: '80px' }}
           />
         </div>
@@ -165,7 +166,7 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
               borderRadius: '5px',
             }}
           >
-            {editId ? 'O‘zgartirish' : 'Saqlash'}
+            {editId ? getText('update') : getText('save')}
           </button>
           <button
             onClick={() => {
@@ -184,21 +185,21 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
               borderRadius: '5px',
             }}
           >
-            Yopish
+            {getText('close')}
           </button>
         </div>
 
-        <h4>Mavjud Shtraf/Bonuslar</h4>
+        <h4>{getText('existingBonusShtraf')}</h4>
         {shtrafList.length === 0 ? (
-          <p>Hozircha shtraf yoki bonus yo‘q</p>
+          <p>{getText('noData')}</p>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={{ border: '1px solid #ccc', padding: '8px' }}>Miqdor</th>
-                <th style={{ border: '1px solid #ccc', padding: '8px' }}>Sana</th>
-                <th style={{ border: '1px solid #ccc', padding: '8px' }}>Izoh</th>
-                <th style={{ border: '1px solid #ccc', padding: '8px' }}>Amallar</th>
+                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{getText('amount')}</th>
+                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{getText('date')}</th>
+                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{getText('comment')}</th>
+                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{getText('actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -214,13 +215,13 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
                       onClick={() => handleEdit(item)}
                       style={{ marginRight: '5px', padding: '5px' }}
                     >
-                      O‘zgartirish
+                      {getText('update')}
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
                       style={{ padding: '5px', backgroundColor: '#f44336', color: 'white', border: 'none' }}
                     >
-                      O‘chirish
+                      {getText('delete')}
                     </button>
                   </td>
                 </tr>

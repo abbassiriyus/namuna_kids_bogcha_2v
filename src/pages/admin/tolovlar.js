@@ -103,9 +103,6 @@ export default function TolovlarPage() {
       const headers = { Authorization: `Bearer ${token}` };
       const type = typeof window !== 'undefined' ? localStorage.getItem('type') : null;
       const adminId = type === '3' && typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('admin'))?.id : null;
-console.log(month,"asdasd");
-var month=document.querySelector("#month1").value
-console.log(document.querySelector("#month1").value);
 
       const apiCalls = [
         axios.get(`${url}/guruh`, { headers }),
@@ -216,7 +213,9 @@ console.log(document.querySelector("#month1").value);
     }
   };
 
-  const debouncedFetchData = useMemo(() => debounce(fetchData, 300), []);
+  // `month` ni dependency sifatida kiritish shart: aks holda debounce birinchi
+  // renderdagi eskirgan `fetchData` yopilishini (bugungi oy bilan) doim ishlatib qolaveradi.
+  const debouncedFetchData = useMemo(() => debounce(fetchData, 300), [month]);
 
   const filterRows = () => {
     let filtered = allBolalar;
@@ -275,31 +274,38 @@ console.log(document.querySelector("#month1").value);
     return filtered;
   };
 
-  const filteredRows = filterRows();
+  const filteredRows = useMemo(
+    () => filterRows(),
+    [allBolalar, filter, selectedPaymentType, selectedGroup, groups, searchFish, selectedStatus]
+  );
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedRows = filteredRows.slice(startIndex, endIndex);
 
-  const totalSummary = filteredRows.reduce(
-    (acc, row) => {
-      acc.naqt += row.naqt || 0;
-      acc.karta += row.karta || 0;
-      acc.prichislena += row.prichislena || 0;
-      acc.naqt_prichislena += row.naqt_prichislena || 0;
-      acc.jami_tolangan += row.jami_tolangan || 0;
-      acc.bonus_shtraf += row.bonus_shtraf || 0;
-      acc.qarz_miqdori_otgan += row.qarz_miqdori_otgan || 0;
-      return acc;
-    },
-    {
-      naqt: 0,
-      karta: 0,
-      prichislena: 0,
-      naqt_prichislena: 0,
-      jami_tolangan: 0,
-      bonus_shtraf: 0,
-      qarz_miqdori_otgan: 0,
-    }
+  const totalSummary = useMemo(
+    () =>
+      filteredRows.reduce(
+        (acc, row) => {
+          acc.naqt += row.naqt || 0;
+          acc.karta += row.karta || 0;
+          acc.prichislena += row.prichislena || 0;
+          acc.naqt_prichislena += row.naqt_prichislena || 0;
+          acc.jami_tolangan += row.jami_tolangan || 0;
+          acc.bonus_shtraf += row.bonus_shtraf || 0;
+          acc.qarz_miqdori_otgan += row.qarz_miqdori_otgan || 0;
+          return acc;
+        },
+        {
+          naqt: 0,
+          karta: 0,
+          prichislena: 0,
+          naqt_prichislena: 0,
+          jami_tolangan: 0,
+          bonus_shtraf: 0,
+          qarz_miqdori_otgan: 0,
+        }
+      ),
+    [filteredRows]
   );
 
   const exportToDocx = async () => {
@@ -584,6 +590,8 @@ console.log(document.querySelector("#month1").value);
   return (
     <LayoutComponent>
       <>
+        {permissions.view_payments ? (
+        <>
         <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '16px' }}>
           To‘lovlar va daromadlar ({month})
         </h2>
@@ -599,7 +607,6 @@ console.log(document.querySelector("#month1").value);
               onChange={(e) => {
                 setMonth(e.target.value);
                 setCurrentPage(1);
-console.log(e.target.value);
               }}
               id='month1'
               style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '6px' }}
@@ -774,6 +781,10 @@ console.log(e.target.value);
               </p>
             </div>
           </>
+        )}
+        </>
+        ) : (
+          <p style={{ padding: '20px', color: 'red' }}>Sizda to‘lovlarni ko‘rish uchun ruxsat yo‘q!</p>
         )}
 
         {modalOpen && (permissions.create_payments || permissions.edit_payments) && (

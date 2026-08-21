@@ -21,22 +21,21 @@ router.post('/', verifyToken, async (req, res) => {
 });
 
 // READ – barcha chiqim_ombor yozuvlarini olish
-router.get('/chiqim_ombor', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   const { start, end, product } = req.query;
   let query = 'SELECT * FROM chiqim_ombor';
   const conditions = [];
+  const params = [];
 
-  if (start && end) conditions.push(`chiqim_sana BETWEEN '${start}' AND '${end}'`);
-  else if (start) conditions.push(`chiqim_sana >= '${start}'`);
-  else if (end) conditions.push(`chiqim_sana <= '${end}'`);
-
-  if (product) conditions.push(`sklad_product_id = ${product}`);
+  if (start) { conditions.push(`chiqim_sana >= $${params.length + 1}`); params.push(start); }
+  if (end) { conditions.push(`chiqim_sana <= $${params.length + 1}`); params.push(end); }
+  if (product) { conditions.push(`sklad_product_id = $${params.length + 1}`); params.push(product); }
 
   if (conditions.length > 0) query += ' WHERE ' + conditions.join(' AND ');
   query += ' ORDER BY chiqim_sana DESC';
 
   try {
-    const result = await pool.query(query);
+    const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
     console.error('Xatolik:', err.message);
@@ -44,7 +43,7 @@ router.get('/chiqim_ombor', async (req, res) => {
   }
 });
 
-router.post('/bulk', async (req, res) => {
+router.post('/bulk', verifyToken, async (req, res) => {
   const items = req.body;
 
   try {
@@ -52,16 +51,19 @@ router.post('/bulk', async (req, res) => {
       return res.status(400).json({ error: "Bo‘sh ma'lumot yuborildi." });
     }
 
-    const values = items.map(i =>
-      `(${i.sklad_product_id}, ${i.hajm}, '${i.description || ''}', '${i.chiqim_sana}')`
-    ).join(",");
+    const params = [];
+    const values = items.map(i => {
+      params.push(i.sklad_product_id, i.hajm, i.description || '', i.chiqim_sana);
+      const n = params.length;
+      return `($${n - 3}, $${n - 2}, $${n - 1}, $${n})`;
+    }).join(",");
 
     const query = `
       INSERT INTO chiqim_ombor (sklad_product_id, hajm, description, chiqim_sana)
       VALUES ${values}
     `;
 
-    await pool.query(query);
+    await pool.query(query, params);
     res.status(201).send("OK");
   } catch (err) {
     console.error("Bulk insert error:", err);

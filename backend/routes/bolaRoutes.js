@@ -136,7 +136,7 @@ router.put('/:id', verifyToken, async (req, res) => {
   }
 });
 
-router.put('/:id/toggle-active', async (req, res) => {
+router.put('/:id/toggle-active', verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -150,7 +150,7 @@ router.put('/:id/toggle-active', async (req, res) => {
     const updated = !current;
 
     // Yangilash
-    await pool.query('UPDATE bola SET is_active = $1 WHERE id = $2', [updated, id]);
+    await pool.query('UPDATE bola SET is_active = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [updated, id]);
 
     res.json({ message: 'Holat muvaffaqiyatli yangilandi', is_active: updated });
   } catch (err) {

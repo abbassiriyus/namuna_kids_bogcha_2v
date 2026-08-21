@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db'); // PostgreSQL poolni chaqiramiz
+const verifyToken = require('../middleware/verifyToken');
 
 // CREATE - POST /bola_kuni_all
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
   const { sana, mavzu } = req.body;
   try {
     const result = await pool.query(`
@@ -18,7 +19,7 @@ router.post('/', async (req, res) => {
 
 
 // GET /bola_kuni_all?month=YYYY-MM
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   const { month, year } = req.query;
   try {
     const result = await pool.query(`
@@ -33,7 +34,7 @@ router.get('/', async (req, res) => {
 
 
 // READ ONE - GET /bola_kuni_all/:id
-router.get('/:id', async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(`SELECT * FROM bola_kuni_all WHERE id = $1`, [id]);
@@ -46,7 +47,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE - PUT /bola_kuni_all/:id
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   const { mavzu, sana } = req.body;
   try {
@@ -62,7 +63,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/', async (req, res) => {
+router.delete('/', verifyToken, async (req, res) => {
   const { sana } = req.body;
   try {
     const result = await pool.query(`

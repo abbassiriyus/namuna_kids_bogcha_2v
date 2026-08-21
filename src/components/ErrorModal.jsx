@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import styles from '../styles/ErrorModal.module.css';
+import { getText } from '../i18n/translations';
 
 const ErrorModal = ({ message, onClose }) => {
   const [mounted, setMounted] = useState(false);
@@ -15,7 +16,7 @@ const ErrorModal = ({ message, onClose }) => {
     <div className={styles.errorModal}>
       <div className={styles.errorContent}>
         <p>{message}</p>
-        <button onClick={onClose}>Yopish</button>
+        <button onClick={onClose}>{getText('close')}</button>
       </div>
     </div>
   );

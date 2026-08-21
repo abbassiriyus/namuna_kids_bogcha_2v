@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db'); // PostgreSQL poolni chaqiramiz
+const verifyToken = require('../middleware/verifyToken');
 
 // CREATE - POST /darssana
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
   const { mavzu, sana } = req.body;
   try {
     const result = await pool.query(
@@ -19,7 +20,7 @@ router.post('/', async (req, res) => {
 
 
 // GET /darssana?month=YYYY-MM
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   const { month } = req.query;
 
   try {
@@ -55,7 +56,7 @@ router.get('/', async (req, res) => {
 
 
 // READ ONE - GET /darssana/:id
-router.get('/:id', async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(`SELECT * FROM darssana WHERE id = $1`, [id]);
@@ -68,7 +69,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE - PUT /darssana/:id
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   const { mavzu, sana } = req.body;
   try {
@@ -84,7 +85,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   const client = await pool.connect();
 
@@ -105,7 +106,7 @@ router.delete('/:id', async (req, res) => {
     await client.query('COMMIT');
     res.json({ message: 'Dars va unga bog‘langan davomatlar o‘chirildi' });
   } catch (err) {
-    await client.query('ROLLBACK');
+    try { await client.query('ROLLBACK'); } catch (rollbackErr) { console.error('Rollback xatolik:', rollbackErr.message); }
     console.error('Darssana delete error:', err.message);
     res.status(500).json({ error: 'Server error' });
   } finally {

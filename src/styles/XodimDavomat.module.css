@@ -217,7 +217,7 @@
 
 .overlay {
   background: rgba(15, 23, 42, 0.5);
-  z-index: 99;
+  z-index: 100000;
 }
 
 .modalContent {

@@ -5,6 +5,7 @@ import axios from 'axios';
 import url from '../host/host';
 import { Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
+import { getText } from '../i18n/translations';
 
 export default function IngredientModal({ open, setOpen, taomId, onSaved, ingredient }) {
   const [formData, setFormData] = useState({
@@ -70,20 +71,20 @@ export default function IngredientModal({ open, setOpen, taomId, onSaved, ingred
   return (
     <div className={styles.modal}>
       <div className={styles.modal__content}>
-        <h3 className={styles.modal__title}>Mahsulot biriktirish</h3>
+        <h3 className={styles.modal__title}>{getText('attachProduct')}</h3>
         <div className={styles.modal__form}>
           <select name="sklad_product_id" value={formData.sklad_product_id} onChange={handleChange}>
-            <option value="">Mahsulotni tanlang</option>
+            <option value="">{getText('selectProduct')}</option>
             {mahsulotlar.map((m) => (
               <option key={m.id} value={m.id}>{m.nomi}</option>
             ))}
           </select>
-          <input name="miqdor" value={formData.miqdor} onChange={handleChange} placeholder="Miqdor" type="number" />
-          <input name="miqdor_birlik" value={formData.miqdor_birlik} readOnly placeholder="Birlik (kg, l, dona)" />
+          <input name="miqdor" value={formData.miqdor} onChange={handleChange} placeholder={getText('amount')} type="number" />
+          <input name="miqdor_birlik" value={formData.miqdor_birlik} readOnly placeholder={getText('unitPlaceholder')} />
         </div>
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> Saqlash</button>
-          <button onClick={() => setOpen(false)}><X size={16} /> Bekor qilish</button>
+          <button onClick={handleSubmit}><Check size={16} /> {getText('save')}</button>
+          <button onClick={() => setOpen(false)}><X size={16} /> {getText('cancel')}</button>
         </div>
       </div>
     </div>

@@ -98,9 +98,6 @@ export default function DarslarPage() {
       return;
     }
 
-    const isoDate = new Date(dateStr);
-    isoDate.setDate(isoDate.getDate() + 1);
-    const sanaPlusOne = isoDate.toISOString();
     const isChecked = selectedDates.includes(dateStr);
 
     setLoading(true);
@@ -110,7 +107,7 @@ export default function DarslarPage() {
           setErrorMessage("Sizda dars kunini o'chirish uchun ruxsat yo'q!");
           return;
         }
-        await axios.delete(`${url}/bola_kun_all`, { data: { sana: sanaPlusOne }, ...authHeader });
+        await axios.delete(`${url}/bola_kun_all`, { data: { sana: dateStr }, ...authHeader });
         setSelectedDates((prev) => prev.filter((d) => d !== dateStr));
       } else {
         if (!permissions.create_lessons) {
@@ -120,7 +117,7 @@ export default function DarslarPage() {
         await axios.post(
           `${url}/bola_kun_all`,
           {
-            sana: sanaPlusOne,
+            sana: dateStr,
             mavzu: 'Avtomatik mavzu',
           },
           authHeader
@@ -148,13 +145,10 @@ export default function DarslarPage() {
       for (const day of days) {
         const dateStr = day.toLocaleDateString('sv-SE');
         if (!selectedDates.includes(dateStr)) {
-          const isoDate = new Date(dateStr);
-          isoDate.setDate(isoDate.getDate() + 1);
-          const sanaPlusOne = isoDate.toISOString();
           await axios.post(
             `${url}/bola_kun_all`,
             {
-              sana: sanaPlusOne,
+              sana: dateStr,
               mavzu: 'Avtomatik mavzu',
             },
             authHeader

@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db'); // PostgreSQL ulanishi
+const verifyToken = require('../middleware/verifyToken');
 
 // ✅ GET - Barcha daromat_type yozuvlar
 // ✅ GET - Yil va oy bo‘yicha daromat_type yozuvlari
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     const { year, month } = req.query;
 
@@ -29,7 +30,7 @@ router.get('/', async (req, res) => {
 });
 
 // ✅ GET - Faqat 1 bola_id uchun va sana (oy) bo‘yicha
-router.get('/bola/:bola_id/:yearMonth', async (req, res) => {
+router.get('/bola/:bola_id/:yearMonth', verifyToken, async (req, res) => {
   const { bola_id, yearMonth } = req.params;
   try {
     const result = await pool.query(
@@ -45,7 +46,7 @@ router.get('/bola/:bola_id/:yearMonth', async (req, res) => {
 });
 
 // ✅ POST - Yangi daromat yozuvi qo‘shish
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
   const { bola_id, sana, naqt = 0, karta = 0, prichislena = 0,naqt_prichislena=0 } = req.body;
   try {
     const result = await pool.query(
@@ -62,13 +63,13 @@ router.post('/', async (req, res) => {
 });
 
 // ✅ PUT - Ma’lumotni yangilash
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   const { naqt = 0, karta = 0, prichislena = 0,naqt_prichislena=0 } = req.body;
   try {
     const result = await pool.query(
       `UPDATE daromat_type
-       SET naqt = $1, karta = $2, prichislena = $3,naqt_prichislena=$4 updated_at = NOW()
+       SET naqt = $1, karta = $2, prichislena = $3, naqt_prichislena = $4
        WHERE id = $5
        RETURNING *`,
       [naqt, karta, prichislena,naqt_prichislena, id]
@@ -84,7 +85,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // ✅ DELETE - O‘chirish
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(

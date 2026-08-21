@@ -4,6 +4,11 @@
   --color-primary-hover: #1d4ed8;
   --color-primary-soft: #eff6ff;
 
+  /* Pastel purple accent glow — used as a soft ambient light on the login
+     screen and behind every admin page (see Login.module.css, Layout.module.css) */
+  --color-accent-purple: #a78bfa;
+  --color-accent-purple-soft: #f1ebfe;
+
   /* Surfaces */
   --color-bg: #f4f6f9;
   --color-surface: #ffffff;

@@ -4,6 +4,7 @@ import { useState } from "react";
 import axios from "axios";
 import url from "../host/host";
 import styles from "../styles/BolaModal.module.css"; // IngredientModal asosidagi style
+import { getText } from "../i18n/translations";
 
 export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
     const [sana, setSana] = useState("");
@@ -31,10 +32,10 @@ export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
     return (
         <div className={styles.modal}>
             <div className={styles.modal__content}>
-                <h3 className={styles.modal__title}>Ovqatni Ishlatish</h3>
+                <h3 className={styles.modal__title}>{getText('useMeal')}</h3>
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <label className={styles.label}>
-                        Sana:
+                        {getText('date')}:
                         <input
                             type="date"
                             className={styles.input}
@@ -44,7 +45,7 @@ export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
                         />
                     </label>
                     <label className={styles.label}>
-                        Bola soni:
+                        {getText('childrenCount')}:
                         <input
                             type="number"
                             min="1"
@@ -55,9 +56,9 @@ export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
                         />
                     </label>
                     <div className={styles.modal__buttons}>
-                        <button type="submit" className={styles.saveButton}>Saqlash</button>
+                        <button type="submit" className={styles.saveButton}>{getText('save')}</button>
                         <button type="button" onClick={() => setOpen(false)} className={styles.cancelButton}>
-                            Bekor qilish
+                            {getText('cancel')}
                         </button>
                     </div>
                 </form>

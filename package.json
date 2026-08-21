@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0 -p 3000",
+    "dev": "concurrently -n frontend,backend -c blue,green \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "next dev -H 0.0.0.0 -p 3000",
+    "dev:backend": "npm --prefix backend start",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -36,6 +38,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/react": "19.1.8",
+    "concurrently": "^10.0.5",
     "eslint": "^9",
     "eslint-config-next": "15.1.0"
   }

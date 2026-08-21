@@ -21,7 +21,7 @@ router.get('/', verifyToken, async (req, res) => {
     }
     if (product) {
       values.push(product);
-      baseQuery += ` AND sklad_maishiy_id = $${values.length}`;
+      baseQuery += ` AND sklad_product_id = $${values.length}`;
     }
 
     baseQuery += ' ORDER BY id DESC';
@@ -36,33 +36,33 @@ router.get('/', verifyToken, async (req, res) => {
 
 // POST /chiqim_maishiy/multi
 router.post('/multi', verifyToken, async (req, res) => {
+  const data = req.body; // array of chiqim objects
+  if (!Array.isArray(data) || data.length === 0) {
+    return res.status(400).json({ error: 'Data should be a non-empty array' });
+  }
+
   const client = await pool.connect();
   try {
-    const data = req.body; // array of chiqim objects
-    if (!Array.isArray(data)) {
-      return res.status(400).json({ error: 'Data should be an array' });
-    }
-
     await client.query('BEGIN');
-    const results = [];
 
-    for (const item of data) {
-      const { sklad_maishiy_id, hajm, chiqim_sana, description } = item;
-      const result = await client.query(
-        `
-        INSERT INTO chiqim_maishiy (sklad_maishiy_id, hajm, chiqim_sana, description)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *
-        `,
-        [sklad_maishiy_id, hajm, chiqim_sana, description]
-      );
-      results.push(result.rows[0]);
-    }
+    const params = [];
+    const values = data.map(item => {
+      params.push(item.sklad_product_id, item.hajm, item.chiqim_sana, item.description || null);
+      const n = params.length;
+      return `($${n - 3}, $${n - 2}, $${n - 1}, $${n})`;
+    }).join(',');
+
+    const result = await client.query(
+      `INSERT INTO chiqim_maishiy (sklad_product_id, hajm, chiqim_sana, description)
+       VALUES ${values}
+       RETURNING *`,
+      params
+    );
 
     await client.query('COMMIT');
-    res.status(201).json(results);
+    res.status(201).json(result.rows);
   } catch (err) {
-    await client.query('ROLLBACK');
+    try { await client.query('ROLLBACK'); } catch (rollbackErr) { console.error('Rollback xatolik:', rollbackErr.message); }
     console.error('Xatolik:', err.message);
     res.status(500).json({ error: err.message });
   } finally {
@@ -72,12 +72,12 @@ router.post('/multi', verifyToken, async (req, res) => {
 
 // POST yangi chiqim_maishiy
 router.post('/',verifyToken, async (req, res) => {
-  const { hajm, sklad_product_id, description } = req.body;
+  const { hajm, sklad_product_id, description, chiqim_sana } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO chiqim_maishiy (hajm, sklad_product_id, description)
-       VALUES ($1, $2, $3) RETURNING *`,
-      [hajm, sklad_product_id, description]
+      `INSERT INTO chiqim_maishiy (hajm, sklad_product_id, description, chiqim_sana)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [hajm, sklad_product_id, description, chiqim_sana]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -89,16 +89,17 @@ router.post('/',verifyToken, async (req, res) => {
 // PUT tahrirlash
 router.put('/:id',verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { hajm, sklad_product_id, description } = req.body;
+  const { hajm, sklad_product_id, description, chiqim_sana } = req.body;
   try {
     const result = await pool.query(
       `UPDATE chiqim_maishiy SET
          hajm = $1,
          sklad_product_id = $2,
          description = $3,
+         chiqim_sana = COALESCE($4, chiqim_sana),
          updated_at = CURRENT_TIMESTAMP
-       WHERE id = $4 RETURNING *`,
-      [hajm, sklad_product_id, description, id]
+       WHERE id = $5 RETURNING *`,
+      [hajm, sklad_product_id, description, chiqim_sana, id]
     );
     res.json(result.rows[0]);
   } catch (err) {

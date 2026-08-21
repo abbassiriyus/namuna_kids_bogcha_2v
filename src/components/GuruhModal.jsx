@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
+import { getText } from '../i18n/translations';
 
 export default function GuruhModal({ guruh, onClose, onSave, xodimlar = [] }) {
   const [formData, setFormData] = useState(guruh || {});
@@ -26,14 +27,14 @@ export default function GuruhModal({ guruh, onClose, onSave, xodimlar = [] }) {
     <div className={styles.modal}>
       <div className={styles.modal__content}>
         <h3 className={styles.modal__title}>
-          {formData.id ? "Guruhni tahrirlash" : "Yangi guruh qo‘shish"}
+          {formData.id ? getText('editGroup') : getText('addGroup')}
         </h3>
 
         <div className={styles.modal__form}>
           <input
             className={styles.input}
             name="name"
-            placeholder="Guruh nomi"
+            placeholder={getText('groupName')}
             value={formData.name || ''}
             onChange={handleChange}
           />
@@ -44,7 +45,7 @@ export default function GuruhModal({ guruh, onClose, onSave, xodimlar = [] }) {
   value={formData.xodim_id || ''}
   onChange={handleChange}
 >
-  <option value="">Tarbiyachi tanlang</option>
+  <option value="">{getText('selectTeacher')}</option>
   {xodimlar.map((x) => (
     <option key={x.id} value={x.id}>{x.name}</option>
   ))}
@@ -53,8 +54,8 @@ export default function GuruhModal({ guruh, onClose, onSave, xodimlar = [] }) {
         </div>
 
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> Saqlash</button>
-          <button onClick={onClose}><X size={16} /> Bekor</button>
+          <button onClick={handleSubmit}><Check size={16} /> {getText('save')}</button>
+          <button onClick={onClose}><X size={16} /> {getText('cancel')}</button>
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ router.get('/', verifyToken, async (req, res) => {
     }
     if (product) {
       values.push(product);
-      query += ` AND sklad_maishiy_id = $${values.length}`;
+      query += ` AND sklad_product_id = $${values.length}`;
     }
 
     query += ' ORDER BY id DESC';
@@ -35,30 +35,33 @@ router.get('/', verifyToken, async (req, res) => {
 
 
 router.post('/multi', verifyToken, async (req, res) => {
+  const data = req.body; // array of kirim_maishiy
+  if (!Array.isArray(data) || data.length === 0) {
+    return res.status(400).json({ error: 'Data should be a non-empty array' });
+  }
+
   const client = await pool.connect();
   try {
-    const data = req.body; // array of kirim_maishiy
-    if (!Array.isArray(data)) {
-      return res.status(400).json({ error: 'Data should be an array' });
-    }
-
     await client.query('BEGIN');
-    const results = [];
 
-    for (const item of data) {
-      const { sklad_maishiy_id, hajm, narx, description } = item;
-      const result = await client.query(
-        `INSERT INTO kirim_maishiy (sklad_maishiy_id, hajm, narx, description)
-         VALUES ($1, $2, $3, $4) RETURNING *`,
-        [sklad_maishiy_id, hajm, narx, description]
-      );
-      results.push(result.rows[0]);
-    }
+    const params = [];
+    const values = data.map(item => {
+      params.push(item.sklad_product_id, item.hajm, item.narx, item.description || null);
+      const n = params.length;
+      return `($${n - 3}, $${n - 2}, $${n - 1}, $${n})`;
+    }).join(',');
+
+    const result = await client.query(
+      `INSERT INTO kirim_maishiy (sklad_product_id, hajm, narx, description)
+       VALUES ${values}
+       RETURNING *`,
+      params
+    );
 
     await client.query('COMMIT');
-    res.status(201).json(results);
+    res.status(201).json(result.rows);
   } catch (err) {
-    await client.query('ROLLBACK');
+    try { await client.query('ROLLBACK'); } catch (rollbackErr) { console.error('Rollback xatolik:', rollbackErr.message); }
     console.error('Kirim yozishda xatolik:', err.message);
     res.status(500).json({ error: err.message });
   } finally {

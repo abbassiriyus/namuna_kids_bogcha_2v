@@ -5,6 +5,7 @@ import { Save, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
+import { getText } from '../i18n/translations';
 
 export default function DaromatModal({ open, onClose, bola, month, onSaved }) {
   const [formData, setFormData] = useState({
@@ -124,10 +125,10 @@ export default function DaromatModal({ open, onClose, bola, month, onSaved }) {
         <h3>{bola.fish} — {month} oyi uchun to‘lov</h3>
 
         {loading ? (
-          <p style={{ padding: '10px 0', color: '#555' }}>Ma'lumotlar yuklanmoqda...</p>
+          <p style={{ padding: '10px 0', color: '#555' }}>{getText('loadingData')}</p>
         ) : (
           <>
-            <label>Sana (automatik):</label>
+            <label>{getText('autoDate')}:</label>
             <input
               type="text"
               defaultValue={sana}
@@ -136,40 +137,40 @@ export default function DaromatModal({ open, onClose, bola, month, onSaved }) {
               style={{ backgroundColor: '#eee', marginBottom: '12px' }}
             />
 
-            <label>Naqt to‘lov:</label>
+            <label>{getText('cashPayment')}:</label>
             <input
               type="number"
-              placeholder="Naqt"
+              placeholder={getText('cashPayment')}
               defaultValue={formData.naqt || 0}
               onChange={(e) => setFormData({ ...formData, naqt: e.target.value })}
               onKeyDown={(e) => handleKeyDown(e, kartaRef)}
               ref={naqtRef}
             />
 
-            <label>Karta orqali to‘lov:</label>
+            <label>{getText('cardPayment')}:</label>
             <input
               type="number"
-              placeholder="Karta"
+              placeholder={getText('cardPayment')}
               defaultValue={formData.karta || 0}
               onChange={(e) => setFormData({ ...formData, karta: e.target.value })}
               onKeyDown={(e) => handleKeyDown(e, prichislenaRef)}
               ref={kartaRef}
             />
 
-            <label>Bank orqali to‘lov:</label>
+            <label>{getText('bankPayment')}:</label>
             <input
               type="number"
-              placeholder="Bank to`lov"
+              placeholder={getText('bankPayment')}
               defaultValue={formData.prichislena || 0}
               onChange={(e) => setFormData({ ...formData, prichislena: e.target.value })}
               onKeyDown={(e) => handleKeyDown(e, naqtPrichislenaRef)}
               ref={prichislenaRef}
             />
 
-            <label>Bank orqali naqt tarzda:</label>
+            <label>{getText('bankCashPayment')}:</label>
             <input
               type="number"
-              placeholder="Bank(Naqt) to`lov"
+              placeholder={getText('bankCashPayment')}
               defaultValue={formData.naqt_prichislena || 0}
               onChange={(e) => setFormData({ ...formData, naqt_prichislena: e.target.value })}
               onKeyDown={(e) => handleKeyDown(e, null)}
@@ -178,11 +179,11 @@ export default function DaromatModal({ open, onClose, bola, month, onSaved }) {
 
             <div className={styles.modal__buttons}>
               {saving ? (
-                <button disabled><Save size={16} /> Saqlanmoqda...</button>
+                <button disabled><Save size={16} /> {getText('saving')}</button>
               ) : (
-                <button onClick={handleSave}><Save size={16} /> Saqlash</button>
+                <button onClick={handleSave}><Save size={16} /> {getText('save')}</button>
               )}
-              <button onClick={onClose}><X size={16} /> Yopish</button>
+              <button onClick={onClose}><X size={16} /> {getText('close')}</button>
             </div>
           </>
         )}

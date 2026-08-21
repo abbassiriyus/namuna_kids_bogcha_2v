@@ -5,6 +5,7 @@ import { Trash2, Plus, Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
+import { getText } from '../i18n/translations';
 
 export default function ChiqimModal({ isOpen, onClose, onSave, products = [], initialData = null }) {
   const [rows, setRows] = useState([{ sklad_product_id: '', hajm: '', description: '' }]);
@@ -136,10 +137,10 @@ console.log(payload);
     <div className={styles.modal}>
       <div className={styles.modal__content}>
         <h3 className={styles.modal__title}>
-          {initialData ? 'Chiqimni tahrirlash' : 'Yangi chiqim(lar) qo‘shish'}
+          {initialData ? getText('editExpense') : getText('addExpenses')}
         </h3>
 
-        <label>Chiqim sanasi:</label>
+        <label>{getText('expenseDate')}:</label>
         <input
           type="date"
           value={chiqimSana}
@@ -162,7 +163,7 @@ console.log(payload);
                   className={styles.input}
                   style={{ flex: 1 }}
                 >
-                  <option value="">Mahsulot tanlang</option>
+                  <option value="">{getText('selectProduct')}</option>
                   {products.sort((a, b) => a.nomi.localeCompare(b.nomi)).map(p => (
                     <option key={p.id} value={p.id}>{p.nomi}</option>
                   ))}
@@ -173,7 +174,7 @@ console.log(payload);
                   name="hajm"
                   value={row.hajm}
                   onChange={(e) => handleChange(index, e)}
-                  placeholder="Hajm"
+                  placeholder={getText('volume')}
                   className={styles.input}
                   style={{ flex: 1 }}
                 />
@@ -189,7 +190,7 @@ console.log(payload);
                       color: 'red',
                       cursor: 'pointer',
                     }}
-                    title="O‘chirish"
+                    title={getText('delete')}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -200,14 +201,14 @@ console.log(payload);
                 name="description"
                 value={row.description}
                 onChange={(e) => handleChange(index, e)}
-                placeholder="Izoh"
+                placeholder={getText('comment')}
                 className={styles.textarea}
                 style={{ marginTop: '8px', width: '96%' }}
               />
 
               {mavjud !== undefined && (
                 <p style={{ marginTop: '4px', color: 'gray' }}>
-                  <strong>Mavjud hajm:</strong> {mavjud} {product?.hajm_birlik || ''}
+                  <strong>{getText('availableVolume')}:</strong> {mavjud} {product?.hajm_birlik || ''}
                 </p>
               )}
             </div>
@@ -228,12 +229,12 @@ console.log(payload);
             fontWeight: 'bold',
           }}
         >
-          <Plus size={16} /> Yana qator
+          <Plus size={16} /> {getText('addRow')}
         </button>
 
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> Saqlash</button>
-          <button onClick={onClose}><X size={16} /> Bekor qilish</button>
+          <button onClick={handleSubmit}><Check size={16} /> {getText('save')}</button>
+          <button onClick={onClose}><X size={16} /> {getText('cancel')}</button>
         </div>
       </div>
     </div>
