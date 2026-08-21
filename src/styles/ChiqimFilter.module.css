@@ -1,0 +1,64 @@
+/* components/ChiqimFilter.module.css */
+.filterContainer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  background-color: var(--color-surface-muted);
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.input,
+.searchInput,
+.button {
+  padding: 8px 14px;
+  font-size: 15px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.input,
+.searchInput {
+  min-width: 150px;
+}
+
+.input:focus,
+.searchInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+  outline: none;
+}
+
+.searchInput {
+  width: 250px;
+  max-width: 100%;
+}
+
+.button {
+  cursor: pointer;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  border: none;
+  transition: background-color 0.15s ease;
+}
+
+.button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.button:active {
+  background-color: var(--color-primary-hover);
+}
+
+@media (max-width: 768px) {
+  .filterContainer {
+    justify-content: center;
+  }
+}

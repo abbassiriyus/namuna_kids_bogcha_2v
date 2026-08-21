@@ -1,0 +1,437 @@
+.modal {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal__content {
+  background: var(--color-surface);
+  padding: 24px;
+  width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+}
+
+.modal__title {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal__form input,
+.modal__form select,
+.modal__form textarea {
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+  outline: none;
+  width: 96%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.modal__form input:focus,
+.modal__form select:focus,
+.modal__form textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+  background: var(--color-surface);
+}
+
+.modal__form textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.modal__buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal__buttons button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.modal__buttons button:first-child {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.modal__buttons button:last-child {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+.input {
+  width: 96%;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+  background: var(--color-surface);
+}
+.modal__info {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+.modal__form button {
+  padding: 8px 14px;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.modal__form button:hover {
+  background-color: var(--color-primary-hover);
+}
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: var(--color-surface);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+}
+
+.modalContent input {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalContent {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 95%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+  animation: fadeSlideIn 0.2s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal__buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.modal__buttons button {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.modal__buttons button:hover {
+  opacity: 0.9;
+}
+
+.modalContent input[type="number"],
+.modalContent input[type="text"] {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  width: 97%;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.modalContent ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.modalContent  li {
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  padding: 10px;
+  border-radius: var(--radius-sm);
+}
+
+.modalContent li:hover {
+  background-color: var(--color-border);
+}
+
+.modalContent li button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* Bare <h3>/<label> elements rendered directly inside the overlay's content
+   box in a few consumers (DaromatModal, DaromatDeleteModal, DarsModal) that
+   don't use .modal__title / .modal__form — kept narrowly scoped via the
+   direct-child combinator so no other consumer is affected. */
+.modalContent > h3,
+.modal > h3 {
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modalContent label,
+.modal > label {
+  display: block;
+  margin: 10px 0 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.disabledInput {
+  width: 96%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.modal__section {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.modal__section:first-of-type {
+  margin-top: 8px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.modal__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.modal__row:last-child {
+  border-bottom: none;
+}
+
+.modal__row button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease;
+}
+
+.modal__row button:hover {
+  background: var(--color-danger-soft);
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.saveBtn,
+.saveButton {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.saveBtn:hover,
+.saveButton:hover {
+  background: var(--color-primary-hover);
+}
+
+.cancelBtn,
+.cancelButton {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.cancelBtn:hover,
+.cancelButton:hover {
+  background: var(--color-border);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 768px) {
+  .modal__content,
+  .modalContent {
+    width: 80%;
+    padding: 16px;
+    border-radius: var(--radius-md);
+  }
+
+  .modal__title {
+    font-size: 1.05rem;
+  }
+
+  .modal__form input,
+  .modal__form select,
+  .modal__form textarea,
+  .modalContent input {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .modal__form button,
+  .modal__buttons button,
+  .modalContent li button {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+
+  .modal__buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .modal__info {
+    font-size: 0.8rem;
+  }
+
+  .modalContent {
+    padding: 16px;
+    width: 90%;
+  }
+
+  .modalContent ul {
+    margin-top: 8px;
+  }
+
+  .modalContent li {
+    font-size: 14px;
+    padding: 8px;
+  }
+}

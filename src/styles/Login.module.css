@@ -1,0 +1,324 @@
+.page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+/* Legacy /yoqlama login screen — shares this module but with its own simpler markup
+   (no authShell/cardWrap wrapper), so it gets its own scoped card treatment below. */
+.bg {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 15% 15%, rgba(37, 99, 235, 0.12), transparent 55%),
+    radial-gradient(circle at 85% 85%, rgba(124, 58, 237, 0.1), transparent 55%);
+  pointer-events: none;
+}
+
+.bg .loginBox {
+  position: relative;
+  z-index: 1;
+  width: min(400px, 100%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 32px 28px;
+  gap: 14px;
+}
+
+.bg .loginBox h2 {
+  margin: 0 0 4px;
+  color: var(--color-text);
+  font-size: 1.4rem;
+}
+
+/* Kindergarten ornament (kid faces / stars / balloons) — static tile, no animation. */
+.ornament {
+  position: absolute;
+  inset: 0;
+  background-image: url('/ornament.svg');
+  background-repeat: repeat;
+  background-size: 200px;
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Static-painted, GPU-only glow — cheap: transform-only animation, no layout/paint per frame */
+.glow {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.22) 0%, transparent 68%);
+  filter: blur(60px);
+  top: -18%;
+  left: -12%;
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 16s ease-in-out infinite;
+  will-change: transform;
+}
+
+.glowSecondary {
+  top: auto;
+  left: auto;
+  bottom: -22%;
+  right: -14%;
+  width: 460px;
+  height: 460px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.16) 0%, transparent 68%);
+  animation-duration: 20s;
+  animation-direction: reverse;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -22px, 0) scale(1.05); }
+}
+
+.authShell {
+  position: relative;
+  z-index: 1;
+  width: min(960px, 100%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.brandPanel {
+  padding: 48px 44px;
+  background: var(--color-primary);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.logoBadge {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.kicker {
+  display: inline-block;
+  margin-top: 22px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.brandPanel h1 {
+  margin-top: 20px;
+  font-size: clamp(1.7rem, 2.4vw, 2.4rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.brandPanel p {
+  margin-top: 14px;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 460px;
+}
+
+.features {
+  margin-top: 24px;
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.features li {
+  position: relative;
+  padding-left: 26px;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 500;
+  font-size: 0.92rem;
+}
+
+.features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 700;
+}
+
+.cardWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: var(--color-surface);
+}
+
+.loginBox {
+  width: min(400px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.loginBox h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.7rem;
+  line-height: 1.2;
+}
+
+.langButton {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field span {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.loginBox input {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-size: 1rem;
+  padding: 12px 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.loginBox input::placeholder {
+  color: var(--color-text-soft);
+}
+
+.loginBox input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+  background: var(--color-surface);
+}
+
+.loginBox button {
+  margin-top: 4px;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 13px 18px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-primary);
+}
+
+.loginBox button:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.loginBox button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.error {
+  margin: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  border: 1px solid rgba(220, 38, 38, 0.18);
+  color: var(--color-danger);
+  padding: 11px 14px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .authShell {
+    grid-template-columns: 1fr;
+  }
+
+  .brandPanel {
+    padding: 32px 24px;
+  }
+
+  .cardWrap {
+    padding: 24px 18px 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 16px;
+  }
+
+  .loginBox h2 {
+    font-size: 1.5rem;
+  }
+}

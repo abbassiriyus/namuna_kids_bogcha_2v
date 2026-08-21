@@ -1,0 +1,26 @@
+.toggleContainer {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-muted);
+}
+.toggleContainer label {
+  margin-left: 10px;
+  font-size: 14px;
+  color: var(--color-text);
+}
+.loading {
+  padding: 10px;
+  text-align: center;
+  font-size: 16px;
+  color: var(--color-text-muted);
+}
+.errorMessage {
+  padding: 16px;
+  color: var(--color-danger);
+  font-weight: 600;
+  text-align: center;
+}

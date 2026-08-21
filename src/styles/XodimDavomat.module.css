@@ -1,0 +1,342 @@
+/* Container for the entire component */
+.wrapper {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Controls section (month selector and export buttons) */
+.controls {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.label {
+  font-weight: bold;
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+.monthSelect {
+  padding: 6px 12px;
+  font-size: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.monthSelect:disabled {
+  background: var(--color-surface-muted);
+  color: var(--color-text-soft);
+  cursor: not-allowed;
+}
+
+.exportBtn, .exportTomorrowBtn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.exportBtn {
+  background: var(--color-primary);
+}
+
+.exportBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.exportTomorrowBtn {
+  background: var(--color-success);
+}
+
+.exportTomorrowBtn:hover:not(:disabled) {
+  background: #15803d;
+  transform: translateY(-1px);
+}
+
+.exportBtn:disabled, .exportTomorrowBtn:disabled {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+/* Title */
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--color-text);
+}
+
+/* Loading message */
+.loading {
+  padding: 10px;
+  text-align: center;
+  font-size: 16px;
+  color: var(--color-text-muted);
+}
+
+/* Table container for horizontal scrolling */
+.tableContainer {
+  overflow-x: auto;
+  max-width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Table styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  font-size: 14px;
+}
+
+.table__head {
+  background: var(--color-surface-muted);
+}
+
+.table__cell {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--color-border);
+  white-space: nowrap;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.sticky {
+  position: sticky;
+  left: 0;
+  background: var(--color-surface);
+  z-index: 2;
+  box-shadow: 2px 0 4px rgba(15, 23, 42, 0.08);
+}
+
+.table__head .table__cell {
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+/* Red background for active workday */
+.redBackground {
+  background: var(--color-danger-soft);
+}
+
+/* Buttons for marking attendance */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.kelBtn, .ketBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  margin: 1px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  width: 100%;
+  max-width: 120px;
+  text-align: center;
+}
+
+.kelBtn {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.kelBtn:hover:not(:disabled) {
+  background: #15803d;
+  transform: translateY(-1px);
+}
+
+.ketBtn {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.ketBtn:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+/* .kelBtn:disabled, .ketBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+} */
+
+/* Time display */
+.time {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+/* Icon for non-attendance */
+.icon {
+  font-size: 16px;
+  color: var(--color-danger);
+}
+
+/* Modal styles */
+.modal {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  padding: 15px;
+  border-radius: var(--radius-lg);
+  max-width: 400px;
+  width: 90%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+}
+
+.overlay {
+  background: rgba(15, 23, 42, 0.5);
+  z-index: 99;
+}
+
+.modalContent {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.modalContent h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  text-align: center;
+  color: var(--color-text);
+}
+
+.modalItem {
+  margin-bottom: 8px;
+  color: var(--color-text);
+}
+
+.modalItem strong {
+  display: inline-block;
+  width: 120px;
+}
+
+.modalCloseBtn {
+  display: block;
+  margin: 15px auto 0;
+  padding: 8px 16px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.modalCloseBtn:hover {
+  background: var(--color-primary-hover);
+}
+
+/* No permission message */
+.noPermission {
+  padding: 20px;
+  color: var(--color-danger);
+  font-size: 16px;
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 10px;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .monthSelect, .exportBtn, .exportTomorrowBtn {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .table {
+    font-size: 12px;
+  }
+
+  .table__cell {
+    padding: 8px;
+  }
+
+  .kelBtn, .ketBtn {
+    font-size: 10px;
+    padding: 6px 8px;
+    max-width: 100px;
+  }
+
+  .time {
+    font-size: 10px;
+  }
+
+  .modal {
+    width: 95%;
+    padding: 10px;
+  }
+
+  .modalContent h3 {
+    font-size: 16px;
+  }
+
+  .modalItem {
+    font-size: 12px;
+  }
+
+  .modalCloseBtn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 20px;
+  }
+
+  .table__cell {
+    padding: 6px;
+    font-size: 10px;
+  }
+
+  .kelBtn, .ketBtn {
+    font-size: 9px;
+    padding: 5px 6px;
+    max-width: 80px;
+  }
+
+  .time {
+    font-size: 9px;
+  }
+}

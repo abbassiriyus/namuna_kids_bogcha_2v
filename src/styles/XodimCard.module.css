@@ -1,0 +1,280 @@
+/* Kontentni o'rab turuvchi asosiy konteyner */
+.container {
+  padding: 20px; /* Ichki chetki masofa */
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); /* Yumaloq burchaklar */
+  box-shadow: var(--shadow-sm);
+  max-width: 1200px; /* Maksimal kenglik */
+  margin: 0 auto; /* Markazlash */
+}
+
+/* Asosiy sarlavha (h1) stillari */
+.container h1 {
+  font-size: 22px; /* Optimal shrift o'lchami */
+  color: var(--color-text);
+  margin-bottom: 12px; /* Pastki masofa */
+  font-weight: 700; /* Qalin shrift */
+  text-align: center; /* Markazlash */
+}
+
+/* Ikkinchi darajali sarlavha (h2) stillari */
+.container h2 {
+  font-size: 16px; /* Kichikroq shrift */
+  color: var(--color-text-muted);
+  margin-bottom: 18px; /* Pastki masofa */
+  font-weight: 500; /* O'rtacha qalinlik */
+}
+
+/* Jadval stillari */
+.table {
+  width: 100%; /* To'liq kenglik */
+  border-collapse: separate; /* Yumaloq burchaklar uchun */
+  border-spacing: 0; /* Yacheykalar orasidagi masofa yo'q */
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); /* Yumaloq burchaklar */
+  overflow: hidden; /* Chegaralardan tashqari chiqishni oldini oladi */
+  box-shadow: var(--shadow-sm);
+}
+
+/* Jadval sarlavhalari (thead) */
+.table thead {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+
+/* Jadval sarlavhalari va yacheykalar uchun umumiy stillar */
+.table th,
+.table td {
+  padding: 10px 12px; /* Optimal ichki masofa */
+  text-align: left; /* Matn chapga tekislanadi */
+  font-size: 13px; /* Kichikroq shrift */
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Birinchi va oxirgi yacheykalar uchun yumaloq burchaklar */
+.table th:first-child,
+.table td:first-child {
+  border-top-left-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
+}
+
+.table th:last-child,
+.table td:last-child {
+  border-top-right-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+}
+
+/* Kayfiyat ustuni uchun maxsus stil */
+.table td[data-label="Kayfiyat"] {
+  font-size: 18px; /* Optimal stiker o'lchami */
+  text-align: center; /* Markazlash */
+  transition: transform 0.2s ease; /* Animatsiya */
+}
+
+.table td[data-label="Kayfiyat"]:hover {
+  transform: scale(1.15); /* Sichqoncha kelganda kattalashadi */
+}
+
+/* Jadval qatorlari */
+.table tbody tr {
+  transition: background 0.15s ease; /* Yumshoq animatsiya */
+}
+
+.table tbody tr:hover {
+  background: var(--color-surface-muted);
+}
+
+/* Amallar (tugmalar) konteyneri */
+.actions {
+  display: flex; /* Gorizontal joylashuv */
+  gap: 8px; /* Tugmalar orasidagi masofa */
+  justify-content: center; /* Markazlash */
+}
+
+/* Umumiy tugma stillari */
+.btn {
+  padding: 6px 12px; /* Kichikroq ichki masofa */
+  border: none; /* Chegara yo'q */
+  border-radius: var(--radius-sm); /* Yumaloq burchaklar */
+  cursor: pointer; /* Sichqoncha kursor ko'rinishi */
+  font-weight: 600; /* Qalin shrift */
+  font-size: 12px; /* Kichik shrift */
+  transition: background 0.15s ease; /* Animatsiya */
+  box-shadow: var(--shadow-sm);
+}
+
+/* Yashil tugma stillari */
+.btnGreen {
+  background: var(--color-success);
+  color: white; /* Oq matn */
+}
+
+.btnGreen:hover {
+  background: #15803d; /* Qoramtir yashil */
+}
+
+/* Qizil tugma stillari */
+.btnRed {
+  background: var(--color-danger);
+  color: white; /* Oq matn */
+}
+
+.btnRed:hover {
+  background: #b91c1c; /* Qoramtir qizil */
+}
+
+/* Faolsiz tugma stillari */
+.btn:disabled {
+  opacity: 0.6; /* Shaffoflik */
+  cursor: not-allowed; /* Faolsiz kursor */
+  box-shadow: none;
+}
+
+/* Media so'rovlari */
+
+/* Mobil qurilmalar uchun (maksimal kenglik 768px) */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px; /* Kichikroq ichki masofa */
+    margin: 10px; /* Chetki masofa */
+  }
+
+  .container h1 {
+    font-size: 18px; /* Kichikroq sarlavha */
+  }
+
+  .container h2 {
+    font-size: 14px; /* Kichikroq ikkinchi sarlavha */
+    margin-bottom: 15px; /* Kichikroq masofa */
+  }
+
+  .table {
+    font-size: 11px; /* Kichikroq shrift */
+  }
+
+  .table th,
+  .table td {
+    padding: 8px 10px; /* Kichikroq ichki masofa */
+    font-size: 11px; /* Kichikroq shrift */
+  }
+
+  /* Kayfiyat ustuni mobil ekranlarda */
+  .table td[data-label="Kayfiyat"] {
+    font-size: 16px; /* Kichikroq stiker */
+  }
+
+  /* Tugmalar */
+  .actions {
+    gap: 6px; /* Kichikroq masofa */
+    flex-wrap: wrap; /* Agar joy yetmasa, pastga tushadi */
+  }
+
+  .btn {
+    padding: 5px 8px; /* Kichikroq ichki masofa */
+    font-size: 10px; /* Kichikroq shrift */
+    border-radius: 5px; /* Kichikroq burchaklar */
+  }
+}
+
+/* Planshetlar uchun (kenglik 769px dan 1024px gacha) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding: 15px; /* O'rta ichki masofa */
+    margin: 15px; /* Chetki masofa */
+  }
+
+  .container h1 {
+    font-size: 20px; /* O'rta sarlavha */
+  }
+
+  .container h2 {
+    font-size: 15px; /* O'rta ikkinchi sarlavha */
+  }
+
+  .table th,
+  .table td {
+    padding: 9px 11px; /* O'rta ichki masofa */
+    font-size: 12px; /* O'rta shrift */
+  }
+
+  /* Kayfiyat ustuni planshetlarda */
+  .table td[data-label="Kayfiyat"] {
+    font-size: 17px; /* O'rta stiker o'lchami */
+  }
+
+  .btn {
+    padding: 6px 10px; /* O'rta tugma o'lchami */
+    font-size: 11px; /* O'rta shrift */
+  }
+
+  .actions {
+    gap: 7px; /* Tugmalar orasidagi masofa */
+  }
+}
+
+/* Katta ekranlar uchun (1024px dan yuqori) */
+@media (min-width: 1025px) {
+  .container {
+    padding: 25px; /* Katta ichki masofa */
+  }
+
+  .table th,
+  .table td {
+    padding: 12px 14px; /* Kattaroq ichki masofa */
+  }
+
+  .table td[data-label="Kayfiyat"] {
+    font-size: 20px; /* Kattaroq stiker */
+  }
+}
+
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  width: 400px;
+  max-width: 90%;
+  box-shadow: var(--shadow-lg);
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.modalBody label {
+  font-weight: bold;
+}
+
+.modalBody select {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}

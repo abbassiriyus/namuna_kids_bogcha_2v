@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import './tokens.css';
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  font-family: var(--font-sans);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* Cheap, GPU-only tactile feedback — no layout/paint cost, applies everywhere at once */
+button:not(:disabled) {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.react-calendar {
+  width: auto !important;
+  max-width: 100%;
+  background: white;
+  line-height: 1.125em;
+}
+
+/* Unified modal overlay behavior: prevent page scroll when any modal overlay exists */
+body:has(.modalOverlay),
+body:has(.modalOverlay__root),
+body:has(.modal) {
+  overflow: hidden;
+}
+
+/* Fallback for browsers without :has support: modal overlays should set this class on body when opened. */
+.modal-open {
+  overflow: hidden;
+}
+
+/* Ensure modal overlays cover viewport and don't cause extra scrollbars */
+.modalOverlay,
+.modalOverlay__root,
+.modal {
+  position: fixed;
+  inset: 0;
+}
+
+/* React Modal (react-modal) defaults */
+.ReactModal__Overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background-color: rgba(0,0,0,0.45) !important;
+}
+
+/* Normalize modal stacking to avoid wildly different z-indices */
+.modalOverlay,
+.modal,
+.modalOverlay__root,
+.ReactModal__Overlay,
+.modalOverlayRoot {
+  z-index: 10000;
+}
+
+.modal .modal__content,
+.modalContent,
+.modal__content,
+.modalContent {
+  max-height: 90vh;
+  overflow-y: auto;
+}
