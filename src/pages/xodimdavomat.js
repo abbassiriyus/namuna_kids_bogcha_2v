@@ -4,6 +4,8 @@ import { Smile, Meh, Frown, Angry, CircleHelp, Check, LogOut } from 'lucide-reac
 import url from '../host/host';
 import styles from '../styles/XodimCard.module.css';
 import XodimDavomat from './admin/xodim_davomat_control';
+import FaceLogin from './admin/FaceLogin';
+import { bugungiSana, toLocalDate } from '../utils/sana';
 
 const AdminTable = ({ data, refresh, title, xodimOneDay, todayBolaKuni, xodimWorkdays }) => {
   const token = localStorage.getItem("token");
@@ -170,13 +172,14 @@ const AdminTable = ({ data, refresh, title, xodimOneDay, todayBolaKuni, xodimWor
             {data.map((xodim, index) => {
               const todayOneDay = xodimOneDay.find(
                 item => item.xodim_id === xodim.id && 
-                new Date(item.created_at).toISOString().split('T')[0] === 
-                new Date().toISOString().split('T')[0]
+                toLocalDate(item.created_at) === 
+                bugungiSana()
               );
              
-              const today = new Date();
-              today.setDate(today.getDate() - 1);
-              const todayDate = today.toISOString().split('T')[0];
+              // Ish kuni bugungi sana bilan solishtiriladi. Avval bu yerda bir kun
+              // ayirilardi (UTC siljishini qoplash uchun) — endi mahalliy sana
+              // ishlatilgani uchun bunga hojat yo'q.
+              const todayDate = bugungiSana();
 
               let xodimWorkdaysId = null;
               if (xodim.ish_tur === 1) {
@@ -184,7 +187,7 @@ const AdminTable = ({ data, refresh, title, xodimOneDay, todayBolaKuni, xodimWor
               } else if (xodim.ish_tur === 2) {
                 xodimWorkdaysId = xodimWorkdays.find(w =>
                   w.xodim_id === xodim.id &&
-                  new Date(w.work_day).toISOString().split('T')[0] == todayDate
+                  toLocalDate(w.work_day) == todayDate
                 )?.id || null;
               }
 
@@ -246,6 +249,14 @@ const Xodimlar = () => {
   const [xodimWorkdays, setXodimWorkdays] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [davomatMode, setDavomatMode] = useState(null);
+
+  useEffect(() => {
+    axios
+      .get(`${url}/davomat-settings`)
+      .then((res) => setDavomatMode(res.data.mode || 'button'))
+      .catch(() => setDavomatMode('button'));
+  }, []);
 
   const today = new Date().toLocaleDateString('uz-UZ', {
     weekday: 'long',
@@ -284,13 +295,13 @@ const Xodimlar = () => {
       });
 
       const todayBolaKuni = bolaKuniRes.data.filter(item => 
-        new Date(item.sana).toISOString().split('T')[0] === todayDate
+        toLocalDate(item.sana) === todayDate
       );
 
       const mergedXodimlar = xodimRes.data.map(xodim => {
         const todayOneDay = xodimOneDayRes.data.find(
           item => item.xodim_id === xodim.id && 
-          new Date(item.created_at).toISOString().split('T')[0] === todayDate
+          toLocalDate(item.created_at) === todayDate
         );
         return {
           ...xodim,
@@ -322,15 +333,27 @@ const Xodimlar = () => {
     .filter(x => x.ish_tur === 2)
     .sort((a, b) => a.name.localeCompare(b.name, 'uz'));
 
-  if (loading) return <div>Yuklanmoqda...</div>;
+  if (loading || davomatMode === null) return <div>Yuklanmoqda...</div>;
   if (error) return <div>{error}</div>;
+
+  if (davomatMode === 'face') {
+    // Face ID rejimida xodim tanlash selecti kerak emas: FaceLogin ichida
+    // barcha xodimlarning bugungi holati ko'rinadi, xato belgilashni esa
+    // tanilgan xodimning o'zi "bekor qilish" tugmalari orqali tuzatadi.
+    return (
+      <div className={styles.container}>
+        <h2>Bugungi sana: {today}</h2>
+        <FaceLogin />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
       <h2>Bugungi sana: {today}</h2>
       <XodimDavomat/>
       <h1>Bugungi ishga kelgan xodimlar</h1>
-      
+
       <div>
         <h3>Bugungi bola kuni</h3>
         {bolaKuni.length > 0 ? (
@@ -359,18 +382,18 @@ const Xodimlar = () => {
         )}
       </div>
 
-      <AdminTable 
-        data={oddiyXodimlar} 
-        refresh={fetchData} 
+      <AdminTable
+        data={oddiyXodimlar}
+        refresh={fetchData}
         title="Oddiy xodimlar"
         xodimOneDay={xodimOneDay}
         todayBolaKuni={bolaKuni}
         xodimWorkdays={xodimWorkdays}
       />
-      
-      <AdminTable 
-        data={maxsusXodimlar} 
-        refresh={fetchData} 
+
+      <AdminTable
+        data={maxsusXodimlar}
+        refresh={fetchData}
         title="Maxsus xodimlar"
         xodimOneDay={xodimOneDay}
         todayBolaKuni={bolaKuni}

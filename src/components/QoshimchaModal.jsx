@@ -4,11 +4,11 @@ import styles from '../styles/BolaModal.module.css';
 import { getText } from '../i18n/translations';
 
 export default function QoshimchaModal({ isOpen, onClose, onSave, initialData }) {
-  const [form, setForm] = useState({ price: '', description: '' });
+  const [form, setForm] = useState({ price: '', payment_method: 'naqt', description: '' });
 
   useEffect(() => {
     if (isOpen) {
-      setForm(initialData || { price: '', description: '' });
+      setForm(initialData || { price: '', payment_method: 'naqt', description: '' });
     }
   }, [isOpen, initialData]);
 
@@ -37,6 +37,12 @@ export default function QoshimchaModal({ isOpen, onClose, onSave, initialData })
             onChange={handleChange}
             placeholder={getText('price')}
           />
+          <select name="payment_method" value={form.payment_method} onChange={handleChange}>
+            <option value="naqt">Naqt</option>
+            <option value="karta">Karta</option>
+            <option value="bank">Bank</option>
+            <option value="boshqa">Boshqa</option>
+          </select>
           <textarea
             name="description"
             value={form.description}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import url from '../../host/host';
 import styles from '../../styles/Dashboard.module.css';
+import { bugungiOy } from '../../utils/sana';
 import {
   ResponsiveContainer,
   BarChart,
@@ -16,8 +17,18 @@ import {
   CartesianGrid
 } from 'recharts';
 
-export default function Dashboard() {
-  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+/**
+ * Oy bo'yicha davomat statistikasi.
+ *
+ * Oy tashqaridan (Dashboard'ning yuqorisidagi yil/oy tanlagichidan) beriladi.
+ * `month` prop kelmasa — komponent mustaqil ishlashi uchun — o'z ichki
+ * tanlagichi bilan joriy oyni ishlatadi.
+ */
+export default function Dashboard({ month: monthProp, onMonthChange }) {
+  const [innerMonth, setInnerMonth] = useState(() => bugungiOy());
+  const isControlled = Boolean(monthProp);
+  const month = isControlled ? monthProp : innerMonth;
+  const setMonth = isControlled ? (onMonthChange || (() => {})) : setInnerMonth;
   const [bolalar, setBolalar] = useState([]);
   const [davomatlar, setDavomatlar] = useState([]);
   const [darsKunlar, setDarsKunlar] = useState([]);
@@ -240,15 +251,19 @@ export default function Dashboard() {
     <div className={styles.container}>
       <h2 className={styles.title}>Oy bo‘yicha Davomat Statistikasi</h2>
 
-      <div className={styles.controls}>
-        <label>Oy tanlang: </label>
-        <input
-          type="month"
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-          className={styles.monthInput}
-        />
-      </div>
+      {/* Oy Dashboard'ning yuqorisidagi tanlagichdan boshqarilsa, bu yerda
+          takroriy input ko'rsatilmaydi. */}
+      {!isControlled && (
+        <div className={styles.controls}>
+          <label>Oy tanlang: </label>
+          <input
+            type="month"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            className={styles.monthInput}
+          />
+        </div>
+      )}
 
       <div style={{ marginBottom: '2rem' }}>
         <h2>Kunlik davomat</h2>
@@ -267,7 +282,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      {topDays.length > 0 && (
+      {/* {topDays.length > 0 && (
         <div style={{ marginBottom: '2rem' }}>
           <h3>Eng yaxshi 3 kun</h3>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -286,9 +301,9 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
-      <div style={{ gridColumn: '1 / -1' }}>
+      {/* <div style={{ gridColumn: '1 / -1' }}>
         <h2>Guruhlar KPI statistikasi</h2>
 
         {groupKPIData.length > 0 && (
@@ -326,7 +341,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

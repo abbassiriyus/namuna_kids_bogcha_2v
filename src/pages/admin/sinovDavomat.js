@@ -10,10 +10,11 @@ import LayoutComponent from '../../components/LayoutComponent';
 import DavomatModal from '../../components/DavomatModal';
 import ErrorModal from '../../components/ErrorModal';
 import styles from '../../styles/DavomatPage.module.css';
+import { bugungiOy, bugungiSana, toLocalDate } from '../../utils/sana';
 
 export default function SinovDavomat() {
   const router = useRouter();
-  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [month, setMonth] = useState(() => bugungiOy());
   const [bolalar, setBolalar] = useState([]);
   const [filteredBolalar, setFilteredBolalar] = useState([]);
   const [darsKunlar, setDarsKunlar] = useState([]);
@@ -55,7 +56,10 @@ export default function SinovDavomat() {
       setLoading(true);
       const [year, monthNum] = month.split('-');
       const res = await axios.get(`${url}/bola_kun_all?year=${year}&month=${monthNum}`, authHeader);
+      // API sanani UTC satri sifatida qaytaradi — uni to'g'ridan-to'g'ri kesish
+      // bir kun oldingi sanani berardi. Mahalliy sanaga o'girib qo'yamiz.
       const sorted = res.data
+        .map(d => ({ ...d, sana: toLocalDate(d.sana) }))
         .filter(d => d.sana.startsWith(month))
         .sort((a, b) => new Date(a.sana) - new Date(b.sana));
       setDarsKunlar(sorted);
@@ -101,7 +105,7 @@ export default function SinovDavomat() {
       const allDarsSana = darsSanaRes.data;
 
       const thisMonthDarsIds = allDarsSana
-        .filter(d => d.sana.startsWith(selectedMonth))
+        .filter(d => toLocalDate(d.sana).startsWith(selectedMonth))
         .map(d => d.id);
 
       const monthBolaIds = allDavomat
@@ -154,7 +158,7 @@ export default function SinovDavomat() {
 const [today, setToday] = useState("");
 
 useEffect(() => {
-  setToday(new Date().toISOString().slice(0, 10));
+  setToday(bugungiSana());
 }, []);
   const filterBolalar = (list, guruhId, search, unmarkedOnly) => {
     let result = list;
@@ -170,7 +174,7 @@ useEffect(() => {
     }
 
     if (unmarkedOnly) {
-      // const today = new Date().toISOString().slice(0, 10);
+      // const today = bugungiSana();
       const todayLesson = darsKunlar.find(d => d.sana.slice(0, 10) === today);
       if (todayLesson) {
         result = result.filter(bola => {

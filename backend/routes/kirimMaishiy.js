@@ -16,7 +16,7 @@ router.get('/', verifyToken, async (req, res) => {
     }
     if (end) {
       values.push(end);
-      query += ` AND created_at <= $${values.length}`;
+      query += ` AND created_at < $${values.length}::timestamptz + INTERVAL '1 day'`;
     }
     if (product) {
       values.push(product);
@@ -46,13 +46,13 @@ router.post('/multi', verifyToken, async (req, res) => {
 
     const params = [];
     const values = data.map(item => {
-      params.push(item.sklad_product_id, item.hajm, item.narx, item.description || null);
+      params.push(item.sklad_product_id, item.hajm, item.narx, item.payment_method || null, item.description || null);
       const n = params.length;
-      return `($${n - 3}, $${n - 2}, $${n - 1}, $${n})`;
+      return `($${n - 4}, $${n - 3}, $${n - 2}, $${n - 1}, $${n})`;
     }).join(',');
 
     const result = await client.query(
-      `INSERT INTO kirim_maishiy (sklad_product_id, hajm, narx, description)
+      `INSERT INTO kirim_maishiy (sklad_product_id, hajm, narx, payment_method, description)
        VALUES ${values}
        RETURNING *`,
       params
@@ -73,17 +73,18 @@ router.post('/multi', verifyToken, async (req, res) => {
 // PUT - mavjud yozuvni tahrirlash
 router.put('/:id',verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { hajm, sklad_product_id, narx, description } = req.body;
+  const { hajm, sklad_product_id, narx, payment_method, description } = req.body;
   try {
     const result = await pool.query(
       `UPDATE kirim_maishiy SET
          hajm = $1,
          sklad_product_id = $2,
          narx = $3,
-         description = $4,
+         payment_method = $4,
+         description = $5,
          updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5 RETURNING *`,
-      [hajm, sklad_product_id, narx, description, id]
+       WHERE id = $6 RETURNING *`,
+      [hajm, sklad_product_id, narx, payment_method, description, id]
     );
     res.json(result.rows[0]);
   } catch (err) {

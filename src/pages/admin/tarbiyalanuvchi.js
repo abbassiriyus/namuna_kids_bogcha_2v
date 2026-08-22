@@ -6,6 +6,7 @@ import axios from 'axios';
 import LayoutComponent from '../../components/LayoutComponent';
 import AdminTable from '../../components/AdminTableTarbiyachi';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
 import BolaModal from '../../components/BolaModal.jsx';
 import AdminHeader from '../../components/AdminHeader.jsx';
 import BolaPaymentModal from '../../components/BolaPaymentModal';
@@ -246,25 +247,25 @@ export default function Tarbiyalanuvchilar() {
   }, [data, selectedGroup, isActiveFilter, searchTerm]);
 
   const columnTitles = {
-    username: 'F.I.Sh',
-    metrka: 'Metirka raqami',
-    is_active: 'Holati (aktiv)',
-    guruh_id: 'Guruh',
-    tugilgan_kun: 'Tug‘ilgan sanasi',
-    oylik_toliv: 'Oylik to‘lov',
-    balans: 'Balans',
-    holati: 'Holati',
-    ota_fish: 'Ota F.I.Sh',
-    ota_phone: 'Ota tel',
-    ota_pasport: 'Ota pasport',
-    ona_fish: 'Ona F.I.Sh',
-    ona_phone: 'Ona tel',
-    ona_pasport: 'Ona pasport',
-    qoshimcha_phone: 'Qo‘shimcha tel',
-    address: 'Manzil',
-    description: 'Izoh',
-    created_at: 'Yaratilgan vaqti',
-    updated_at: 'Yangilangan vaqti',
+    username: getText('colFullName'),
+    metrka: getText('colMetrka'),
+    is_active: getText('colActiveStatus'),
+    guruh_id: getText('colGroup'),
+    tugilgan_kun: getText('colBirthDate'),
+    oylik_toliv: getText('colMonthlyFee'),
+    balans: getText('colBalance'),
+    holati: getText('colStatus'),
+    ota_fish: getText('colFatherName'),
+    ota_phone: getText('colFatherPhone'),
+    ota_pasport: getText('colFatherPassport'),
+    ona_fish: getText('colMotherName'),
+    ona_phone: getText('colMotherPhone'),
+    ona_pasport: getText('colMotherPassport'),
+    qoshimcha_phone: getText('colExtraPhone'),
+    address: getText('colAddress'),
+    description: getText('colComment'),
+    created_at: getText('colCreatedDate'),
+    updated_at: getText('colUpdatedDate'),
   };
 
   return (

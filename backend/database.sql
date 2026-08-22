@@ -25,6 +25,7 @@ CREATE TABLE xodim(
    lavozim_id INT NOT NULL,
    address VARCHAR(100) NOT NULL,
    oylik INT NOT NULL,
+   face_descriptor JSONB,
    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -69,6 +70,7 @@ CREATE TABLE sklad_product_taktic(
     hajm NUMERIC(12, 2) NOT NULL, --yangi qoshilayapgan maxsulot
     sklad_product_id integer NOT NULL, --qaysi productga tegishli
     narx integer NOT NULL,
+    payment_method VARCHAR(20), -- naqt/karta/bank/boshqa, umumiySumma.jsx shu bo'yicha guruhlaydi
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -76,6 +78,7 @@ CREATE TABLE sklad_product_taktic(
 CREATE TABLE chiqim_qoshimcha(
     id SERIAL PRIMARY KEY,
     price integer NOT NULL, --yangi qoshilayapgan maxsulot
+    payment_method VARCHAR(20), -- naqt/karta/bank/boshqa, umumiySumma.jsx shu bo'yicha guruhlaydi
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -111,6 +114,7 @@ CREATE TABLE kirim_maishiy(
     hajm integer NOT NULL, --yangi qoshilayapgan maxsulot
     sklad_product_id integer NOT NULL, --qaysi productga tegishli
     narx integer NOT NULL,
+    payment_method VARCHAR(20), -- naqt/karta/bank/boshqa, umumiySumma.jsx shu bo'yicha guruhlaydi
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -394,6 +398,16 @@ CREATE TABLE group_admin (
 );
 ALTER SEQUENCE group_admin_id_seq OWNED BY group_admin.id;
 GRANT USAGE, SELECT ON SEQUENCE group_admin_id_seq TO abbasuz3_user;
+
+-- Global toggle: how employee check-in/out is captured on /xodimdavomat
+-- ('button' = manual Ishga keldim/Ishdan ketdim buttons, 'face' = face-id kiosk).
+-- Superadmin-only setting, single row.
+CREATE TABLE davomat_settings (
+  id SERIAL PRIMARY KEY,
+  mode VARCHAR(10) NOT NULL DEFAULT 'button' CHECK (mode IN ('button', 'face')),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+INSERT INTO davomat_settings (mode) VALUES ('button');
 
 -- Indexes on columns actually used in WHERE filters, so lookups stay fast as
 -- data grows instead of degrading into sequential scans.

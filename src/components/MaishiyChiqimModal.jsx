@@ -3,11 +3,14 @@ import { Trash2, Plus, Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
+import ErrorModal from './ErrorModal';
+import { toLocalDate } from '../utils/sana';
 
 export default function ChiqimModal({ isOpen, onClose, onSave, products = [], initialData = null }) {
   const [rows, setRows] = useState([{ sklad_product_id: '', hajm: '', description: '' }]);
   const [chiqimSana, setChiqimSana] = useState('');
   const [availableHajm, setAvailableHajm] = useState({}); // product_id => hajm
+  const [modalError, setModalError] = useState('');
 const [groupOptions, setGroupOptions] = useState([]);
   const token = localStorage.getItem('token') ? localStorage.getItem('token') : null;
   const authHeader = { headers: { Authorization: `Bearer ${token}` } };
@@ -89,22 +92,27 @@ useEffect(() => {
   };
 
   const handleSubmit = () => {
-    if (!chiqimSana) return alert("❌ Sana tanlanmagan");
+    if (!chiqimSana) return setModalError('Sana tanlanmagan');
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const entered = parseFloat(row.hajm || '0');
       const max = availableHajm[row.sklad_product_id] || 0;
+      const qator = `${i + 1}-qator: `;
 
+      if (!row.sklad_product_id) return setModalError(qator + 'Mahsulot tanlanmagan');
+      if (!row.hajm || entered <= 0 || Number.isNaN(entered)) {
+        return setModalError(qator + 'Hajm kiritilmagan yoki 0 dan katta emas');
+      }
       if (entered > max) {
-        return alert(`❌ ${i + 1}-qator: Omborda faqat ${max} birlik mavjud`);
+        return setModalError(`${qator}Omborda faqat ${max} birlik mavjud`);
       }
     }
 
     // ✅ Sana ustiga 1 kun qo‘shamiz
     const sanaWithOffset = new Date(chiqimSana);
     sanaWithOffset.setDate(sanaWithOffset.getDate() + 1);
-    const formattedSana = sanaWithOffset.toISOString().slice(0, 10);
+    const formattedSana = toLocalDate(sanaWithOffset);
 
     const payload = rows.map(r => ({
       ...r,
@@ -254,6 +262,7 @@ useEffect(() => {
           <button onClick={onClose}><X size={16} /> Bekor qilish</button>
         </div>
       </div>
+      <ErrorModal message={modalError} onClose={() => setModalError('')} />
     </div>
   );
 }

@@ -24,13 +24,13 @@ export default function DaromatModal({ open, onClose, bola, month, onSaved }) {
   const prichislenaRef = useRef(null);
   const naqtPrichislenaRef = useRef(null);
 
-  const getNextMonthDate = (monthStr) => {
-    const [year, mon] = monthStr.split('-').map(Number);
-    const nextMonth = new Date(year, mon);
-    return nextMonth.toISOString().slice(0, 10);
-  };
+  // To'lov tanlangan oyning 1-sanasiga yoziladi (masalan "2024-06" -> "2024-06-01"),
+  // shu bilan Tolovlar sahifasidagi hisob-kitob va DaromatDeleteModal bir xil oyni ko'radi.
+  // Date obyekti ishlatilmaydi — mahalliy vaqt zonasi UTC ga aylantirishda
+  // kunni bir kecha-kunduzga siljitib yuborishi mumkin edi.
+  const getMonthStartDate = (monthStr) => `${monthStr}-01`;
 
-  const sana = getNextMonthDate(month);
+  const sana = getMonthStartDate(month);
 
   useEffect(() => {
     if (bola && open) {

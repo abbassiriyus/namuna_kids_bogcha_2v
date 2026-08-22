@@ -3,13 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import { Settings } from 'lucide-react';
+import { Settings, ScanFace } from 'lucide-react';
 import LayoutComponent from '../../components/LayoutComponent';
 import AdminTable from '../../components/AdminTable';
 import AdminHeader from '../../components/AdminHeader';
 import ErrorModal from '../../components/ErrorModal';
+import FaceCaptureModal from '../../components/FaceCaptureModal';
 import styles from '../../styles/hodimlar.module.css';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
+import { toLocalDate } from '../../utils/sana';
 
 function getMonthDays(year, month) {
   const date = new Date(year, month, 1);
@@ -48,6 +51,7 @@ export default function Hodimlar() {
   const [monthDays, setMonthDays] = useState([]);
   const [activeTab, setActiveTab] = useState('davomat');
   const [searchTerm, setSearchTerm] = useState('');
+  const [faceEmployee, setFaceEmployee] = useState(null);
   const [permissions, setPermissions] = useState({
     view_employees: false,
     create_employees: false,
@@ -231,7 +235,7 @@ export default function Hodimlar() {
       const selectedDates = res.data;
       const updatedDays = days.map((day) => ({
         ...day,
-        checked: selectedDates.includes(day.date.toISOString().slice(0, 10)),
+        checked: selectedDates.includes(toLocalDate(day.date)),
       }));
       setMonthDays(updatedDays);
       setSelectedEmployee({ ...employee, year, month });
@@ -251,17 +255,18 @@ export default function Hodimlar() {
   };
 
   const columnTitles = {
-    id: 'ID',
-    name: 'F.I.Sh',
-    phone: 'Telefon',
-    lavozim_nomi: 'Lavozim',
-    address: 'Manzil',
-    oylik: 'Oylik',
-    ish_tur: 'Ish turi',
-    start_time: 'Boshlanish vaqti',
-    end_time: 'Tugash vaqti',
-    image: 'Rasm',
-    created_at: 'Yaratilgan',
+    id: getText('colId'),
+    name: getText('colFullName'),
+    phone: getText('colPhone'),
+    lavozim_nomi: getText('colPosition'),
+    address: getText('colAddress'),
+    oylik: getText('colSalary'),
+    ish_tur: getText('colWorkType'),
+    start_time: getText('colStartTime'),
+    end_time: getText('colEndTime'),
+    image: getText('colImage'),
+    face_action: getText('colFace'),
+    created_at: getText('colCreatedAt'),
   };
 
   const customRenderers = {
@@ -275,9 +280,9 @@ export default function Hodimlar() {
         />
       ) : '—',
     ish_tur: (row) =>
-      row.ish_tur === 1 ? 'Davomat bilan' : (
+      row.ish_tur === 1 ? getText('workTypeAttendance') : (
         <>
-          Erkin
+          {getText('workTypeFree')}
           <button
             onClick={() => openSettingsModal(row)}
             style={{ marginLeft: '8px', cursor: 'pointer' }}
@@ -287,6 +292,15 @@ export default function Hodimlar() {
           </button>
         </>
       ),
+    face_action: (row) => (
+      <button
+        onClick={() => setFaceEmployee(row)}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+        title="Yuzni saqlash (Face ID)"
+      >
+        <ScanFace size={16} /> {row.face_descriptor ? 'Qayta olish' : 'Saqlash'}
+      </button>
+    ),
   };
 
   return (
@@ -459,7 +473,7 @@ export default function Hodimlar() {
                           updated[idx].checked = newChecked;
                           setMonthDays(updated);
 
-                          const dateStr = day.date.toISOString().slice(0, 10);
+                          const dateStr = toLocalDate(day.date);
 
                           try {
                             if (newChecked) {
@@ -489,6 +503,14 @@ export default function Hodimlar() {
                 </div>
               </div>
             </div>
+          )}
+
+          {faceEmployee && (
+            <FaceCaptureModal
+              employee={faceEmployee}
+              onClose={() => setFaceEmployee(null)}
+              authHeader={authHeader}
+            />
           )}
 
           {fullscreenImage && (
@@ -525,7 +547,7 @@ export default function Hodimlar() {
         </>
       ) : (
         <p style={{ padding: '20px', color: 'red' }}>
-          Sizda xodimlarni ko‘rish uchun ruxsat yo‘q!
+          {getText('noPermission')}
         </p>
       )}
     </LayoutComponent>

@@ -14,6 +14,111 @@
   flex-wrap: wrap;
 }
 
+/* Tezkor statistika kartochkalari */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  color: #fff;
+}
+
+.statLabel {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.statValue {
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.statBlue { background: var(--color-primary); }
+.statGreen { background: var(--color-success); }
+.statRed { background: var(--color-danger); }
+.statPurple { background: #7c3aed; }
+
+/* Superadmin: davomat rejimi (face-id vs oddiy tugmalar) tanlash kartasi */
+.modeCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.modeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modeLabel {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.modeHint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.modeSwitch, .viewSwitch {
+  display: inline-flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.modeBtn, .viewBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modeBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.modeBtn + .modeBtn, .viewBtn + .viewBtn {
+  border-left: 1px solid var(--color-border);
+}
+
+.modeBtnActive, .viewBtnActive {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.viewSwitch {
+  margin-right: auto;
+}
+
 .label {
   font-weight: bold;
   font-size: 16px;
@@ -34,6 +139,23 @@
   color: var(--color-text-soft);
   cursor: not-allowed;
 }
+
+/* Bugungi davomat ko'rinishi: kayfiyat stikeri va holat ranglari */
+.moodCell {
+  text-align: center;
+}
+
+.moodSticker {
+  font-size: 26px;
+  line-height: 1;
+  display: inline-block;
+}
+
+.tone_great { color: var(--color-success); font-weight: 700; }
+.tone_good  { color: var(--color-success); }
+.tone_neutral { color: var(--color-text-muted); }
+.tone_warn  { color: var(--color-warning); font-weight: 600; }
+.tone_bad   { color: var(--color-danger); font-weight: 700; }
 
 .exportBtn, .exportTomorrowBtn {
   padding: 8px 16px;
@@ -200,6 +322,7 @@
 
 /* Modal styles */
 .modal {
+  position: fixed;
   top: 50%;
   left: 50%;
   right: auto;
@@ -213,9 +336,12 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-lg);
+  outline: none;
 }
 
 .overlay {
+  position: fixed;
+  inset: 0;
   background: rgba(15, 23, 42, 0.5);
   z-index: 100000;
 }

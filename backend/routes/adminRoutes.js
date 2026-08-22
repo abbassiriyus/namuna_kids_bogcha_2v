@@ -34,6 +34,49 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
+// ✅ GET — o'zining profili (parolsiz)
+router.get('/me', verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, username, phone_number, type, description, is_active, created_at, updated_at
+       FROM admin WHERE id = $1`,
+      [req.user.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Admin topilmadi' });
+    }
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ✅ PUT — o'zining profilini tahrirlash (type/is_active o'zgartirib bo'lmaydi)
+router.put('/me', verifyToken, async (req, res) => {
+  const { username, phone_number, description, password } = req.body;
+
+  try {
+    let query = `UPDATE admin SET username = $1, phone_number = $2, description = $3, updated_at = CURRENT_TIMESTAMP`;
+    const params = [username, phone_number, description ?? null];
+
+    if (password) {
+      params.push(password);
+      query += `, password = $${params.length}`;
+    }
+
+    params.push(req.user.id);
+    query += ` WHERE id = $${params.length} RETURNING id, username, phone_number, type, description, is_active`;
+
+    const result = await pool.query(query, params);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Admin topilmadi' });
+    }
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ✅ READ ONE admin
 router.get('/:id', verifyToken, async (req, res) => {
   const { id } = req.params;

@@ -8,12 +8,16 @@ import SkladModal from '../../components/SkladModal';
 import ErrorModal from '../../components/ErrorModal';
 import axios from 'axios';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
 import styles from '../../styles/SkladProduct.module.css';
 import { saveAs } from 'file-saver';
 import { exportToExcel } from '../../utils/exportExcel';
 import { Plus, FileText, FileSpreadsheet } from 'lucide-react';
+import { useUserType } from '../../utils/useUserType';
 
 export default function SkladProductPage() {
+  // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
+  const { isSuperAdmin } = useUserType();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -242,7 +246,7 @@ export default function SkladProductPage() {
 
   return (
     <LayoutComponent>
-      {typeof window !== 'undefined' && localStorage.getItem('type') == '1' || permissions.view_household_storage ? (
+      {isSuperAdmin || permissions.view_household_storage ? (
         <>
           <div className={styles.headerWrapper}>
             <h2 className={styles.title}>Sklad mahsulotlari</h2>
@@ -274,13 +278,13 @@ export default function SkladProductPage() {
             title="Sklad"
             columns={['id', 'nomi', 'hajm', 'mavjud_hajm', 'hajm_birlik', 'created_at', 'actions']}
             columnTitles={{
-              id: 'ID',
-              nomi: 'Nomi',
-              hajm: 'Boshlang‘ich hajm',
-              mavjud_hajm: 'Omborda mavjud',
-              hajm_birlik: 'Birlik',
-              created_at: 'Qo‘shilgan sana',
-              actions: 'Amallar',
+              id: getText('colId'),
+              nomi: getText('colName'),
+              hajm: getText('colInitialVolume'),
+              mavjud_hajm: getText('colAvailableInStorage'),
+              hajm_birlik: getText('colUnit'),
+              created_at: getText('colAddedDate'),
+              actions: getText('colActions'),
             }}
             data={filteredData.map((item) => ({
               ...item,

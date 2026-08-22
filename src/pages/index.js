@@ -5,10 +5,11 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import styles from '../styles/Login.module.css';
 import url from '../host/host';
-import { getLanguage, getText } from '../i18n/translations';
+import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 import {
   Home, Users, Calendar, DollarSign, FileText, Briefcase,
-  PieChart, Utensils, Wallet, ShieldCheck
+  PieChart, Utensils, Wallet, ShieldCheck, Loader2
 } from 'lucide-react';
 
 const menu = [
@@ -46,14 +47,9 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [lang, setLang] = useState(getLanguage());
+  const [redirecting, setRedirecting] = useState(false); // login muvaffaqiyatli, sahifa almashmoqda
+  const { lang, toggleLang: toggleLanguage } = useLang();
   const router = useRouter();
-
-  const toggleLanguage = () => {
-    const nextLang = lang === 'uz' ? 'ru' : (lang === 'ru' ? 'en' : 'uz');
-    setLang(nextLang);
-    localStorage.setItem('app_lang', nextLang);
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -107,21 +103,26 @@ export default function Login() {
 
       const allowedMenu = allMenus.find((m) => isSuperAdmin || permissions[`view_${m.key}`]);
 
+      // Sahifaga o'tayotganda loading ko'rsatkichini o'chirmaymiz: aks holda
+      // tugma bir lahzaga "Kirish" holatiga qaytib, foydalanuvchi qayta bosishi
+      // mumkin edi. Navigatsiya tugagach komponent baribir almashadi.
       if (allowedMenu && !allowedMenu.isSubmenu) {
+        setRedirecting(true);
         router.replace(allowedMenu.path);
         return;
       }
 
       if (type === 2) {
+        setRedirecting(true);
         router.replace('/tarbiyachi/davomat');
         return;
       }
 
       setError(getText('loginErrorNoAccess', lang));
+      setIsLoading(false);
     } catch (err) {
       const message = err?.response?.data?.message || err?.message || 'Server bilan bog‘lanishda xatolik yuz berdi.';
       setError(message);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -189,7 +190,14 @@ export default function Login() {
             </label>
 
             <button type="submit" disabled={isLoading}>
-              {isLoading ? getText('loading', lang) : getText('loginButton', lang)}
+              {isLoading ? (
+                <span className={styles.btnLoading}>
+                  <Loader2 size={16} className={styles.spin} />
+                  {redirecting ? getText('loginRedirecting', lang) : getText('loggingIn', lang)}
+                </span>
+              ) : (
+                getText('loginButton', lang)
+              )}
             </button>
           </form>
         </div>

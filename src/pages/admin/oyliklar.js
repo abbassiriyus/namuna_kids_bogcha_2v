@@ -9,16 +9,24 @@ import OylikDeleteModal from '../../components/OylikDeleteModal';
 import ErrorModal from '../../components/ErrorModal';
 import axios from 'axios';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { bugungiOy } from '../../utils/sana';
+import { useUserType } from '../../utils/useUserType';
 
 export default function OyliklarPage() {
+  // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
+  const { isSuperAdmin } = useUserType();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  // Qaysi xodimning to'lov tafsilotlari (akkordion) ochilgani
+  const [expandedId, setExpandedId] = useState(null);
   const [selectedXodim, setSelectedXodim] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [selectedMonth, setSelectedMonth] = useState(() => bugungiOy());
   const [permissions, setPermissions] = useState({
     view_salaries: false,
     create_salaries: false,
@@ -74,7 +82,8 @@ export default function OyliklarPage() {
       const bonusMap = {},
             jarimaMap = {},
             kunlikMap = {},
-            tolanganMap = {};
+            tolanganMap = {},
+            tolovlarMap = {}; // xodim_id => alohida to'lovlar ro'yxati
 
       bonusRes.data.forEach((b) => {
         bonusMap[b.xodim_id] = (bonusMap[b.xodim_id] || 0) + Number(b.narx);
@@ -90,7 +99,14 @@ export default function OyliklarPage() {
 
       typeRes.data.forEach((t) => {
         tolanganMap[t.xodim_id] = (tolanganMap[t.xodim_id] || 0) + Number(t.narx);
+        if (!tolovlarMap[t.xodim_id]) tolovlarMap[t.xodim_id] = [];
+        tolovlarMap[t.xodim_id].push(t);
       });
+
+      // Har bir xodimning to'lovlarini sana bo'yicha eskidan yangiga saralaymiz.
+      Object.values(tolovlarMap).forEach((list) =>
+        list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      );
 
       const enriched = xodimRes.data.map((x) => {
         const bonus = bonusMap[x.id] || 0;
@@ -100,6 +116,7 @@ export default function OyliklarPage() {
         const tolangan = tolanganMap[x.id] || 0;
 
         const total = Math.max(0, oylik + bonus + kunlik - jarima);
+        const tolovlar = tolovlarMap[x.id] || [];
 
         let holat = 'To‘lanmadi';
         if (tolangan >= total && total > 0) holat = 'To‘landi';
@@ -116,7 +133,9 @@ export default function OyliklarPage() {
           kunlik,
           tolangan,
           total,
+          qoldiq: Math.max(0, total - tolangan),
           holat,
+          tolovlar,
         };
       });
 
@@ -154,20 +173,88 @@ export default function OyliklarPage() {
   };
 
   const columnTitles = {
-    id: 'ID',
-    name: 'Ismi',
-    oylik: 'Oylik (so‘m)',
-    bonus: 'Bonus (so‘m)',
-    jarima: 'N/B (so‘m)',
-    kunlik: 'Kunlik (so‘m)',
-    tolangan: 'To‘langan (so‘m)',
-    total: 'Umumiy (so‘m)',
-    holat: 'Holati',
+    id: getText('colId'),
+    name: getText('colFullName'),
+    oylik: getText('colSalary'),
+    bonus: getText('colBonus'),
+    jarima: getText('colPenalty'),
+    kunlik: getText('colDaily'),
+    total: getText('colShouldPay'),
+    tolangan: getText('colPaid'),
+    qoldiq: getText('colRemainder'),
+    holat: getText('colStatus'),
+  };
+
+  const formatSum = (value) =>
+    Number(value || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+  const customRenderers = {
+    // To'lov bir necha bo'lib berilgan bo'lsa, tafsilotlarni ochadigan akkordion.
+    tolangan: (row) => {
+      const tolovlar = row.tolovlar || [];
+      const bolinib = tolovlar.length >= 2;
+      const ochiq = expandedId === row.id;
+
+      if (!bolinib) return <span>{formatSum(row.tolangan)}</span>;
+
+      return (
+        <div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpandedId(ochiq ? null : row.id);
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              font: 'inherit',
+              color: 'var(--color-primary)',
+              fontWeight: 600,
+              padding: 0,
+            }}
+            title="To‘lovlar tafsilotini ko‘rish"
+          >
+            {ochiq ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            {formatSum(row.tolangan)} ({tolovlar.length} ta)
+          </button>
+
+          {ochiq && (
+            <div
+              style={{
+                marginTop: 6,
+                padding: '6px 8px',
+                background: 'var(--color-surface-muted, #f5f5f5)',
+                borderRadius: 6,
+                fontSize: 13,
+                textAlign: 'left',
+              }}
+            >
+              {tolovlar.map((t, i) => (
+                <div
+                  key={t.id}
+                  style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '2px 0' }}
+                >
+                  <span>
+                    {i + 1}. {new Date(t.created_at).toLocaleDateString('uz-UZ')}
+                  </span>
+                  <strong>{formatSum(t.narx)} so‘m</strong>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    },
   };
 
   return (
     <LayoutComponent>
-      {typeof window !== 'undefined' && localStorage.getItem('type') == '1' || permissions.view_salaries ? (
+      {isSuperAdmin || permissions.view_salaries ? (
         <>
           <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
@@ -210,6 +297,7 @@ export default function OyliklarPage() {
               columns={Object.keys(columnTitles)}
               columnTitles={columnTitles}
               data={data}
+              customRenderers={customRenderers}
               onEdit={permissions.edit_salaries ? handleEdit : null}
               onDelete={permissions.delete_salaries ? handleDelete : null}
               permissions={{

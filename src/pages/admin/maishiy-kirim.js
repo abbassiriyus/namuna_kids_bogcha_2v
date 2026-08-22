@@ -12,8 +12,10 @@ import ChiqimFilter from '../../components/ChiqimFilter';
 import { saveAs } from 'file-saver';
 import axios from 'axios';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
 import styles from '../../styles/ChiqimlarPage.module.css';
 import { exportToExcel } from '../../utils/exportExcel';
+import { toLocalDate } from '../../utils/sana';
 
 export default function KirimlarPage() {
   const router = useRouter();
@@ -178,8 +180,8 @@ export default function KirimlarPage() {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    const start = today.toISOString().slice(0, 10);
-    const end = tomorrow.toISOString().slice(0, 10);
+    const start = toLocalDate(today);
+    const end = toLocalDate(tomorrow);
 
     setFilter({ startDate: start, endDate: end, productId: '' });
     fetchData(start, end);
@@ -506,27 +508,27 @@ export default function KirimlarPage() {
                 columnTitles={
                   isAggregated
                     ? {
-                        product_nomi: 'Mahsulot',
-                        hajm_birlik: 'Birlik',
+                        product_nomi: getText('colProduct'),
+                        hajm_birlik: getText('colUnit'),
                         ...uniqueDates.reduce((acc, date) => ({
                           ...acc,
-                          [`hajm_${date}`]: `Hajm (${date})`,
-                          [`narx_${date}`]: `Narx (${date})`,
+                          [`hajm_${date}`]: `${getText('colVolume')} (${date})`,
+                          [`narx_${date}`]: `${getText('colPrice')} (${date})`,
                         }), {}),
-                        umumiy_hajm: 'Umumiy hajm',
-                        umumiy_narx: 'Umumiy narx',
+                        umumiy_hajm: getText('colTotalVolume'),
+                        umumiy_narx: getText('colTotalPrice'),
                       }
                     : {
-                        id: 'ID',
-                        product_nomi: 'Mahsulot',
-                        hajm: 'Hajm',
-                        hajm_birlik: 'Birlik',
-                        narx: 'Narx',
-                        summa: 'Umumiy (so‘m)',
-                        description: 'Izoh',
-                        payment_method: 'To‘lov turi',
-                        created_at: 'Vaqti',
-                        actions: 'Amallar',
+                        id: getText('colId'),
+                        product_nomi: getText('colProduct'),
+                        hajm: getText('colVolume'),
+                        hajm_birlik: getText('colUnit'),
+                        narx: getText('colPrice'),
+                        summa: getText('colTotalSum'),
+                        description: getText('colComment'),
+                        payment_method: getText('colPaymentType'),
+                        created_at: getText('colTime'),
+                        actions: getText('colActions'),
                       }
                 }
                 data={formattedData}

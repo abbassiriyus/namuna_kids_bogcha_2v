@@ -5,12 +5,18 @@
   padding: 20px 14px;
   height: 100vh;
   overflow-y: auto;
+  scrollbar-width: none; /* Firefox: keep scrolling, hide the bar */
+  -ms-overflow-style: none; /* old Edge/IE */
   position: sticky;
   top: 0;
   transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s ease;
   z-index: 1000;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge: keep scrolling, hide the bar */
 }
 
 .sidebar.collapsed {
@@ -313,6 +319,32 @@
   padding: 20px;
   font-size: 0.9rem;
   color: #fff;
+}
+
+/* Sahifaga o'tayotgandagi kichik yuklanish ko'rsatkichi */
+.navSpinner {
+  animation: navSpin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes navSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.item.navigating,
+.subitem.navigating {
+  background: rgba(37, 99, 235, 0.18);
+  color: #fff;
+  cursor: progress;
+}
+
+/* Submenu elementida spinner matndan keyin turadi */
+.subitem.navigating {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .toggleBtn {

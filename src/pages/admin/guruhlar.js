@@ -4,13 +4,17 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
 import LayoutComponent from '../../components/LayoutComponent';
 import AdminTable from '../../components/AdminTable';
 import GuruhModal from '../../components/GuruhModal';
 import AdminHeader from '../../components/AdminHeader';
 import ErrorModal from '../../components/ErrorModal';
+import { useUserType } from '../../utils/useUserType';
 
 export default function GuruhlarPage() {
+  // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
+  const { isSuperAdmin } = useUserType();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [xodimlar, setXodimlar] = useState([]);
@@ -189,11 +193,11 @@ export default function GuruhlarPage() {
   }, []);
 
   const columnTitles = {
-    name: 'Guruh nomi',
-    xodim_id: 'Tarbiya beruvchi',
-    created_at: 'Yaratilgan',
-    updated_at: 'Yangilangan',
-    actions: 'Amallar',
+    name: getText('colGroupName'),
+    xodim_id: getText('colTeacher'),
+    created_at: getText('colCreatedAt'),
+    updated_at: getText('colUpdatedAt'),
+    actions: getText('colActions'),
   };
 
   const filteredData = data.filter((g) => {
@@ -208,7 +212,7 @@ export default function GuruhlarPage() {
 
   return (
     <LayoutComponent>
-      {typeof window !== 'undefined' && localStorage.getItem('type') == '1' || permissions.view_groups ? (
+      {isSuperAdmin || permissions.view_groups ? (
         <>
           <AdminHeader
             title="Guruhlar"

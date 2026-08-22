@@ -3,6 +3,7 @@ import { Trash2, Plus, Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
+import ErrorModal from './ErrorModal';
 
 export default function SkladKirimModal({ isOpen, onClose, onSave, products = [], initialData = null }) {
   const token = localStorage.getItem('token') ? localStorage.getItem('token') : null;
@@ -10,6 +11,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
 
   const [rows, setRows] = useState([{ sklad_product_id: '', hajm: '', narx: '', description: '', payment_method: 'naqt' }]);
   const [hajmMap, setHajmMap] = useState({}); // product_id => mavjud hajm
+  const [modalError, setModalError] = useState('');
 
   // 🔁 initialData ni yuklash
   useEffect(() => {
@@ -80,8 +82,15 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
   };
 
   const handleSubmit = () => {
-    const valid = rows.every(row => row.sklad_product_id && row.hajm && row.narx && row.payment_method);
-    if (!valid) return alert("Barcha qatorlar to‘liq to‘ldirilishi kerak");
+    // Qaysi qatorda aynan nima xato ekanini aniq aytamiz.
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const qator = `${i + 1}-qator: `;
+      if (!row.sklad_product_id) return setModalError(qator + 'Mahsulot tanlanmagan');
+      if (!row.hajm || parseFloat(row.hajm) <= 0) return setModalError(qator + 'Hajm kiritilmagan yoki 0 dan katta emas');
+      if (!row.narx || parseFloat(row.narx) <= 0) return setModalError(qator + 'Narx kiritilmagan yoki 0 dan katta emas');
+      if (!row.payment_method) return setModalError(qator + 'To‘lov turi tanlanmagan');
+    }
 
     onSave(rows.length === 1 && initialData ? rows[0] : rows);
     onClose();
@@ -212,6 +221,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
           <button onClick={onClose}><X size={16} /> Bekor qilish</button>
         </div>
       </div>
+      <ErrorModal message={modalError} onClose={() => setModalError('')} />
     </div>
   );
 }

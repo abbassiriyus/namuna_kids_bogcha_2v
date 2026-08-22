@@ -7,11 +7,15 @@ import LayoutComponent from '../../components/LayoutComponent';
 import AdminTable from '../../components/AdminTable';
 import ErrorModal from '../../components/ErrorModal';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
 import BolaModal from '../../components/BolaModal_prp.jsx';
 import AdminHeader from '../../components/AdminHeader.jsx';
 import styles from '../../styles/DavomatPage.module.css';
+import { useUserType } from '../../utils/useUserType';
 
 export default function Sinov() {
+  // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
+  const { isSuperAdmin } = useUserType();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -326,31 +330,31 @@ export default function Sinov() {
   };
 
   const columnTitles = {
-    username: 'F.I.Sh',
-    metrka: 'Metirka raqami',
-    is_active: 'Holati (aktiv)',
-    holati: 'Holati',
-    guruh_id: 'Guruh',
-    tugilgan_kun: 'Tug‘ilgan sanasi',
-    oylik_toliv: 'Oylik to‘lov',
-    balans: 'Balans',
-    ota_fish: 'Ota F.I.Sh',
-    ota_phone: 'Ota tel',
-    ota_pasport: 'Ota pasport',
-    ona_fish: 'Ona F.I.Sh',
-    ona_phone: 'Ona tel',
-    ona_pasport: 'Ona pasport',
-    qoshimcha_phone: 'Qo‘shimcha tel',
-    address: 'Manzil',
-    description: 'Izoh',
-    created_at: 'Yaratilgan vaqti',
-    updated_at: 'Yangilangan vaqti',
-    actions: 'Amallar',
+    username: getText('colFullName'),
+    metrka: getText('colMetrka'),
+    is_active: getText('colActiveStatus'),
+    holati: getText('colStatus'),
+    guruh_id: getText('colGroup'),
+    tugilgan_kun: getText('colBirthDate'),
+    oylik_toliv: getText('colMonthlyFee'),
+    balans: getText('colBalance'),
+    ota_fish: getText('colFatherName'),
+    ota_phone: getText('colFatherPhone'),
+    ota_pasport: getText('colFatherPassport'),
+    ona_fish: getText('colMotherName'),
+    ona_phone: getText('colMotherPhone'),
+    ona_pasport: getText('colMotherPassport'),
+    qoshimcha_phone: getText('colExtraPhone'),
+    address: getText('colAddress'),
+    description: getText('colComment'),
+    created_at: getText('colCreatedDate'),
+    updated_at: getText('colUpdatedDate'),
+    actions: getText('colActions'),
   };
 
   return (
     <LayoutComponent>
-      {typeof window !== 'undefined' && localStorage.getItem('type') == '1' ||permissions.view_prp ? (
+      {isSuperAdmin || permissions.view_prp ? (
         <>
           <AdminHeader
             title="Tarbiyalanuvchilar"

@@ -7,7 +7,7 @@ import styles from '../styles/Login.module.css';
 import url from '../host/host';
 import {
   Home, Users, Calendar, DollarSign, FileText, Briefcase,
-  PieChart, Utensils, Wallet, ChefHat, Box, ShieldCheck
+  PieChart, Utensils, Wallet, ChefHat, Box, ShieldCheck, Loader2
 } from 'lucide-react';
 
 const menu = [
@@ -45,6 +45,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Yuklanish holati
+  const [redirecting, setRedirecting] = useState(false); // login o'tdi, sahifa almashmoqda
   const router = useRouter();
 
   const handleLogin = async (e) => {
@@ -89,17 +90,24 @@ export default function Login() {
 
       const allowedMenu = allMenus.find((m) => isSuperAdmin || permissions[`view_${m.key}`]);
 
+      // Sahifa almashayotganda loading holatini saqlab qolamiz, aks holda tugma
+      // bir lahzaga "Kirish"ga qaytib, qayta bosilib ketishi mumkin.
       if (allowedMenu && !allowedMenu.isSubmenu) {
+        setRedirecting(true);
         router.push("/xodimdavomat/");
-      } else if (type === 2) {
-        router.push('/xodimdavomat/');
-      } else {
-        setError("Sizda hech qanday sahifaga kirish ruxsati yo‘q");
+        return;
       }
+      if (type === 2) {
+        setRedirecting(true);
+        router.push('/xodimdavomat/');
+        return;
+      }
+
+      setError("Sizda hech qanday sahifaga kirish ruxsati yo‘q");
+      setIsLoading(false);
     } catch (err) {
       setError("Server bilan bog‘lanishda xatolik: " + (err.response?.data?.message || err.message));
-    } finally {
-      setIsLoading(false); // Yuklanish tugadi
+      setIsLoading(false);
     }
   };
 
@@ -125,7 +133,14 @@ export default function Login() {
           disabled={isLoading}
         />
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Yuborilmoqda...' : 'Kirish'}
+          {isLoading ? (
+            <span className={styles.btnLoading}>
+              <Loader2 size={16} className={styles.spin} />
+              {redirecting ? 'Tizimga kirilmoqda, kuting...' : 'Kirilmoqda...'}
+            </span>
+          ) : (
+            'Kirish'
+          )}
         </button>
       </form>
     </div>

@@ -10,10 +10,15 @@ import ChiqimFilter from '../../components/ChiqimFilter';
 import ErrorModal from '../../components/ErrorModal';
 import axios from 'axios';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
 import { saveAs } from 'file-saver';
 import { exportToExcel } from '../../utils/exportExcel';
+import { toLocalDate } from '../../utils/sana';
+import { useUserType } from '../../utils/useUserType';
 
 export default function ChiqimOmborPage() {
+  // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
+  const { isSuperAdmin } = useUserType();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [products, setProducts] = useState([]);
@@ -235,8 +240,8 @@ export default function ChiqimOmborPage() {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    const start = today.toISOString().slice(0, 10);
-    const end = tomorrow.toISOString().slice(0, 10);
+    const start = toLocalDate(today);
+    const end = toLocalDate(tomorrow);
 
     setFilter({ startDate: start, endDate: end, productId: '' });
     fetchData(start, end);
@@ -505,7 +510,7 @@ export default function ChiqimOmborPage() {
 
   return (
     <LayoutComponent>
-      {((typeof window !== 'undefined' && localStorage.getItem('type') === '1') || permissions.view_household_expenses) ? (
+      {(isSuperAdmin || permissions.view_household_expenses) ? (
         <>
           <AdminHeader
             title="Chiqim Ombori"
@@ -571,28 +576,28 @@ export default function ChiqimOmborPage() {
             columnTitles={
               isAggregated
                 ? {
-                    product_nomi: 'Mahsulot',
-                    hajm_birlik: 'Birlik',
+                    product_nomi: getText('colProduct'),
+                    hajm_birlik: getText('colUnit'),
                     ...uniqueDates.reduce(
                       (acc, date) => ({
                         ...acc,
-                        [`hajm_${date}`]: `Hajm (${date})`,
-                        [`narx_${date}`]: `Narx (${date})`,
+                        [`hajm_${date}`]: `${getText('colVolume')} (${date})`,
+                        [`narx_${date}`]: `${getText('colPrice')} (${date})`,
                       }),
                       {}
                     ),
-                    umumiy_hajm: 'Umumiy hajm',
-                    umumiy_narx: 'Umumiy narx',
+                    umumiy_hajm: getText('colTotalVolume'),
+                    umumiy_narx: getText('colTotalPrice'),
                   }
                 : {
-                    id: 'ID',
-                    product_nomi: 'Mahsulot',
-                    hajm: 'Hajm',
-                    hajm_birlik: 'Birlik',
-                    cleanedDescription: 'Izoh',
-                    chiqim_sana: 'Chiqim sanasi',
-                    created_at: 'Yaratilgan sana',
-                    actions: 'Amallar',
+                    id: getText('colId'),
+                    product_nomi: getText('colProduct'),
+                    hajm: getText('colVolume'),
+                    hajm_birlik: getText('colUnit'),
+                    cleanedDescription: getText('colComment'),
+                    chiqim_sana: getText('colExpenseDate'),
+                    created_at: getText('colCreatedDate'),
+                    actions: getText('colActions'),
                   }
             }
             data={displayedData}

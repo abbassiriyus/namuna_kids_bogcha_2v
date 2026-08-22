@@ -70,7 +70,7 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
           )}
 
           <Input name="username" placeholder="F.I.Sh" value={formData.username} onChange={handleChange} error={errors.username} />
-          <Input name="metrka" placeholder="Metirka raqami" value={formData.metrka} onChange={handleChange} error={errors.metrka} />
+          <Input name="metrka" placeholder="Metrika raqami" value={formData.metrka} onChange={handleChange} error={errors.metrka} />
           <Select name="guruh_id" value={formData.guruh_id} onChange={handleChange} options={guruhlar} error={errors.guruh_id} />
           <Input name="tugilgan_kun" type="date" value={formData.tugilgan_kun?.slice(0, 10)} onChange={handleChange} error={errors.tugilgan_kun} />
           <Input name="oylik_toliv" type="number" placeholder="Oylik to‘lov" value={formData.oylik_toliv} onChange={handleChange} error={errors.oylik_toliv} />

@@ -7,14 +7,18 @@ import AdminTable from '../../components/AdminTable';
 import QoshimchaModal from '../../components/QoshimchaModal';
 import axios from 'axios';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
 import AdminHeader from '../../components/AdminHeader';
 import ChiqimFilter from '../../components/ChiqimFilter';
 import ErrorModal from '../../components/ErrorModal';
 import { saveAs } from 'file-saver';
 import { exportToExcel } from '../../utils/exportExcel';
 import { FileSpreadsheet } from 'lucide-react';
+import { useUserType } from '../../utils/useUserType';
 
 export default function QoshimchaPage() {
+  // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
+  const { isSuperAdmin } = useUserType();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -285,7 +289,7 @@ export default function QoshimchaPage() {
 
   return (
     <LayoutComponent>
-      {typeof window !== 'undefined' && localStorage.getItem('type') == '1' || permissions.view_extras ? (
+      {isSuperAdmin || permissions.view_extras ? (
         <>
           <AdminHeader
             title="Qo‘shimcha chiqimlar"
@@ -327,13 +331,14 @@ export default function QoshimchaPage() {
 
           <AdminTable
             title="Qo‘shimcha chiqimlar ro‘yxati"
-            columns={['id', 'price', 'description', 'created_at', 'actions']}
+            columns={['id', 'price', 'payment_method', 'description', 'created_at', 'actions']}
             columnTitles={{
-              id: 'ID',
-              price: 'Narxi',
-              description: 'Izoh',
-              created_at: 'Vaqti',
-              actions: 'Amallar',
+              id: getText('colId'),
+              price: getText('colPrice'),
+              payment_method: getText('colPaymentType'),
+              description: getText('colComment'),
+              created_at: getText('colTime'),
+              actions: getText('colActions'),
             }}
             data={data}
             onDelete={permissions.delete_extras ? (id) => handleDelete(id) : null}

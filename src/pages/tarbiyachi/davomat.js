@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import url from '../../host/host';
 import { Check, X } from 'lucide-react';
+import { bugungiSana } from '../../utils/sana';
 
 export default function DavomatBugungi() {
   const [adminId, setAdminId] = useState(null);
@@ -16,7 +17,7 @@ export default function DavomatBugungi() {
  const [today, setToday] = useState("");
 
 useEffect(() => {
-  setToday(new Date().toISOString().slice(0, 10));
+  setToday(bugungiSana());
 }, []);
 
   // localStorage faqat clientda o'qiladi
@@ -56,7 +57,7 @@ useEffect(() => {
     setBolalar(filteredBolalar);
 
     const darsRes = await axios.get(`${url}/bola_kun_all?month=${today.slice(0, 7)}`, authHeader);
-    const todayLesson = darsRes.data.find(d => d.sana.slice(0, 10) === today);
+    const todayLesson = darsRes.data.find(d => toLocalDate(d.sana) === today);
     setDars(todayLesson);
 
     const davomatRes = await axios.get(`${url}/bola_kun`, authHeader);

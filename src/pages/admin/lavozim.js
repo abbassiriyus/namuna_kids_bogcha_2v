@@ -8,8 +8,12 @@ import AdminTable from '../../components/AdminTable';
 import AdminHeader from '../../components/AdminHeader';
 import ErrorModal from '../../components/ErrorModal';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
+import { useUserType } from '../../utils/useUserType';
 
 export default function Lavozimlar() {
+  // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
+  const { isSuperAdmin } = useUserType();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -144,15 +148,15 @@ export default function Lavozimlar() {
   };
 
   const columnTitles = {
-    id: 'ID',
-    name: 'Lavozim nomi',
-    created_at: 'Yaratilgan',
-    updated_at: 'Yangilangan',
+    id: getText('colId'),
+    name: getText('colPositionName'),
+    created_at: getText('colCreatedAt'),
+    updated_at: getText('colUpdatedAt'),
   };
 
   return (
     <LayoutComponent>
-      {typeof window !== 'undefined' && localStorage.getItem('type') == '1' || permissions.view_positions ? (
+      {isSuperAdmin || permissions.view_positions ? (
         <>
           <AdminHeader
             title="Lavozimlar"

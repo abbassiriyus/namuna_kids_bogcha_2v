@@ -34,6 +34,8 @@ const bolaPayNewRoutes = require('./routes/bolaPayNewRoutes');
 const xodimOneDayRoutes = require('./routes/xodimOneDayRoutes');
 const xodimWorkdaysRoutes = require('./routes/xodimWorkdaysRoutes');
 const groupAdminRoutes = require('./routes/groupAdminRoutes');
+const faceRoutes = require('./routes/faceRoutes');
+const davomatSettingsRoutes = require('./routes/davomatSettingsRoutes');
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -78,6 +80,8 @@ app.use('/bola-pay-new', bolaPayNewRoutes);
 app.use('/xodim_one_day', xodimOneDayRoutes);
 app.use('/xodim_workdays', xodimWorkdaysRoutes);
 app.use('/group-admin', groupAdminRoutes);
+app.use('/api', faceRoutes);
+app.use('/davomat-settings', davomatSettingsRoutes);
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);

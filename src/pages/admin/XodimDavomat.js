@@ -11,7 +11,8 @@ import url from '../../host/host';
 import { saveAs } from 'file-saver';
 import Modal from 'react-modal';
 import { exportToExcel } from '../../utils/exportExcel';
-import { FileSpreadsheet, FileText, Check, LogOut, X } from 'lucide-react';
+import { FileSpreadsheet, FileText, Check, LogOut, X, ScanFace, MousePointerClick } from 'lucide-react';
+import { getDavomatMood, formatMinutes } from '../../utils/davomatMood';
 
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -40,11 +41,17 @@ export default function XodimDavomat() {
     edit_employees: true,
     delete_employees: true,
   });
-  const [userType, setUserType] = useState(typeof window !== 'undefined' ? localStorage.getItem('type') : null);
+  const [userType, setUserType] = useState(null);
+
+  useEffect(() => {
+    setUserType(localStorage.getItem('type'));
+  }, []);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedDetails, setSelectedDetails] = useState(null);
   const [loadingStates, setLoadingStates] = useState({});
-
+  const [davomatMode, setDavomatMode] = useState('button');
+  const [modeSaving, setModeSaving] = useState(false);
+  const [viewMode, setViewMode] = useState('simple'); // 'simple' | 'detailed'
   const bugun = dayjs().tz('Asia/Tashkent').format('YYYY-MM-DD');
 
   const getAuthHeaders = () => {
@@ -182,30 +189,40 @@ export default function XodimDavomat() {
       const sortedXodimlar = xodimRes.data.sort((a, b) => a.name.localeCompare(b.name, 'uz'));
       setXodimlar(sortedXodimlar);
 
+      // Dars sanasi bazada haqiqiy kun sifatida saqlanadi. `.tz('Asia/Tashkent')`
+      // JSON'dagi UTC ko'rinishini mahalliy kunga qaytaradi — qo'shimcha
+      // `.subtract(1,'day')` kerak emas edi, aynan shu davomatni bir kunga
+      // surib yuborardi.
       const oyKunlari = bolaKuniRes.data
         .map(k => ({
           ...k,
           original_sana: k.sana,
-          sana: dayjs(k.sana).tz('Asia/Tashkent').subtract(1, 'day').format('YYYY-MM-DD'),
+          sana: dayjs(k.sana).tz('Asia/Tashkent').format('YYYY-MM-DD'),
         }))
         .filter(k => dayjs(k.sana).format('YYYY-MM') === selectedMonth && !dayjs(k.sana).isAfter(bugun))
         .sort((a, b) => new Date(a.sana) - new Date(b.sana));
       setIshKunlari(oyKunlari);
 
+      // Barcha maxsus ish kunlarini bitta so'rovda olamiz. Avval har bir xodim
+      // uchun alohida so'rov yuborilardi (N+1) va o'sha manzil backendda
+      // mavjud bo'lmagani uchun 404 qaytarardi.
+      const workdaysRes = await axios.get(
+        `${url}/xodim_workdays?month=${selectedMonth}`,
+        getAuthHeaders()
+      );
+      const workdaysByXodim = {};
+      workdaysRes.data.forEach((k) => {
+        const workDay = dayjs(k.work_day).tz('Asia/Tashkent').format('YYYY-MM-DD');
+        if (dayjs(workDay).isAfter(bugun)) return;
+        if (!workdaysByXodim[k.xodim_id]) workdaysByXodim[k.xodim_id] = [];
+        workdaysByXodim[k.xodim_id].push({ ...k, work_day: workDay });
+      });
+
       const kunMap = {};
       let allMaxsusWorkdays = [];
       for (const xodim of sortedXodimlar) {
         if (xodim.ish_tur === 2) {
-          const res = await axios.get(`${url}/xodim_workdays/xodim/${xodim.id}`, getAuthHeaders());
-          kunMap[xodim.id] = res.data
-            .map(k => ({
-              ...k,
-              work_day: dayjs(k.work_day).tz('Asia/Tashkent').format('YYYY-MM-DD'),
-            }))
-            .filter(k => 
-              dayjs(k.work_day).format('YYYY-MM') === selectedMonth &&
-              !dayjs(k.work_day).isAfter(bugun)
-            );
+          kunMap[xodim.id] = workdaysByXodim[xodim.id] || [];
           allMaxsusWorkdays = [...allMaxsusWorkdays, ...kunMap[xodim.id]];
         } else {
           kunMap[xodim.id] = oyKunlari;
@@ -331,13 +348,34 @@ export default function XodimDavomat() {
     fetchData();
   }, [selectedMonth]);
 
+  useEffect(() => {
+    axios
+      .get(`${url}/davomat-settings`)
+      .then((res) => setDavomatMode(res.data.mode || 'button'))
+      .catch((err) => console.error('Davomat rejimini olishda xatolik:', err));
+  }, []);
+
+  const changeDavomatMode = async (mode) => {
+    if (mode === davomatMode || modeSaving) return;
+    setModeSaving(true);
+    try {
+      const res = await axios.put(`${url}/davomat-settings`, { mode }, getAuthHeaders());
+      setDavomatMode(res.data.mode);
+    } catch (err) {
+      console.error('Davomat rejimini o‘zgartirishda xatolik:', err);
+      setErrorMessage("Davomat rejimini o'zgartirishda xatolik yuz berdi!");
+    } finally {
+      setModeSaving(false);
+    }
+  };
+
   const openModal = (xodim, kun, att, vaqtInfo, isToday) => {
     const expectedStart = xodim.start_time;
     const expectedEnd = xodim.end_time;
     const actualStart = att?.start_time || vaqtInfo?.kelgan || '-';
     const actualEnd = att?.end_time || vaqtInfo?.ketgan || (isToday ? 'Hali ketmagan' : '-');
     const { lateness } = getBackgroundColorAndLateness(actualStart, actualEnd, expectedStart, expectedEnd);
-    const displayDate = xodim.ish_tur === 1 ? dayjs(kun.original_sana).tz('Asia/Tashkent').subtract(1, 'day').format('DD-MM-YYYY') : dayjs(kun.work_day).format('DD-MM-YYYY');
+    const displayDate = xodim.ish_tur === 1 ? dayjs(kun.original_sana).tz('Asia/Tashkent').format('DD-MM-YYYY') : dayjs(kun.work_day).format('DD-MM-YYYY');
 
     setSelectedDetails({
       xodimName: xodim.name,
@@ -621,7 +659,7 @@ export default function XodimDavomat() {
           .map(k => ({
             ...k,
             original_sana: k.sana,
-            sana: dayjs(k.sana).tz('Asia/Tashkent').subtract(1, 'day').format('YYYY-MM-DD'),
+            sana: dayjs(k.sana).tz('Asia/Tashkent').format('YYYY-MM-DD'),
           }))
           .filter(k => k.sana === tomorrow);
       } catch (err) {
@@ -767,7 +805,7 @@ export default function XodimDavomat() {
           .map(k => ({
             ...k,
             original_sana: k.sana,
-            sana: dayjs(k.sana).tz('Asia/Tashkent').subtract(1, 'day').format('YYYY-MM-DD'),
+            sana: dayjs(k.sana).tz('Asia/Tashkent').format('YYYY-MM-DD'),
           }))
           .filter(k => k.sana === tomorrow);
       } catch (err) {
@@ -852,89 +890,246 @@ export default function XodimDavomat() {
     }
   };
 
+  const todayKelgan = xodimlar.filter((x) => vaqtlar[x.id]?.kelgan).length;
+  const todayKelmagan = Math.max(xodimlar.length - todayKelgan, 0);
+  const fulfilledRates = xodimlar
+    .map((x) => summaries[x.id])
+    .filter((s) => s && Number(s.plan) > 0)
+    .map((s) => (Number(s.fulfilled) / Number(s.plan)) * 100);
+  const avgFulfilled = fulfilledRates.length
+    ? Math.round(fulfilledRates.reduce((a, b) => a + b, 0) / fulfilledRates.length)
+    : 0;
+
   return (
     <LayoutComponent>
       {userType === '1' || permissions.view_employees ? (
         <>
           <div className={styles.wrapper}>
-            <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <label htmlFor="monthSelect" style={{ fontWeight: 'bold' }}>
+            <h1 className={styles.title}>Xodimlar Davomat</h1>
+
+            <div className={styles.statGrid}>
+              <div className={`${styles.statCard} ${styles.statBlue}`}>
+                <span className={styles.statLabel}>Jami xodimlar</span>
+                <span className={styles.statValue}>{xodimlar.length}</span>
+              </div>
+              <div className={`${styles.statCard} ${styles.statGreen}`}>
+                <span className={styles.statLabel}>Bugun kelgan</span>
+                <span className={styles.statValue}>{todayKelgan}</span>
+              </div>
+              <div className={`${styles.statCard} ${styles.statRed}`}>
+                <span className={styles.statLabel}>Bugun kelmagan</span>
+                <span className={styles.statValue}>{todayKelmagan}</span>
+              </div>
+              <div className={`${styles.statCard} ${styles.statPurple}`}>
+                <span className={styles.statLabel}>O'rtacha bajarilish</span>
+                <span className={styles.statValue}>{avgFulfilled}%</span>
+              </div>
+            </div>
+
+            <div className={styles.modeCard}>
+              <div className={styles.modeInfo}>
+                <span className={styles.modeLabel}>Davomat rejimi ({`/xodimdavomat`}):</span>
+                <span className={styles.modeHint}>
+                  Xodimlar ishga kelish-ketishni qanday belgilashi (faqat super admin o'zgartira oladi)
+                </span>
+              </div>
+              <div className={styles.modeSwitch}>
+                <button
+                  type="button"
+                  className={`${styles.modeBtn} ${davomatMode === 'button' ? styles.modeBtnActive : ''}`}
+                  onClick={() => changeDavomatMode('button')}
+                  disabled={userType !== '1' || modeSaving}
+                >
+                  <MousePointerClick size={15} /> Oddiy tugmalar
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.modeBtn} ${davomatMode === 'face' ? styles.modeBtnActive : ''}`}
+                  onClick={() => changeDavomatMode('face')}
+                  disabled={userType !== '1' || modeSaving}
+                >
+                  <ScanFace size={15} /> Face ID
+                </button>
+              </div>
+            </div>
+
+            {/* Yuz ma'lumotini yangilash Face ID oynasiga (/xodimdavomat)
+                ko'chirildi — u yerda kamera va xodimlar ro'yxati birga turadi. */}
+
+            <div className={styles.controls}>
+              <label htmlFor="monthSelect" className={styles.label}>
                 Oyni tanlang:
               </label>
               <input
                 type="month"
                 id="monthSelect"
+                className={styles.monthSelect}
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '16px',
-                  border: '1px solid #ccc',
-                  borderRadius: '6px',
-                }}
                 disabled={loading}
               />
+
+              <div className={styles.viewSwitch}>
+                <button
+                  type="button"
+                  className={`${styles.viewBtn} ${viewMode === 'simple' ? styles.viewBtnActive : ''}`}
+                  onClick={() => setViewMode('simple')}
+                >
+                  Oddiy ko'rinish
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.viewBtn} ${viewMode === 'detailed' ? styles.viewBtnActive : ''}`}
+                  onClick={() => setViewMode('detailed')}
+                >
+                  Kunlik jadval
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.viewBtn} ${viewMode === 'bugun' ? styles.viewBtnActive : ''}`}
+                  onClick={() => setViewMode('bugun')}
+                >
+                  Bugungi davomat
+                </button>
+              </div>
+
               <button
+                className={styles.exportBtn}
                 onClick={()=>handleExportToWord()}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 16px',
-                  background: '#3498db',
-                  color: '#fff',
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
                 disabled={loading || !permissions.view_employees}
               >
                 <FileText size={16} /> Export (Oylik)
               </button>
 
               <button
+                className={styles.exportTomorrowBtn}
                 onClick={()=>handleExportToExcel()}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 16px',
-                  background: '#217346',
-                  color: '#fff',
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
                 disabled={loading || !permissions.view_employees}
               >
                 <FileSpreadsheet size={16} /> Excel (Oylik)
               </button>
 
               <button
+                className={styles.exportTomorrowBtn}
                 onClick={()=>handleExportTomorrowToExcel()}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 16px',
-                  background: '#217346',
-                  color: '#fff',
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
                 disabled={loading || !permissions.view_employees}
               >
                 <FileSpreadsheet size={16} /> Excel (Ertangi kun)
               </button>
-
             </div>
 
-            <h1 className={styles.title}>Xodimlar Davomat</h1>
             {loading ? (
-              <p style={{ padding: '10px' }}>Yuklanmoqda...</p>
+              <p className={styles.loading}>Yuklanmoqda...</p>
+            ) : viewMode === 'bugun' ? (
+              <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                  <thead className={styles.table__head}>
+                    <tr>
+                      <th className={`${styles.table__cell} ${styles.sticky}`}>Ism</th>
+                      <th className={styles.table__cell}>Kayfiyat</th>
+                      <th className={styles.table__cell}>Reja (kelish–ketish)</th>
+                      <th className={styles.table__cell}>Kelgan</th>
+                      <th className={styles.table__cell}>Ketgan</th>
+                      <th className={styles.table__cell}>Kechikkan</th>
+                      <th className={styles.table__cell}>Erta ketgan</th>
+                      <th className={styles.table__cell}>Holat</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {xodimlar.map((xodim) => {
+                      const info = vaqtlar[xodim.id] || {};
+                      const mood = getDavomatMood({
+                        startTime: info.kelgan,
+                        endTime: info.ketgan,
+                        planStart: xodim.start_time,
+                        planEnd: xodim.end_time,
+                        seed: xodim.id,
+                      });
+                      return (
+                        <tr key={xodim.id}>
+                          <td className={`${styles.table__cell} ${styles.sticky}`}>{xodim.name}</td>
+                          <td className={`${styles.table__cell} ${styles.moodCell}`} title={mood.label}>
+                            <span className={styles.moodSticker}>{mood.sticker}</span>
+                          </td>
+                          <td className={styles.table__cell}>
+                            {(xodim.start_time || '-').slice(0, 5)} – {(xodim.end_time || '-').slice(0, 5)}
+                          </td>
+                          <td className={styles.table__cell}>{info.kelgan ? info.kelgan.slice(0, 5) : '-'}</td>
+                          <td className={styles.table__cell}>
+                            {info.ketgan ? info.ketgan.slice(0, 5) : (info.kelgan ? 'Ishda' : '-')}
+                          </td>
+                          <td className={styles.table__cell}>{formatMinutes(mood.kechikish)}</td>
+                          <td className={styles.table__cell}>{formatMinutes(mood.ertaKetish)}</td>
+                          <td className={`${styles.table__cell} ${styles[`tone_${mood.tone}`] || ''}`}>
+                            {mood.label}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : viewMode === 'simple' ? (
+              <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                  <thead className={styles.table__head}>
+                    <tr>
+                      <th className={`${styles.table__cell} ${styles.sticky}`}>Ism</th>
+                      <th className={styles.table__cell}>Ish turi</th>
+                      <th className={styles.table__cell}>Bugungi holat</th>
+                      <th className={styles.table__cell}>Kelgan kunlari</th>
+                      <th className={styles.table__cell}>Kelmagan kunlari</th>
+                      <th className={styles.table__cell}>Oy plani (soat)</th>
+                      <th className={styles.table__cell}>Bajargani (soat)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {xodimlar.map((xodim) => {
+                      const sum = summaries[xodim.id] || {};
+                      const todayInfo = vaqtlar[xodim.id];
+                      return (
+                        <tr key={xodim.id}>
+                          <td className={`${styles.table__cell} ${styles.sticky}`}>{xodim.name}</td>
+                          <td className={styles.table__cell}>{xodim.ish_tur === 1 ? 'Oddiy' : 'Maxsus'}</td>
+                          <td className={styles.table__cell}>
+                            {todayInfo?.kelgan ? (
+                              <div className={styles.actions}>
+                                <span className={styles.time}>
+                                  {todayInfo.kelgan.slice(0, 5)}
+                                  {todayInfo.ketgan ? ` – ${todayInfo.ketgan.slice(0, 5)}` : ''}
+                                </span>
+                                {!todayInfo.ketgan && (
+                                  <button
+                                    className={styles.ketBtn}
+                                    onClick={() => sendTime(xodim.id, 'ketgan')}
+                                    disabled={loading || !permissions.edit_employees || loadingStates[`ketgan_${xodim.id}`]}
+                                  >
+                                    {loadingStates[`ketgan_${xodim.id}`] ? 'Saqlanmoqda...' : <><LogOut size={14} /> Ishdan ketdim</>}
+                                  </button>
+                                )}
+                              </div>
+                            ) : (
+                              <button
+                                className={styles.kelBtn}
+                                onClick={() => sendTime(xodim.id, 'kelgan')}
+                                disabled={loading || !permissions.edit_employees || loadingStates[`kelgan_${xodim.id}`]}
+                              >
+                                {loadingStates[`kelgan_${xodim.id}`] ? 'Saqlanmoqda...' : <><Check size={14} /> Ishga keldim</>}
+                              </button>
+                            )}
+                          </td>
+                          <td className={styles.table__cell}>{sum.attendedDays || 0}</td>
+                          <td className={styles.table__cell}>{sum.missedDays || 0}</td>
+                          <td className={styles.table__cell}>{sum.plan || 0}</td>
+                          <td className={styles.table__cell}>{sum.fulfilled || 0}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             ) : (
-              <div>
+              <div className={styles.tableContainer}>
                 <table className={styles.table}>
                   <thead className={styles.table__head}>
                     <tr>
@@ -1037,61 +1232,30 @@ export default function XodimDavomat() {
           <Modal
             isOpen={modalIsOpen}
             onRequestClose={closeModal}
-            style={{
-              content: {
-                top: '50%',
-                left: '50%',
-                right: 'auto',
-                bottom: 'auto',
-                marginRight: '-50%',
-                transform: 'translate(-50%, -50%)',
-                padding: '15px',
-                borderRadius: '8px',
-                maxWidth: '400px',
-                width: '90%',
-                background: '#fff',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-              },
-              overlay: {
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                zIndex: 99,
-              },
-            }}
+            className={styles.modal}
+            overlayClassName={styles.overlay}
           >
             {selectedDetails && (
-              <div style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                <h3 style={{ margin: '0 0 10px', fontSize: '18px', textAlign: 'center' }}>
+              <div className={styles.modalContent}>
+                <h3>
                   {selectedDetails.xodimName} ({selectedDetails.kun})
                 </h3>
-                <div style={{ marginBottom: '8px' }}>
+                <div className={styles.modalItem}>
                   <strong>Kelish vaqti:</strong> {selectedDetails.expectedStart}
                 </div>
-                <div style={{ marginBottom: '8px' }}>
+                <div className={styles.modalItem}>
                   <strong>Aslida kelgan:</strong> {selectedDetails.actualStart}
                 </div>
-                <div style={{ marginBottom: '8px' }}>
+                <div className={styles.modalItem}>
                   <strong>Ketish vaqti:</strong> {selectedDetails.expectedEnd}
                 </div>
-                <div style={{ marginBottom: '8px' }}>
+                <div className={styles.modalItem}>
                   <strong>Aslida ketgan:</strong> {selectedDetails.actualEnd}
                 </div>
-                <div style={{ marginBottom: '15px' }}>
+                <div className={styles.modalItem}>
                   <strong>Kechikish:</strong> {selectedDetails.lateness}
                 </div>
-                <button
-                  onClick={closeModal}
-                  style={{
-                    display: 'block',
-                    margin: '0 auto',
-                    padding: '8px 16px',
-                    background: '#3498db',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                  }}
-                >
+                <button className={styles.modalCloseBtn} onClick={closeModal}>
                   Yopish
                 </button>
               </div>
@@ -1099,7 +1263,7 @@ export default function XodimDavomat() {
           </Modal>
         </>
       ) : (
-        <p style={{ padding: '20px', color: 'red' }}>
+        <p className={styles.noPermission}>
           Sizda xodimlar davomatini ko'rish uchun ruxsat yo'q!
         </p>
       )}

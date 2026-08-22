@@ -9,18 +9,20 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import styles from '../../styles/AdminTable.module.css';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
 import LayoutComponent from '../../components/LayoutComponent';
 import DaromatModal from '../../components/DaromatModal';
 import DaromatDeleteModal from '../../components/DaromatDeleteModal';
 import BonusShtrafModal from '../../components/BonusShtrafModal';
 import AdminTable from '../../components/AdminTableTolov';
 import ErrorModal from '../../components/ErrorModal';
+import { bugungiOy } from '../../utils/sana';
 
 export default function TolovlarPage() {
   const [rows, setRows] = useState([]);
   const [allBolalar, setAllBolalar] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [month, setMonth] = useState(() => bugungiOy());
   const [selectedGroup, setSelectedGroup] = useState('');
   const [searchFish, setSearchFish] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
@@ -60,25 +62,29 @@ export default function TolovlarPage() {
     'qarz_hadola_otgan',
     'qarz_miqdori_otgan',
     'balans',
+    'prognoz_tola_kelsa',
+    'prognoz_kelmasa',
   ];
 
   const columnTitles = {
-    fish: 'F.I.Sh.',
-    guruh: 'Guruh',
-    oylik_tolov: "Oylik to'lov",
-    kunlik_tolov: "Kunlik to'lov",
-    jami: 'Jami dars',
-    kelgan: 'Kelgan',
-    hisob: 'Hisoblangan (jami)',
-    naqt: 'Naqt',
-    karta: 'Karta',
-    prichislena: 'Bank',
-    naqt_prichislena: 'Bank (naqt)',
-    jami_tolangan: 'Jami to‘langan',
-    bonus_shtraf: 'Bonus/Shtraf',
-    qarz_hadola_otgan: 'O‘tgan oylardagi holat',
-    qarz_miqdori_otgan: 'O‘tgan oylardagi',
-    balans: 'Balans (ortiqcha/qarz)',
+    fish: getText('colFullName'),
+    guruh: getText('colGroup'),
+    oylik_tolov: getText('colMonthlyFee'),
+    kunlik_tolov: getText('colDailyFee'),
+    jami: getText('colTotalLessons'),
+    kelgan: getText('colAttended'),
+    hisob: getText('colCalculated'),
+    naqt: getText('colCash'),
+    karta: getText('colCard'),
+    prichislena: getText('colBank'),
+    naqt_prichislena: getText('colBankCash'),
+    jami_tolangan: getText('colTotalPaid'),
+    bonus_shtraf: getText('colBonusPenalty'),
+    qarz_hadola_otgan: getText('colPastStatus'),
+    qarz_miqdori_otgan: getText('colPastAmount'),
+    balans: getText('colBalanceFull'),
+    prognoz_tola_kelsa: getText('colForecastFull'),
+    prognoz_kelmasa: getText('colForecastNone'),
   };
 
   const formatCurrency = (value) => {
@@ -155,6 +161,8 @@ export default function TolovlarPage() {
           bonus_shtraf: 0,
           jami_dars_kun: 0,
           bola_dars_kunlari: [],
+          prognoz_tola_kelsa: 0,
+          prognoz_kelmasa: 0,
         };
 
         // Calculate previous months' debt/credit
@@ -186,6 +194,8 @@ export default function TolovlarPage() {
           qarz_hadola_otgan,
           qarz_miqdori_otgan:-qarz_miqdori_otgan,
           balans: oyData.balans,
+          prognoz_tola_kelsa: oyData.prognoz_tola_kelsa ?? 0,
+          prognoz_kelmasa: oyData.prognoz_kelmasa ?? 0,
           username: bola.username,
           guruh_id: guruhMap[bola.guruh_id] || 'Noma’lum',
           is_active: bola.is_active,
@@ -603,7 +613,7 @@ export default function TolovlarPage() {
               type="month"
               defaultValue={month}
               min="2020-01"
-              max={new Date().toISOString().slice(0, 7)}
+              max={bugungiOy()}
               onChange={(e) => {
                 setMonth(e.target.value);
                 setCurrentPage(1);

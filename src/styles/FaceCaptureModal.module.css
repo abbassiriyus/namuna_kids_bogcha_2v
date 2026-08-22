@@ -1,0 +1,98 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100000;
+}
+
+.modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal h3 {
+  margin: 0 0 12px;
+  color: var(--color-text);
+}
+
+.videoBox {
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  margin-bottom: 12px;
+}
+
+.videoBox video {
+  width: 100%;
+  display: block;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0 0 8px;
+}
+
+.message {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.messageSuccess {
+  color: var(--color-success);
+}
+
+.messageError {
+  color: var(--color-danger);
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.modalButtons button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.15s ease;
+}
+
+.modalButtons button:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.modalButtons button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modalButtons button:last-child {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.modalButtons button:last-child:hover {
+  background: var(--color-danger);
+  color: #fff;
+}

@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import styles from '../styles/Sidebar.module.css';
-import { getLanguage, getText } from '../i18n/translations';
+import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 import * as Icons from 'lucide-react';
 import url from '../host/host.js';
 
 export default function Sidebar() {
   const router = useRouter();
-  const [lang, setLang] = useState(getLanguage());
+  // Til butun ilova bo'ylab bitta joydan boshqariladi, shuning uchun bu yerda
+  // almashtirilganda barcha sahifalar va modallar ham darhol tarjima bo'ladi.
+  const { lang, toggleLang } = useLang();
   const [oshxonaOpen, setOshxonaOpen] = useState(false);
   const [maishiyOpen, setMaishiyOpen] = useState(false);
   const [visiblePermissions, setVisiblePermissions] = useState({});
@@ -18,6 +21,32 @@ export default function Sidebar() {
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false); // Sidebar uchun mobil toggle
   const [collapsed, setCollapsed] = useState(false); // Desktop uchun: faqat ikonka rejimi
+  const [navigatingTo, setNavigatingTo] = useState(null); // qaysi sahifaga o'tilmoqda
+
+  // Sahifalar orasida o'tishda kichik yuklanish ko'rsatkichi. Router hodisalari
+  // orqali kuzatamiz — shunda sekin ochiladigan sahifada ham foydalanuvchi
+  // bosgani ishlayotganini ko'radi va tugmani qayta bosavermaydi.
+  useEffect(() => {
+    const handleStart = (targetPath) => setNavigatingTo(targetPath);
+    const handleDone = () => setNavigatingTo(null);
+
+    router.events.on('routeChangeStart', handleStart);
+    router.events.on('routeChangeComplete', handleDone);
+    router.events.on('routeChangeError', handleDone);
+
+    return () => {
+      router.events.off('routeChangeStart', handleStart);
+      router.events.off('routeChangeComplete', handleDone);
+      router.events.off('routeChangeError', handleDone);
+    };
+  }, [router]);
+
+  // Bir sahifaga ikki marta bosilmasligi uchun umumiy navigatsiya funksiyasi.
+  const goTo = (path) => {
+    if (navigatingTo || router.pathname === path) return;
+    router.push(path);
+    setIsOpen(false);
+  };
 
   useEffect(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('sidebar_collapsed') : null;
@@ -34,12 +63,8 @@ export default function Sidebar() {
     });
   };
 
-  const toggleLanguage = () => {
-    // cycle: uz -> ru -> en -> uz
-    const nextLang = lang === 'uz' ? 'ru' : (lang === 'ru' ? 'en' : 'uz');
-    setLang(nextLang);
-    localStorage.setItem('app_lang', nextLang);
-  };
+  // uz -> ru -> en -> uz (LanguageContext ichida)
+  const toggleLanguage = toggleLang;
 
   useEffect(() => {
     const loadPermissions = async () => {
@@ -125,16 +150,17 @@ export default function Sidebar() {
       <ul className={styles.submenu}>
         {menuList.filter((m) => hasPermission(m.key)).map((sub, idx) => {
           const isSubActive = router.pathname === sub.path;
+          const isNavigating = navigatingTo === sub.path;
           return (
             <li
               key={idx}
-              onClick={() => {
-                router.push(sub.path);
-                setIsOpen(false);
-              }}
-              className={`${styles.subitem} ${isSubActive ? styles.active : ''}`}
+              onClick={() => goTo(sub.path)}
+              className={`${styles.subitem} ${isSubActive ? styles.active : ''} ${isNavigating ? styles.navigating : ''}`}
             >
               {sub.name}
+              {isNavigating && Icons.Loader2 && (
+                <Icons.Loader2 size={13} className={styles.navSpinner} />
+              )}
             </li>
           );
         })}
@@ -183,18 +209,35 @@ export default function Sidebar() {
         </div>
 
         <ul className={styles.menu}>
+          <li
+            onClick={() => goTo('/admin/profile')}
+            className={`${styles.item} ${router.pathname === '/admin/profile' ? styles.active : ''} ${navigatingTo === '/admin/profile' ? styles.navigating : ''}`}
+          >
+            <span className={styles.iconWrap}>
+              {navigatingTo === '/admin/profile' && Icons.Loader2
+                ? <Icons.Loader2 size={20} className={styles.navSpinner} />
+                : (Icons.UserCircle ? <Icons.UserCircle size={20} /> : <span />)}
+            </span>
+            <span className={styles.label}>{getText('profile', lang)}</span>
+            <span className={styles.tooltip}>{getText('profile', lang)}</span>
+          </li>
+
           {menu.filter((m) => hasPermission(m.key)).map((item, i) => {
             const isActive = router.pathname === item.path;
+            const isNavigating = navigatingTo === item.path;
             return (
               <li
                 key={i}
-                onClick={() => {
-                  router.push(item.path);
-                  setIsOpen(false);
-                }}
-                className={`${styles.item} ${isActive ? styles.active : ''}`}
+                onClick={() => goTo(item.path)}
+                className={`${styles.item} ${isActive ? styles.active : ''} ${isNavigating ? styles.navigating : ''}`}
               >
-                <span className={styles.iconWrap}>{item.icon}</span>
+                {/* Yuklanayotganda ikonka o'rniga spinner ko'rsatiladi —
+                    collapsed rejimda ham ko'rinadi, chunki matn yashiringan. */}
+                <span className={styles.iconWrap}>
+                  {isNavigating && Icons.Loader2
+                    ? <Icons.Loader2 size={20} className={styles.navSpinner} />
+                    : item.icon}
+                </span>
                 <span className={styles.label}>{item.name}</span>
                 <span className={styles.tooltip}>{item.name}</span>
               </li>

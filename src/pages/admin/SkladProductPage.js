@@ -8,6 +8,7 @@ import SkladModal from '../../components/SkladModal';
 import ErrorModal from '../../components/ErrorModal';
 import axios from 'axios';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
 import styles from '../../styles/SkladProduct.module.css';
 import { saveAs } from 'file-saver';
 import { exportToExcel } from '../../utils/exportExcel';
@@ -302,13 +303,13 @@ export default function SkladProductPage() {
               title="Sklad"
               columns={['id', 'nomi', 'hajm', 'mavjud_hajm', 'hajm_birlik', 'created_at', 'actions']}
               columnTitles={{
-                id: 'ID',
-                nomi: 'Nomi',
-                hajm: 'Boshlang‘ich hajm',
-                mavjud_hajm: 'Omborda mavjud',
-                hajm_birlik: 'Birlik',
-                created_at: 'Qo‘shilgan sana',
-                actions: 'Amallar',
+                id: getText('colId'),
+                nomi: getText('colName'),
+                hajm: getText('colInitialVolume'),
+                mavjud_hajm: getText('colAvailableInStorage'),
+                hajm_birlik: getText('colUnit'),
+                created_at: getText('colAddedDate'),
+                actions: getText('colActions'),
               }}
               data={filteredData.map((item) => ({
                 ...item,

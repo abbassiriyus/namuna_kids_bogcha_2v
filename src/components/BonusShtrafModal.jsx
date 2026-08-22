@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import url from '../host/host';
 import { getText } from '../i18n/translations';
+import { bugungiSana } from '../utils/sana';
 
 export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }) {
   const [miqdor, setMiqdor] = useState('');
-  const [sana, setSana] = useState(month ? `${month}-01` : new Date().toISOString().slice(0, 10));
+  const [sana, setSana] = useState(month ? `${month}-01` : bugungiSana());
   const [izoh, setIzoh] = useState('');
   const [shtrafList, setShtrafList] = useState([]);
   const [editId, setEditId] = useState(null);
@@ -61,7 +62,7 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
       }
 
       setMiqdor('');
-      setSana(month ? `${month}-01` : new Date().toISOString().slice(0, 10));
+      setSana(month ? `${month}-01` : bugungiSana());
       setIzoh('');
       setEditId(null);
       setError('');
@@ -171,7 +172,7 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
           <button
             onClick={() => {
               setMiqdor('');
-              setSana(month ? `${month}-01` : new Date().toISOString().slice(0, 10));
+              setSana(month ? `${month}-01` : bugungiSana());
               setIzoh('');
               setEditId(null);
               setError('');

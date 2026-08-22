@@ -7,6 +7,7 @@ import AdminTable from "../../components/AdminTable";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import url from "../../host/host";
+import { getText } from '../../i18n/translations';
 
 export default function Tarix() {
   const [data, setData] = useState([]);
@@ -81,12 +82,12 @@ export default function Tarix() {
 
   const columnTitles = {
     id: "№",
-    admin_username: "Admin", 
-     method: "Amal",
-    table_name: "Jadval",
-    izoh: "Izoh (JSON)",
-    created_at: "Yaratilgan",
-    updated_at: "Yangilangan",
+    admin_username: getText('colAdmin'),
+    method: getText('colAction'),
+    table_name: getText('colTable'),
+    izoh: getText('colCommentJson'),
+    created_at: getText('colCreatedAt'),
+    updated_at: getText('colUpdatedAt'),
   };
 
   // 🔽 unique adminlarni chiqarib olish

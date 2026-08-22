@@ -1,0 +1,18 @@
+.track {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: transparent;
+  z-index: 1000000;
+  pointer-events: none;
+}
+
+.bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), #60a5fa);
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.6);
+  border-radius: 0 3px 3px 0;
+  transition: width 0.2s ease;
+}

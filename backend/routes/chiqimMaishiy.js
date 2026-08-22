@@ -17,7 +17,7 @@ router.get('/', verifyToken, async (req, res) => {
     }
     if (end) {
       values.push(end);
-      baseQuery += ` AND chiqim_sana <= $${values.length}`;
+      baseQuery += ` AND chiqim_sana < $${values.length}::timestamptz + INTERVAL '1 day'`;
     }
     if (product) {
       values.push(product);

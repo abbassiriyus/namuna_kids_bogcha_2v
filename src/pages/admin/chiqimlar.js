@@ -10,9 +10,11 @@ import ChiqimFilter from '../../components/ChiqimFilter';
 import ErrorModal from '../../components/ErrorModal';
 import axios from 'axios';
 import url from '../../host/host';
+import { getText } from '../../i18n/translations';
 import { saveAs } from 'file-saver';
 import styles from '../../styles/ChiqimOmbor.module.css'; // Assuming a CSS module for styling
 import { exportToExcel } from '../../utils/exportExcel';
+import { toLocalDate } from '../../utils/sana';
 
 export default function ChiqimOmborPage() {
   const router = useRouter();
@@ -148,8 +150,8 @@ export default function ChiqimOmborPage() {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    const start = today.toISOString().slice(0, 10);
-    const end = tomorrow.toISOString().slice(0, 10);
+    const start = toLocalDate(today);
+    const end = toLocalDate(tomorrow);
 
     setFilter({ startDate: start, endDate: end, productId: '' });
     fetchData(start, end);
@@ -422,7 +424,7 @@ const handleSave = async (form) => {
     setEditingItem(null);
   } catch (err) {
     console.error('Saqlashda xatolik:', err.response?.data || err.message);
-    setErrorMessage(`Saqlashda xatolik yuz berdi: ${JSON.stringify(err.response?.data || err.message)}`);
+    setErrorMessage(err.response?.data?.error || 'Saqlashda xatolik yuz berdi. Ma\'lumotlarni tekshirib qayta urinib ko\'ring.');
   } finally {
     setLoading(false);
   }
@@ -506,20 +508,20 @@ const handleSave = async (form) => {
                 columnTitles={
                   isAggregated
                     ? {
-                        product_nomi: 'Mahsulot',
-                        hajm_birlik: 'Birlik',
+                        product_nomi: getText('colProduct'),
+                        hajm_birlik: getText('colUnit'),
                         ...uniqueDates.reduce((acc, date) => ({ ...acc, [date]: date }), {}),
-                        umumiy: 'Umumiy',
+                        umumiy: getText('colTotal'),
                       }
                     : {
-                        id: 'ID',
-                        product_nomi: 'Mahsulot',
-                        hajm: 'Hajm',
-                        hajm_birlik: 'Birlik',
-                        description: 'Izoh',
-                        chiqim_sana: 'Chiqim sanasi',
-                        created_at: 'Yaratilgan sana',
-                        actions: 'Amallar',
+                        id: getText('colId'),
+                        product_nomi: getText('colProduct'),
+                        hajm: getText('colVolume'),
+                        hajm_birlik: getText('colUnit'),
+                        description: getText('colComment'),
+                        chiqim_sana: getText('colExpenseDate'),
+                        created_at: getText('colCreatedDate'),
+                        actions: getText('colActions'),
                       }
                 }
                 data={displayedData.map((item) => ({

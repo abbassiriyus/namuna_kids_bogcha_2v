@@ -288,6 +288,23 @@
   cursor: wait;
 }
 
+/* Kirish tugmasidagi yuklanish ko'rsatkichi */
+.btnLoading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .error {
   margin: 0;
   border-radius: var(--radius-sm);

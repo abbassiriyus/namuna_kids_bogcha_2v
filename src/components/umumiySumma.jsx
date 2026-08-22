@@ -202,6 +202,7 @@ export default function UmumiySumma() {
       // Xodimlar oyligi summasini hisoblash
       const oylikTotals = oylikRows.reduce(
         (acc, row) => ({
+          ...acc,
           total_kirim: acc.total_kirim + (parseFloat(row?.narx) || 0),
         }),
         { total_naqt: 0, total_karta: 0, total_prichislena: 0, total_naqt_prichislena: 0, total_kirim: 0 }

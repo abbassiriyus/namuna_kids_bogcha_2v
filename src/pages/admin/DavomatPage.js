@@ -10,10 +10,11 @@ import LayoutComponent from '../../components/LayoutComponent';
 import DavomatModal from '../../components/DavomatModal';
 import ErrorModal from '../../components/ErrorModal';
 import styles from '../../styles/DavomatPage.module.css';
+import { bugungiOy, bugungiSana, toLocalDate } from '../../utils/sana';
 
 export default function DavomatPage() {
   const router = useRouter();
-  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [month, setMonth] = useState(() => bugungiOy());
   const [bolalar, setBolalar] = useState([]);
   const [filteredBolalar, setFilteredBolalar] = useState([]);
   const [darsKunlar, setDarsKunlar] = useState([]);
@@ -55,7 +56,11 @@ export default function DavomatPage() {
       setLoading(true);
       const [year, monthNum] = month.split('-');
       const res = await axios.get(`${url}/bola_kun_all?year=${year}&month=${monthNum}`, authHeader);
+      // API sanani UTC satri sifatida qaytaradi ("2026-08-21T19:00:00.000Z"),
+      // uni to'g'ridan-to'g'ri kesish bir kun oldingi sanani berardi — shu sababli
+      // bugungi dars topilmay qolardi. Mahalliy sanaga o'girib qo'yamiz.
       const sorted = res.data
+        .map(d => ({ ...d, sana: toLocalDate(d.sana) }))
         .filter(d => d.sana.startsWith(month))
         .sort((a, b) => new Date(a.sana) - new Date(b.sana));
       setDarsKunlar(sorted);
@@ -101,7 +106,7 @@ export default function DavomatPage() {
       const allDarsSana = darsSanaRes.data;
 
       const thisMonthDarsIds = allDarsSana
-        .filter(d => d.sana.startsWith(selectedMonth))
+        .filter(d => toLocalDate(d.sana).startsWith(selectedMonth))
         .map(d => d.id);
 
       const monthBolaIds = allDavomat
@@ -154,7 +159,7 @@ export default function DavomatPage() {
 const [today, setToday] = useState("");
 
 useEffect(() => {
-  setToday(new Date().toISOString().slice(0, 10));
+  setToday(bugungiSana());
 }, []);
   const filterBolalar = (list, guruhId, search, unmarkedOnly) => {
     let result = list;
@@ -170,7 +175,7 @@ useEffect(() => {
     }
 
     if (unmarkedOnly) {
-      // const today = new Date().toISOString().slice(0, 10);
+      // const today = bugungiSana();
       const todayLesson = darsKunlar.find(d => d.sana.slice(0, 10) === today);
       if (todayLesson) {
         result = result.filter(bola => {
@@ -232,12 +237,14 @@ useEffect(() => {
       await fetchDavomatlar();
       setSelected(null);
     } catch (err) {
-      if (err.response?.status === 403) {
-        setErrorMessage('Davomatni saqlash uchun ruxsat yo‘q');
-      } else {
-        console.error('Xatolik:', err);
-        setErrorMessage('Davomatni saqlashda noma’lum xatolik yuz berdi');
-      }
+      // Serverdan kelgan aniq sababni ko'rsatamiz (masalan "Faqat bugungi dars
+      // uchun davomat kiritish mumkin"), aks holda sabab yashirin qolardi.
+      console.error('Xatolik:', err);
+      setErrorMessage(
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        'Davomatni saqlashda noma’lum xatolik yuz berdi'
+      );
     } finally {
       setLoading(false);
     }

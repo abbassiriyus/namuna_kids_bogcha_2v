@@ -10,6 +10,7 @@
   justify-content: center;
   align-items: center;
   z-index: 999999;
+  animation: errorOverlayFadeIn 0.2s ease-out;
 }
 
 .errorContent {
@@ -21,6 +22,21 @@
   text-align: center;
   max-width: 400px;
   width: 90%;
+  animation: errorPopShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes errorOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes errorPopShake {
+  0% { transform: scale(0.8) translateY(-16px); opacity: 0; }
+  50% { transform: scale(1.03) translateY(0); opacity: 1; }
+  62% { transform: translateX(-6px); }
+  74% { transform: translateX(5px); }
+  86% { transform: translateX(-3px); }
+  100% { transform: translateX(0); opacity: 1; }
 }
 
 .errorContent p {

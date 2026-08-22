@@ -6,11 +6,14 @@ import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
 import { getText } from '../i18n/translations';
+import ErrorModal from './ErrorModal';
+import { toLocalDate } from '../utils/sana';
 
 export default function ChiqimModal({ isOpen, onClose, onSave, products = [], initialData = null }) {
   const [rows, setRows] = useState([{ sklad_product_id: '', hajm: '', description: '' }]);
   const [chiqimSana, setChiqimSana] = useState('');
   const [availableHajm, setAvailableHajm] = useState({}); // product_id => hajm
+  const [modalError, setModalError] = useState('');
 
   const token = localStorage.getItem('token') ? localStorage.getItem('token') : null;
   const authHeader = { headers: { Authorization: `Bearer ${token}` } };
@@ -68,6 +71,15 @@ export default function ChiqimModal({ isOpen, onClose, onSave, products = [], in
       availableMap[id] = boshlangich + kirim - chiqim;
     });
 
+    // Tahrirlanayotgan yozuvning eski hajmi yuqorida chiqim sifatida
+    // hisobga olingan (bazadan hali o'chirilmagani uchun) — uni qaytarib
+    // qo'shamiz, aks holda mavjud hajm haqiqatdan kamroq ko'rsatilib,
+    // to'g'ri qiymat ham "yetarli emas" deb rad etilib qolar edi.
+    if (initialData?.sklad_product_id) {
+      const editId = Number(initialData.sklad_product_id);
+      availableMap[editId] = (availableMap[editId] || 0) + Number(initialData.hajm || 0);
+    }
+
     console.log('Available Hajm:', availableMap);
     setAvailableHajm(availableMap);
   } catch (err) {
@@ -83,7 +95,7 @@ const handleChange = (index, e) => {
 };
 const handleSubmit = () => {
   if (!chiqimSana) {
-    return alert("❌ Sana tanlanmagan");
+    return setModalError('Sana tanlanmagan');
   }
 
   // Faqat to‘ldirilgan qatorlarni olish
@@ -92,7 +104,7 @@ const handleSubmit = () => {
   );
 
   if (validRows.length === 0) {
-    return alert("❌ Kamida bitta to‘ldirilgan qator bo‘lishi kerak");
+    return setModalError('Kamida bitta to‘ldirilgan qator bo‘lishi kerak');
   }
 
   for (let i = 0; i < validRows.length; i++) {
@@ -102,22 +114,22 @@ const handleSubmit = () => {
     const max = availableHajm[productId] || 0;
 
     if (!productId || isNaN(productId)) {
-      return alert(`❌ ${i + 1}-qator: Mahsulot tanlanmagan`);
+      return setModalError(`${i + 1}-qator: Mahsulot tanlanmagan`);
     }
 
     if (entered <= 0 || isNaN(entered)) {
-      return alert(`❌ ${i + 1}-qator: Hajm noto‘g‘ri yoki kiritilmagan`);
+      return setModalError(`${i + 1}-qator: Hajm noto‘g‘ri yoki kiritilmagan`);
     }
 
     if (entered > max) {
-      return alert(`❌ ${i + 1}-qator: Omborda faqat ${max} birlik mavjud`);
+      return setModalError(`${i + 1}-qator: Omborda faqat ${max} birlik mavjud`);
     }
   }
 
   // Sana ustiga 1 kun qo‘shamiz
   const sanaWithOffset = new Date(chiqimSana);
   sanaWithOffset.setDate(sanaWithOffset.getDate() + 1);
-  const formattedSana = sanaWithOffset.toISOString().slice(0, 10);
+  const formattedSana = toLocalDate(sanaWithOffset);
 
   const payload = validRows.map((r) => ({
     ...r,
@@ -125,9 +137,11 @@ const handleSubmit = () => {
     hajm: Number(r.hajm),
     chiqim_sana: formattedSana,
   }));
-console.log(payload);
 
-  onSave(payload);
+  // Bitta qatorni tahrirlayotgan bo‘lsa, PUT so‘rovi ishlashi uchun
+  // massiv emas, alohida obyekt yuboramiz (aks holda bulk-INSERT chaqirilib,
+  // yangilash o‘rniga yangi qator qo‘shilib qolar edi).
+  onSave(payload.length === 1 && initialData ? payload[0] : payload);
   onClose();
   setRows([{ sklad_product_id: '', hajm: '', description: '' }]);
 };
@@ -237,6 +251,7 @@ console.log(payload);
           <button onClick={onClose}><X size={16} /> {getText('cancel')}</button>
         </div>
       </div>
+      <ErrorModal message={modalError} onClose={() => setModalError('')} />
     </div>
   );
 }
