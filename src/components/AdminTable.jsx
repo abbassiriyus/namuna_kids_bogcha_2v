@@ -4,9 +4,9 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import { Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from '../styles/AdminTable.module.css';
+import { getText } from '../i18n/translations';
 
 export default function AdminTable({
-  title,
   columns,
   columnTitles = {},
   data,
@@ -15,26 +15,9 @@ export default function AdminTable({
   customRenderers = {},
   customActions = {},
   permissions = {},
-  simpleView = false,
 }) {
-  if (simpleView) {
-    // Lazy require to avoid circular deps
-    const SimpleTable = require('./SimpleTable').default;
-    return (
-      <SimpleTable
-        title={title}
-        columns={columns.filter((c) => c !== 'actions')}
-        columnTitles={columnTitles}
-        data={data}
-        onAdd={() => { if (typeof window !== 'undefined' && window.alert) window.alert('Qo\'shish'); }}
-        onEdit={(row) => { if (onEdit) onEdit(row); }}
-        onDelete={(row) => { if (onDelete) onDelete(row.id || row); }}
-      />
-    );
-  }
   const itemsPerPage = 100;
   const [currentPage, setCurrentPage] = useState(1);
-
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -61,11 +44,7 @@ export default function AdminTable({
   const hasImageColumn = columns.includes('image');
 
   const handleDeleteClick = (id) => {
-    if (
-      confirm(
-        "Haqiqatan ham bu tarbiyalanuvchini o‘chirmoqchimisiz? Bu amaliyot yomon oqibatlarga olib kelishi mumkin!"
-      )
-    ) {
+    if (confirm(getText('confirmDelete'))) {
       onDelete(id);
     }
   };
@@ -79,7 +58,7 @@ export default function AdminTable({
               <thead className={styles.adminTable__thead}>
                 <tr>
                   {(permissions.edit1 || permissions.delete1) && (
-                    <th className={styles.adminTable__th}>Amallar</th>
+                    <th className={styles.adminTable__th}>{getText('colActions')}</th>
                   )}
                   <th className={styles.adminTable__th}>№</th>
                   {displayColumns.map((col, idx) => (
@@ -97,7 +76,7 @@ export default function AdminTable({
                         className={`${styles.adminTable__td} ${styles.actionsCell}`}
                       >
                         {permissions.delete1 && onDelete && (
-                          <button className={styles.deleteBtn} onClick={() => handleDeleteClick(row.id)} title="O'chirish">
+                          <button className={styles.deleteBtn} onClick={() => handleDeleteClick(row.id)} title={getText('delete')}>
                             <Trash2 size={16} />
                           </button>
                         )}
@@ -170,7 +149,7 @@ export default function AdminTable({
           {/* Pagination */}
           <div className={styles.pagination}>
             <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-              <ChevronLeft size={16} /> Oldingi
+              <ChevronLeft size={16} /> {getText('prev')}
             </button>
             <span>
               {currentPage} / {totalPages}
@@ -179,7 +158,7 @@ export default function AdminTable({
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
             >
-              Keyingi <ChevronRight size={16} />
+              {getText('next')} <ChevronRight size={16} />
             </button>
           </div>
         </>

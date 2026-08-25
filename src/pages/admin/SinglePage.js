@@ -46,8 +46,7 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
       router.replace('/');
     } else {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      axios.defaults.baseURL = url;
-      axios.defaults.timeout = 20000; // 20s timeout for network calls
+      axios.defaults.timeout = 20000;
     }
   }, [token, router]);
 
@@ -72,79 +71,12 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
     try {
       const [year, monthNum] = month.split('-');
 
-      // API chaqiruvlari with per-request diagnostics
-      console.log('Fetching dashboard data from', url, 'month:', month);
-
-      let bolalarRes, davomatRes, darsKunlarRes, guruhlarRes;
-
-      try {
-        bolalarRes = await axios.get('/bola/all', authHeader);
-      } catch (e) {
-        console.error('Failed to fetch /bola/all', e);
-        // Retry via server-side proxy to avoid CORS or network issues
-        if (typeof window !== 'undefined') {
-          try {
-            const proxyRes = await axios.get(`${window.location.origin}/api/proxy?target=${encodeURIComponent('/bola/all')}`, authHeader);
-            bolalarRes = proxyRes;
-          } catch (pErr) {
-            console.error('Proxy retry failed for /bola/all', pErr);
-            throw e;
-          }
-        } else {
-          throw e;
-        }
-      }
-
-      try {
-        davomatRes = await axios.get('/bola_kun', authHeader);
-      } catch (e) {
-        console.error('Failed to fetch /bola_kun', e);
-        if (typeof window !== 'undefined') {
-          try {
-            const proxyRes = await axios.get(`${window.location.origin}/api/proxy?target=${encodeURIComponent('/bola_kun')}`, authHeader);
-            davomatRes = proxyRes;
-          } catch (pErr) {
-            console.error('Proxy retry failed for /bola_kun', pErr);
-            throw e;
-          }
-        } else {
-          throw e;
-        }
-      }
-
-      try {
-        darsKunlarRes = await axios.get(`/bola_kun_all?year=${year}&month=${monthNum}`, authHeader);
-      } catch (e) {
-        console.error(`Failed to fetch /bola_kun_all?year=${year}&month=${monthNum}`, e);
-        if (typeof window !== 'undefined') {
-          try {
-            const proxyRes = await axios.get(`${window.location.origin}/api/proxy?target=${encodeURIComponent(`/bola_kun_all?year=${year}&month=${monthNum}`)}`, authHeader);
-            darsKunlarRes = proxyRes;
-          } catch (pErr) {
-            console.error('Proxy retry failed for bola_kun_all', pErr);
-            throw e;
-          }
-        } else {
-          throw e;
-        }
-      }
-
-      try {
-        guruhlarRes = await axios.get('/guruh', authHeader);
-      } catch (e) {
-        console.error('Failed to fetch /guruh', e);
-        if (typeof window !== 'undefined') {
-          try {
-            const proxyRes = await axios.get(`${window.location.origin}/api/proxy?target=${encodeURIComponent('/guruh')}`, authHeader);
-            guruhlarRes = proxyRes;
-          } catch (pErr) {
-            console.error('Proxy retry failed for /guruh', pErr);
-            throw e;
-          }
-        } else {
-          throw e;
-        }
-      }
+      const [bolalarRes, davomatRes, darsKunlarRes, guruhlarRes] = await Promise.all([
+        axios.get(`${url}/bola/all`, authHeader),
+        axios.get(`${url}/bola_kun`, authHeader),
+        axios.get(`${url}/bola_kun_all?year=${year}&month=${monthNum}`, authHeader),
+        axios.get(`${url}/guruh`, authHeader),
+      ]);
 
       // Shu oydagi dars kunlarini olish
       const darsFiltered = darsKunlarRes.data

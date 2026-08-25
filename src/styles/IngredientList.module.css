@@ -97,3 +97,41 @@
 .deleteButton:hover {
   filter: brightness(0.97);
 }
+
+.useButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.empty {
+  font-size: 0.9rem;
+  color: var(--color-text-muted, #64748b);
+  margin: 0;
+}
+
+.stock {
+  color: var(--color-text-muted, #64748b);
+  font-size: 0.8rem;
+}
+
+.itemActions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.editButton {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.editButton:hover {
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}

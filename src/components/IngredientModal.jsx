@@ -8,48 +8,44 @@ import styles from '../styles/BolaModal.module.css';
 import { getText } from '../i18n/translations';
 
 export default function IngredientModal({ open, setOpen, taomId, onSaved, ingredient }) {
-  const [formData, setFormData] = useState({
-    sklad_product_id: '',
-    miqdor: '',
-    miqdor_birlik: ''
-  });
+  const [formData, setFormData] = useState({ sklad_product_id: '', miqdor: '', miqdor_birlik: '' });
   const [mahsulotlar, setMahsulotlar] = useState([]);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const isEdit = Boolean(ingredient);
 
   useEffect(() => {
+    setError('');
     if (ingredient) {
       setFormData({
         sklad_product_id: ingredient.sklad_product_id || '',
         miqdor: ingredient.miqdor || '',
-        miqdor_birlik: ingredient.miqdor_birlik || ''
+        miqdor_birlik: ingredient.hajm_birlik || '',
       });
     } else {
       setFormData({ sklad_product_id: '', miqdor: '', miqdor_birlik: '' });
     }
-  }, [ingredient]);
+  }, [ingredient, open]);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${url}/sklad_product`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setMahsulotlar(res.data);
-    };
-    fetchProducts();
-  }, []);
+    if (!open) return;
+    axios
+      .get(`${url}/sklad_product`)
+      .then((res) => setMahsulotlar(res.data))
+      .catch(() => setError(getText('loadError')));
+  }, [open]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Agar mahsulot tanlansa, birlikni avtomatik to‘ldiramiz
+    // Mahsulot tanlanganda birlik avtomatik to'ldiriladi.
     if (name === 'sklad_product_id') {
-      const selected = mahsulotlar.find(m => m.id == value);
+      const selected = mahsulotlar.find((m) => String(m.id) === String(value));
       setFormData((prev) => ({
         ...prev,
         sklad_product_id: value,
-        miqdor_birlik: selected?.hajm_birlik || ''
+        miqdor_birlik: selected?.hajm_birlik || '',
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -57,12 +53,29 @@ export default function IngredientModal({ open, setOpen, taomId, onSaved, ingred
   };
 
   const handleSubmit = async () => {
+    if (!formData.sklad_product_id || Number(formData.miqdor) <= 0) {
+      setError(getText('fillAllFields'));
+      return;
+    }
+
+    setSaving(true);
+    setError('');
     try {
-      await axios.post(`${url}/taom/${taomId}/ingredient`, formData);
+      const payload = {
+        sklad_product_id: Number(formData.sklad_product_id),
+        miqdor: Number(formData.miqdor),
+      };
+      if (isEdit) {
+        await axios.put(`${url}/taom_ingredient/${ingredient.id}`, payload);
+      } else {
+        await axios.post(`${url}/taom/${taomId}/ingredient`, payload);
+      }
       setOpen(false);
       onSaved();
     } catch (err) {
-      console.error("Xatolik:", err);
+      setError(err.response?.data?.error || getText('saveError'));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -71,7 +84,9 @@ export default function IngredientModal({ open, setOpen, taomId, onSaved, ingred
   return (
     <div className={styles.modal}>
       <div className={styles.modal__content}>
-        <h3 className={styles.modal__title}>{getText('attachProduct')}</h3>
+        <h3 className={styles.modal__title}>
+          {isEdit ? getText('editIngredient') : getText('attachProduct')}
+        </h3>
         <div className={styles.modal__form}>
           <select name="sklad_product_id" value={formData.sklad_product_id} onChange={handleChange}>
             <option value="">{getText('selectProduct')}</option>
@@ -79,11 +94,22 @@ export default function IngredientModal({ open, setOpen, taomId, onSaved, ingred
               <option key={m.id} value={m.id}>{m.nomi}</option>
             ))}
           </select>
-          <input name="miqdor" value={formData.miqdor} onChange={handleChange} placeholder={getText('amount')} type="number" />
+          <input
+            name="miqdor"
+            value={formData.miqdor}
+            onChange={handleChange}
+            placeholder={getText('amountPerChild')}
+            type="number"
+            min="0"
+            step="any"
+          />
           <input name="miqdor_birlik" value={formData.miqdor_birlik} readOnly placeholder={getText('unitPlaceholder')} />
         </div>
+        {error && <p style={{ color: '#dc2626', margin: '4px 0' }}>{error}</p>}
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> {getText('save')}</button>
+          <button onClick={handleSubmit} disabled={saving}>
+            <Check size={16} /> {saving ? getText('saving') : getText('save')}
+          </button>
           <button onClick={() => setOpen(false)}><X size={16} /> {getText('cancel')}</button>
         </div>
       </div>

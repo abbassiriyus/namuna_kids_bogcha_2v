@@ -55,15 +55,14 @@ export default function SkladModal({ isOpen, onClose, onSave, initialData }) {
             onChange={handleChange}
             placeholder={getText('volumePlaceholder')}
           />
+          {/* value — bazadagi qiymat, o'zgarmaydi; faqat ko'rinadigan nomi tarjima qilinadi. */}
           <select name="hajm_birlik" value={formData.hajm_birlik} onChange={handleChange}>
-            <option value="kg">kg</option>
-            <option value="litr">litr</option>
-            <option value="dona">dona</option>
-            <option value="metr">metr</option>
-            <option value="bog'">bog'</option>
-            <option value="gramm">gramm</option>
-
-
+            <option value="kg">{getText('unitKg')}</option>
+            <option value="litr">{getText('unitLitr')}</option>
+            <option value="dona">{getText('unitDona')}</option>
+            <option value="metr">{getText('unitMetr')}</option>
+            <option value={"bog'"}>{getText('unitBogh')}</option>
+            <option value="gramm">{getText('unitGramm')}</option>
           </select>
         </div>
 

@@ -1,87 +1,117 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import url from '../host/host';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Pencil } from 'lucide-react';
 import IngredientModal from '../components/IngredientModal';
 import styles from '../styles/IngredientList.module.css';
 import UseTaomModal from './UseTaomModal';
+import { getText } from '../i18n/translations';
 
-export default function IngredientList({ taomId }) {
+export default function IngredientList({ taomId, onUsed }) {
   const [ingredients, setIngredients] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
+  const [openUseModal, setOpenUseModal] = useState(false);
 
-const [openUseModal, setOpenUseModal] = useState(false);
-  const fetchIngredients = async () => {
+  const fetchIngredients = useCallback(async () => {
     try {
       const res = await axios.get(`${url}/taom/${taomId}/ingredient`);
       setIngredients(res.data);
     } catch (err) {
-      console.error("Mahsulotlarni olishda xatolik:", err);
+      console.error('Mahsulotlarni olishda xatolik:', err);
     }
-  };
+  }, [taomId]);
 
   useEffect(() => {
     fetchIngredients();
-  }, [taomId]);
+  }, [fetchIngredients]);
 
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${url}/taom_ingredient/${id}`);
       fetchIngredients();
     } catch (err) {
-      console.error("O‘chirishda xatolik:", err);
+      console.error('O‘chirishda xatolik:', err);
     }
   };
 
- return (
-  <div className={styles.container}>
-    <div className={styles.header}>
-      <h4 className={styles.title}>Kerakli mahsulotlar</h4>
-      <div className={styles.buttonGroup}>
-        <button className={styles.actionButton} onClick={() => {
-          setSelectedIngredient(null);
-          setOpen(true);
-        }}>
-          <Plus size={16} />
-          <span>Qo‘shish</span>
-        </button>
-        <button className={styles.useButton} onClick={() => setOpenUseModal(true)}>
-          <span>Ishlatish</span>
-        </button>
-      </div>
-    </div>
+  const handleUsed = () => {
+    fetchIngredients();
+    onUsed && onUsed();
+  };
 
-    <ul className={styles.list}>
-      {ingredients.map((item) => (
-        <li key={item.id} className={styles.item}>
-          <span className={styles.itemText}>
-            {item.nomi} – {item.miqdor} {item.hajm_birlik}
-          </span>
-          <button className={styles.deleteButton} onClick={() => handleDelete(item.id)}>
-            <Trash2 size={16} />
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h4 className={styles.title}>{getText('requiredProducts')}</h4>
+        <div className={styles.buttonGroup}>
+          <button
+            className={styles.actionButton}
+            onClick={() => { setSelectedIngredient(null); setOpen(true); }}
+          >
+            <Plus size={16} />
+            <span>{getText('add')}</span>
           </button>
-        </li>
-      ))}
-    </ul>
+          <button
+            className={styles.useButton}
+            onClick={() => setOpenUseModal(true)}
+            disabled={ingredients.length === 0}
+            title={ingredients.length === 0 ? getText('addIngredientFirst') : undefined}
+          >
+            <span>{getText('useToday')}</span>
+          </button>
+        </div>
+      </div>
 
-    <UseTaomModal
-      open={openUseModal}
-      setOpen={setOpenUseModal}
-      taomId={taomId}
-      onSaved={fetchIngredients}
-    />
+      {ingredients.length === 0 ? (
+        <p className={styles.empty}>{getText('noIngredients')}</p>
+      ) : (
+        <ul className={styles.list}>
+          {ingredients.map((item) => (
+            <li key={item.id} className={styles.item}>
+              <span className={styles.itemText}>
+                {item.nomi} – {item.miqdor} {item.hajm_birlik}
+                <small className={styles.stock}>
+                  {' '}({getText('availableInStorage')}: {item.mavjud} {item.hajm_birlik})
+                </small>
+              </span>
+              <span className={styles.itemActions}>
+                <button
+                  className={styles.editButton}
+                  onClick={() => { setSelectedIngredient(item); setOpen(true); }}
+                  aria-label={getText('edit')}
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
+                  className={styles.deleteButton}
+                  onClick={() => handleDelete(item.id)}
+                  aria-label={getText('delete')}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
 
-    <IngredientModal
-      open={open}
-      setOpen={setOpen}
-      taomId={taomId}
-      onSaved={fetchIngredients}
-      ingredient={selectedIngredient}
-    />
-  </div>
-);
+      <UseTaomModal
+        open={openUseModal}
+        setOpen={setOpenUseModal}
+        taomId={taomId}
+        onSaved={handleUsed}
+      />
 
+      <IngredientModal
+        open={open}
+        setOpen={setOpen}
+        taomId={taomId}
+        onSaved={fetchIngredients}
+        ingredient={selectedIngredient}
+      />
+    </div>
+  );
 }

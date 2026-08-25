@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
+import { getText } from '../i18n/translations';
 
 export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
   const [formData, setFormData] = useState(bola || {});
@@ -35,7 +36,7 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
     const newErrors = {};
     requiredFields.forEach((field) => {
       if (!formData[field] || formData[field].toString().trim() === '') {
-        newErrors[field] = 'Bu maydon to‘ldirilishi shart';
+        newErrors[field] = getText('requiredField');
       }
     });
 
@@ -48,15 +49,14 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
       await onSave(formData);
       onClose(); // ✅ faqat muvaffaqiyatli saqlanganda modal yopiladi
     } catch (err) {
-      const msg = err?.response?.data?.error || 'Saqlashda xatolik yuz berdi';
-      setServerError(msg); // ❗ xatolikni ko‘rsatish
+      setServerError(err?.response?.data?.error || getText('saveError'));
     }
   };
 
   return (
     <div className={styles.modal}>
       <div className={styles.modal__content}>
-        <h3 className={styles.modal__title}>Tarbiyalanuvchini tahrirlash</h3>
+        <h3 className={styles.modal__title}>{getText('editStudent')}</h3>
         <div className={styles.modal__form}>
 
           {serverError && (
@@ -65,31 +65,31 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
             </div>
           )}
 
-          <Input name="username" placeholder="F.I.Sh" value={formData.username} onChange={handleChange} error={errors.username} />
-          <Input name="metrka" placeholder="Metrika raqami" value={formData.metrka} onChange={handleChange} error={errors.metrka} />
+          <Input name="username" placeholder={getText('colFullName')} value={formData.username} onChange={handleChange} error={errors.username} />
+          <Input name="metrka" placeholder={getText('colMetrka')} value={formData.metrka} onChange={handleChange} error={errors.metrka} />
           <Select name="guruh_id" value={formData.guruh_id} onChange={handleChange} options={guruhlar} error={errors.guruh_id} />
           <Input name="tugilgan_kun" type="date" value={formData.tugilgan_kun?.slice(0, 10)} onChange={handleChange} error={errors.tugilgan_kun} />
-          <Input name="oylik_toliv" type="number" placeholder="Oylik to‘lov" value={formData.oylik_toliv} onChange={handleChange} error={errors.oylik_toliv} />
-          <Input name="balans" type="number" placeholder="Balans" value={formData.balans} onChange={handleChange} />
-          <Input name="holati" placeholder="Holati" value={formData.holati} onChange={handleChange} />
+          <Input name="oylik_toliv" type="number" placeholder={getText('colMonthlyFee')} value={formData.oylik_toliv} onChange={handleChange} error={errors.oylik_toliv} />
+          <Input name="balans" type="number" placeholder={getText('colBalance')} value={formData.balans} onChange={handleChange} />
+          <Input name="holati" placeholder={getText('statusPlaceholder')} value={formData.holati} onChange={handleChange} />
 
-          <h4>Otasining ma'lumotlari</h4>
-          <Input name="ota_fish" placeholder="Ota F.I.Sh" value={formData.ota_fish} onChange={handleChange} error={errors.ota_fish} />
-          <Input name="ota_phone" placeholder="Ota telefon" value={formData.ota_phone} onChange={handleChange} error={errors.ota_phone} />
-          <Input name="ota_pasport" placeholder="Ota pasport" value={formData.ota_pasport} onChange={handleChange} />
+          <h4>{getText('fatherInfo')}</h4>
+          <Input name="ota_fish" placeholder={getText('colFatherName')} value={formData.ota_fish} onChange={handleChange} error={errors.ota_fish} />
+          <Input name="ota_phone" placeholder={getText('colFatherPhone')} value={formData.ota_phone} onChange={handleChange} error={errors.ota_phone} />
+          <Input name="ota_pasport" placeholder={getText('colFatherPassport')} value={formData.ota_pasport} onChange={handleChange} />
 
-          <h4>Onasining ma'lumotlari</h4>
-          <Input name="ona_fish" placeholder="Ona F.I.Sh" value={formData.ona_fish} onChange={handleChange} error={errors.ona_fish} />
-          <Input name="ona_phone" placeholder="Ona telefon" value={formData.ona_phone} onChange={handleChange} error={errors.ona_phone} />
-          <Input name="ona_pasport" placeholder="Ona pasport" value={formData.ona_pasport} onChange={handleChange} />
+          <h4>{getText('motherInfo')}</h4>
+          <Input name="ona_fish" placeholder={getText('colMotherName')} value={formData.ona_fish} onChange={handleChange} error={errors.ona_fish} />
+          <Input name="ona_phone" placeholder={getText('colMotherPhone')} value={formData.ona_phone} onChange={handleChange} error={errors.ona_phone} />
+          <Input name="ona_pasport" placeholder={getText('colMotherPassport')} value={formData.ona_pasport} onChange={handleChange} />
 
-          <Input name="qoshimcha_phone" placeholder="Qo‘shimcha telefon" value={formData.qoshimcha_phone} onChange={handleChange} />
-          <Input name="address" placeholder="Manzil" value={formData.address} onChange={handleChange} />
+          <Input name="qoshimcha_phone" placeholder={getText('colExtraPhone')} value={formData.qoshimcha_phone} onChange={handleChange} />
+          <Input name="address" placeholder={getText('colAddress')} value={formData.address} onChange={handleChange} />
 
           <div>
             <textarea
               name="description"
-              placeholder="Izoh"
+              placeholder={getText('comment')}
               value={formData.description || ''}
               onChange={handleChange}
               style={{ width: '100%', padding: '8px', marginTop: '4px' }}
@@ -98,8 +98,8 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
         </div>
 
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> Saqlash</button>
-          <button onClick={onClose}><X size={16} /> Bekor qilish</button>
+          <button onClick={handleSubmit}><Check size={16} /> {getText('save')}</button>
+          <button onClick={onClose}><X size={16} /> {getText('cancel')}</button>
         </div>
       </div>
     </div>
@@ -141,7 +141,7 @@ function Select({ name, value, onChange, options, error }) {
           width: '100%'
         }}
       >
-        <option value="">Guruhni tanlang</option>
+        <option value="">{getText('selectGroup')}</option>
         {options.map((g) => (
           <option key={g.id} value={g.id}>{g.name}</option>
         ))}

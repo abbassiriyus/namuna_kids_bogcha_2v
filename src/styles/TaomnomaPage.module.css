@@ -68,3 +68,50 @@
   background-color: var(--color-danger-soft);
   border-color: var(--color-danger);
 }
+
+.emptyState {
+  color: var(--color-text-muted, #64748b);
+  padding: 1rem 0;
+}
+
+.historySection {
+  margin-top: 2rem;
+}
+
+.historyTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.75rem;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+}
+
+.historyTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.historyTable th,
+.historyTable td {
+  padding: 0.65rem 0.9rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.historyTable th {
+  color: var(--color-text-muted, #64748b);
+  font-weight: 600;
+  background-color: var(--color-surface-muted);
+}
+
+.historyTable tbody tr:last-child td {
+  border-bottom: none;
+}

@@ -102,15 +102,11 @@ export default function SkladProductPage() {
 
       setData(enriched);
     } catch (err) {
-      console.error('Ma\'lumotlarni olishda xatolik:', {
-        message: err.message,
-        status: err.response?.status,
-      });
       if (err.response?.status === 401 || err.response?.status === 403) {
         localStorage.removeItem('token');
         router.push('/');
       } else {
-        setErrorMessage('Ma\'lumotlarni yuklashda xatolik yuz berdi: ' + err.message);
+        setErrorMessage(getText('loadError'));
       }
     } finally {
       setLoading(false);
@@ -123,21 +119,20 @@ export default function SkladProductPage() {
 
   const handleDelete = async (id) => {
     if (!permissions.delete_kitchen_storage) {
-      setErrorMessage("Sizda sklad mahsulotini o‘chirish uchun ruxsat yo‘q!");
+      setErrorMessage(getText('noActionPermission'));
       return;
     }
     try {
       await axios.delete(`${url}/sklad_product/${id}`, authHeader);
       await fetchData();
     } catch (err) {
-      console.error('O‘chirishda xatolik:', err.message);
-      setErrorMessage('Sklad mahsulotini o‘chirishda xatolik yuz berdi: ' + err.message);
+      setErrorMessage(err.response?.data?.error || getText('deleteError'));
     }
   };
 
   const handleEdit = (item) => {
     if (!permissions.edit_kitchen_storage) {
-      setErrorMessage("Sizda sklad mahsulotini tahrirlash uchun ruxsat yo‘q!");
+      setErrorMessage(getText('noActionPermission'));
       return;
     }
     setEditingItem(item);
@@ -145,26 +140,23 @@ export default function SkladProductPage() {
   };
 
   const handleSave = async (form) => {
+    const allowed = editingItem ? permissions.edit_kitchen_storage : permissions.create_kitchen_storage;
+    if (!allowed) {
+      setErrorMessage(getText('noActionPermission'));
+      return;
+    }
+
     try {
       if (editingItem) {
-        if (!permissions.edit_kitchen_storage) {
-          setErrorMessage("Sizda sklad mahsulotini tahrirlash uchun ruxsat yo‘q!");
-          return;
-        }
         await axios.put(`${url}/sklad_product/${editingItem.id}`, form, authHeader);
       } else {
-        if (!permissions.create_kitchen_storage) {
-          setErrorMessage("Sizda sklad mahsulotini yaratish uchun ruxsat yo‘q!");
-          return;
-        }
         await axios.post(`${url}/sklad_product`, form, authHeader);
       }
       setModalOpen(false);
       setEditingItem(null);
       await fetchData();
     } catch (err) {
-      console.error('Saqlashda xatolik:', err.message);
-      setErrorMessage('Saqlashda xatolik yuz berdi: ' + err.message);
+      setErrorMessage(err.response?.data?.error || getText('saveError'));
     }
   };
 
@@ -172,13 +164,13 @@ export default function SkladProductPage() {
     const filteredExportData = filteredData.filter(item => Number(item.mavjud_hajm) > 0);
 
     if (!filteredExportData.length) {
-      setErrorMessage("Eksport qilish uchun mavjud hajmi 0 dan katta mahsulot yo‘q!");
+      setErrorMessage(getText('exportNothing'));
       return;
     }
 
     const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, WidthType, AlignmentType, ShadingType } = await import('docx');
 
-    const headers = ['#', 'Nomi',  'Omborda mavjud', 'Birlik']
+    const headers = ['#', getText('colName'), getText('colAvailableInStorage'), getText('colUnit')];
     const columnWidths = [500, 2000, 1500, 1500, 1000, 2000];
 
     const createCell = (text, width, align = AlignmentType.CENTER, bold = false) =>
@@ -216,7 +208,7 @@ export default function SkladProductPage() {
         {
           children: [
             new Paragraph({
-              text: 'Sklad mahsulotlari ro‘yxati (Mavjud hajm > 0)',
+              text: getText('storageListTitle'),
               heading: 'Heading1',
               alignment: AlignmentType.CENTER,
             }),
@@ -232,21 +224,18 @@ export default function SkladProductPage() {
 
     Packer.toBlob(doc)
       .then((blob) => saveAs(blob, 'sklad_mahsulotlari.docx'))
-      .catch((err) => {
-        console.error('Word eksportida xatolik:', err);
-        setErrorMessage('Word hujjatini eksport qilishda xatolik yuz berdi: ' + err.message);
-      });
+      .catch(() => setErrorMessage(getText('exportWordError')));
   };
 
   const handleExportToExcel = async () => {
     const filteredExportData = filteredData.filter(item => Number(item.mavjud_hajm) > 0);
 
     if (!filteredExportData.length) {
-      setErrorMessage("Eksport qilish uchun mavjud hajmi 0 dan katta mahsulot yo‘q!");
+      setErrorMessage(getText('exportNothing'));
       return;
     }
 
-    const headers = ['#', 'Nomi', 'Omborda mavjud', 'Birlik'];
+    const headers = ['#', getText('colName'), getText('colAvailableInStorage'), getText('colUnit')];
     const rows = filteredExportData.map((item, index) => [
       index + 1,
       item.nomi || '',
@@ -256,9 +245,8 @@ export default function SkladProductPage() {
 
     try {
       await exportToExcel({ headers, rows, filename: 'sklad_mahsulotlari' });
-    } catch (err) {
-      console.error('Excel eksportida xatolik:', err);
-      setErrorMessage('Excel faylini eksport qilishda xatolik yuz berdi: ' + err.message);
+    } catch {
+      setErrorMessage(getText('exportExcelError'));
     }
   };
 
@@ -273,31 +261,31 @@ export default function SkladProductPage() {
       {canView ? (
         <>
           <div className={styles.headerWrapper}>
-            <h2 className={styles.title}>Ombordagi maxsulotlar</h2>
+            <h2 className={styles.title}>{getText('storageProducts')}</h2>
             <input
               type="text"
               className={styles.searchInput}
-              placeholder="Mahsulotni qidirish..."
+              placeholder={getText('searchProduct')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <div className={styles.buttonGroup}>
               {permissions.create_kitchen_storage && (
                 <button onClick={() => setModalOpen(true)} className={styles.addButton}>
-                  <Plus size={16} /> Yangi mahsulot
+                  <Plus size={16} /> {getText('newProduct')}
                 </button>
               )}
               <button onClick={handleExportToWord} className={styles.exportButton}>
-                <FileText size={16} /> Word'ga eksport
+                <FileText size={16} /> {getText('exportWord')}
               </button>
               <button onClick={handleExportToExcel} className={styles.exportButton}>
-                <FileSpreadsheet size={16} /> Excel'ga eksport
+                <FileSpreadsheet size={16} /> {getText('exportExcel')}
               </button>
             </div>
           </div>
 
           {loading ? (
-            <p>Loading...</p>
+            <p>{getText('loadingData')}</p>
           ) : (
             <AdminTable
               title="Sklad"
@@ -341,9 +329,7 @@ export default function SkladProductPage() {
           <ErrorModal message={errorMessage} onClose={() => setErrorMessage('')} />
         </>
       ) : (
-        <p style={{ padding: '20px', color: 'red' }}>
-          Sizda sklad mahsulotlarini ko‘rish uchun ruxsat yo‘q!
-        </p>
+        <p style={{ padding: '20px', color: 'red' }}>{getText('noPermission')}</p>
       )}
     </LayoutComponent>
   );

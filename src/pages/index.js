@@ -121,8 +121,13 @@ export default function Login() {
       setError(getText('loginErrorNoAccess', lang));
       setIsLoading(false);
     } catch (err) {
-      const message = err?.response?.data?.message || err?.message || 'Server bilan bog‘lanishda xatolik yuz berdi.';
-      setError(message);
+      const codeKeys = {
+        userNotFound: 'loginErrorUserNotFound',
+        inactive: 'loginErrorInactive',
+        wrongPassword: 'loginErrorWrongPassword',
+      };
+      const key = codeKeys[err?.response?.data?.code];
+      setError(key ? getText(key, lang) : getText('loginErrorServer', lang));
       setIsLoading(false);
     }
   };
