@@ -189,7 +189,7 @@ export default function DarslarPage() {
                 className={styles.calendar__autofillBtn}
                 disabled={loading || !permissions.create_lessons}
               >
-                Avtomatik to'ldirish
+                Avtomatik to&apos;ldirish
               </button>
             </div>
 

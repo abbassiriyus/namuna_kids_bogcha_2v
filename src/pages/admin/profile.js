@@ -130,7 +130,7 @@ export default function Profile() {
           <UserCircle size={22} style={{ verticalAlign: 'middle', marginRight: 8 }} />
           Mening profilim
         </h1>
-        <p className={styles.subtitle}>O'zingizning login, telefon va parolingizni shu yerda yangilang</p>
+        <p className={styles.subtitle}>O&apos;zingizning login, telefon va parolingizni shu yerda yangilang</p>
 
         {loading ? (
           <p>Yuklanmoqda...</p>

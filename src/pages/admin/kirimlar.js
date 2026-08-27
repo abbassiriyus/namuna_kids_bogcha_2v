@@ -535,7 +535,7 @@ export default function SkladChiqimPage() {
                 }}
               />
               <div className={styles.totalBox}>
-                Jami summa: {isNaN(totalSum) ? '0' : Number(totalSum.toFixed(2)).toLocaleString()} so'm
+                Jami summa: {isNaN(totalSum) ? '0' : Number(totalSum.toFixed(2)).toLocaleString()} so&apos;m
               </div>
             </>
           )}

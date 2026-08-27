@@ -736,7 +736,7 @@ export default function TolovlarPage() {
         {loading ? (
           <p style={{ padding: '10px' }}>Yuklanmoqda...</p>
         ) : filteredRows.length === 0 ? (
-          <p style={{ padding: '10px' }}>Hech qanday ma'lumot topilmadi.</p>
+          <p style={{ padding: '10px' }}>Hech qanday ma&apos;lumot topilmadi.</p>
         ) : (
           <>
             <p>

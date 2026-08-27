@@ -527,14 +527,14 @@ export default function UmumiySumma() {
           className={styles.button}
           disabled={loading || !data}
         >
-          Word'ga Eksport
+          Word&apos;ga Eksport
         </button>
         <button
           onClick={handleExportToExcel}
           className={styles.button}
           disabled={loading || !data}
         >
-          Excel'ga Eksport
+          Excel&apos;ga Eksport
         </button>
       </div>
 

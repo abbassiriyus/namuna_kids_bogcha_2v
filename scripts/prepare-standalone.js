@@ -69,5 +69,17 @@ if (!fs.existsSync(uploadsDir)) {
   console.log('  (uploads/ allaqachon mavjud — tegilmadi)');
 }
 
+// 4) package.json'dagi "start" skriptini standalone uchun to'g'rilaymiz —
+//    "next start" standalone'da ishlamaydi (to'liq next CLI kerak bo'ladi),
+//    serverda shunchaki `npm start` deb qo'ysa bo'lishi uchun shu yerda tuzatamiz.
+const pkgPath = path.join(standaloneDir, 'package.json');
+if (fs.existsSync(pkgPath)) {
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  pkg.scripts = { start: 'node server.js' };
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+  console.log('  ✓ package.json "start" skripti "node server.js" ga tuzatildi');
+}
+
 console.log(`\n✓ Tayyor: ${standaloneDir}`);
-console.log('  Serverda ishga tushirish: node server.js  (PORT va HOSTNAME env orqali sozlanadi)');
+console.log('  Serverda ishga tushirish: npm start  (yoki: node server.js)');
+console.log('  PORT va HOSTNAME env orqali sozlanadi');

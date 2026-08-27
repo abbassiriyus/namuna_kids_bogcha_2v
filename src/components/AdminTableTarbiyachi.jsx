@@ -133,7 +133,7 @@ export default function AdminTable({
           {selectedRow && permissions.view_students && (
             <div className={styles.modal}>
               <div className={styles['modal__content']}>
-                <div className={styles['modal__header']}>Batafsil ma'lumot</div>
+                <div className={styles['modal__header']}>Batafsil ma&apos;lumot</div>
                 <table className={styles['modal__table']}>
                   <tbody>
                     {additionalColumns.map((col, i) => (

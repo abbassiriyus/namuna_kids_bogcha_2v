@@ -351,7 +351,7 @@ export default function QoshimchaPage() {
           />
 
           <div style={{ marginTop: '10px', fontWeight: 'bold' }}>
-            Jami summa: {data.reduce((acc, item) => acc + (item.price || 0), 0).toLocaleString()} so'm
+            Jami summa: {data.reduce((acc, item) => acc + (item.price || 0), 0).toLocaleString()} so&apos;m
           </div>
 
           {modalOpen && (permissions.create_extras || permissions.edit_extras) && (

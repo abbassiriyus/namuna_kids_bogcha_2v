@@ -921,7 +921,7 @@ export default function XodimDavomat() {
                 <span className={styles.statValue}>{todayKelmagan}</span>
               </div>
               <div className={`${styles.statCard} ${styles.statPurple}`}>
-                <span className={styles.statLabel}>O'rtacha bajarilish</span>
+                <span className={styles.statLabel}>O&apos;rtacha bajarilish</span>
                 <span className={styles.statValue}>{avgFulfilled}%</span>
               </div>
             </div>
@@ -930,7 +930,7 @@ export default function XodimDavomat() {
               <div className={styles.modeInfo}>
                 <span className={styles.modeLabel}>Davomat rejimi ({`/xodimdavomat`}):</span>
                 <span className={styles.modeHint}>
-                  Xodimlar ishga kelish-ketishni qanday belgilashi (faqat super admin o'zgartira oladi)
+                  Xodimlar ishga kelish-ketishni qanday belgilashi (faqat super admin o&apos;zgartira oladi)
                 </span>
               </div>
               <div className={styles.modeSwitch}>
@@ -975,7 +975,7 @@ export default function XodimDavomat() {
                   className={`${styles.viewBtn} ${viewMode === 'simple' ? styles.viewBtnActive : ''}`}
                   onClick={() => setViewMode('simple')}
                 >
-                  Oddiy ko'rinish
+                  Oddiy ko&apos;rinish
                 </button>
                 <button
                   type="button"
@@ -1264,7 +1264,7 @@ export default function XodimDavomat() {
         </>
       ) : (
         <p className={styles.noPermission}>
-          Sizda xodimlar davomatini ko'rish uchun ruxsat yo'q!
+          Sizda xodimlar davomatini ko&apos;rish uchun ruxsat yo&apos;q!
         </p>
       )}
     </LayoutComponent>
