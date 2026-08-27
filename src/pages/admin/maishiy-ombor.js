@@ -8,7 +8,7 @@ import SkladModal from '../../components/SkladModal';
 import ErrorModal from '../../components/ErrorModal';
 import axios from 'axios';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import styles from '../../styles/SkladProduct.module.css';
 import { saveAs } from 'file-saver';
 import { exportToExcel } from '../../utils/exportExcel';
@@ -16,6 +16,7 @@ import { Plus, FileText, FileSpreadsheet } from 'lucide-react';
 import { useUserType } from '../../utils/useUserType';
 
 export default function SkladProductPage() {
+  const { t } = useLang();
   // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
   const { isSuperAdmin } = useUserType();
   const router = useRouter();
@@ -105,7 +106,7 @@ export default function SkladProductPage() {
         }
         router.push('/');
       } else {
-        setErrorMessage('Ma\'lumotlarni yuklashda xatolik yuz berdi!');
+        setErrorMessage(t('loadError'));
       }
     }
   };
@@ -116,7 +117,7 @@ export default function SkladProductPage() {
 
   const handleDelete = async (id) => {
     if (!permissions.delete_household_storage) {
-      setErrorMessage("Sizda mahsulotni o‘chirish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noDeleteProductPermission'));
       return;
     }
     try {
@@ -124,13 +125,13 @@ export default function SkladProductPage() {
       await fetchData();
     } catch (err) {
       console.error("O'chirishda xatolik:", err);
-      setErrorMessage('Mahsulotni o‘chirishda xatolik yuz berdi!');
+      setErrorMessage(t('productDeleteError'));
     }
   };
 
   const handleEdit = (item) => {
     if (!permissions.edit_household_storage) {
-      setErrorMessage("Sizda mahsulotni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMessage(t('noEditProductPermission'));
       return;
     }
     setEditingItem(item);
@@ -139,11 +140,11 @@ export default function SkladProductPage() {
 
   const handleSave = async (form) => {
     if (!permissions.create_household_storage && !editingItem) {
-      setErrorMessage("Sizda mahsulotni yaratish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noCreateProductPermission'));
       return;
     }
     if (!permissions.edit_household_storage && editingItem) {
-      setErrorMessage("Sizda mahsulotni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMessage(t('noEditProductPermission'));
       return;
     }
     try {
@@ -157,7 +158,7 @@ export default function SkladProductPage() {
       await fetchData();
     } catch (err) {
       console.error("Saqlashda xatolik:", err);
-      setErrorMessage('Saqlashda xatolik yuz berdi!');
+      setErrorMessage(t('saveError'));
     }
   };
 
@@ -172,7 +173,7 @@ export default function SkladProductPage() {
     const availableProducts = data.filter(item => item.mavjud_hajm > 0);
 
     if (availableProducts.length === 0) {
-      setErrorMessage("Hozircha mavjud mahsulot yo‘q!");
+      setErrorMessage(t('noProductsYet'));
       return;
     }
 
@@ -207,7 +208,7 @@ export default function SkladProductPage() {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: "Sklad - Mavjud mahsulotlar",
+                  text: t('storageAvailableProducts'),
                   bold: true,
                   size: 28,
                 }),
@@ -229,7 +230,7 @@ export default function SkladProductPage() {
     const availableProducts = data.filter(item => item.mavjud_hajm > 0);
 
     if (availableProducts.length === 0) {
-      setErrorMessage("Hozircha mavjud mahsulot yo‘q!");
+      setErrorMessage(t('noProductsYet'));
       return;
     }
 
@@ -249,12 +250,12 @@ export default function SkladProductPage() {
       {isSuperAdmin || permissions.view_household_storage ? (
         <>
           <div className={styles.headerWrapper}>
-            <h2 className={styles.title}>Sklad mahsulotlari</h2>
+            <h2 className={styles.title}>{t('storageProducts')}</h2>
 
             <input
               type="text"
               className={styles.searchInput}
-              placeholder="Mahsulotni qidirish..."
+              placeholder={t('searchProduct')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -275,16 +276,16 @@ export default function SkladProductPage() {
           </div>
 
           <AdminTable
-            title="Sklad"
+            title={t('storageTitle')}
             columns={['id', 'nomi', 'hajm', 'mavjud_hajm', 'hajm_birlik', 'created_at', 'actions']}
             columnTitles={{
-              id: getText('colId'),
-              nomi: getText('colName'),
-              hajm: getText('colInitialVolume'),
-              mavjud_hajm: getText('colAvailableInStorage'),
-              hajm_birlik: getText('colUnit'),
-              created_at: getText('colAddedDate'),
-              actions: getText('colActions'),
+              id: t('colId'),
+              nomi: t('colName'),
+              hajm: t('colInitialVolume'),
+              mavjud_hajm: t('colAvailableInStorage'),
+              hajm_birlik: t('colUnit'),
+              created_at: t('colAddedDate'),
+              actions: t('colActions'),
             }}
             data={filteredData.map((item) => ({
               ...item,

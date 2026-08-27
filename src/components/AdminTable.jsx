@@ -4,7 +4,7 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import { Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from '../styles/AdminTable.module.css';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function AdminTable({
   columns,
@@ -16,6 +16,7 @@ export default function AdminTable({
   customActions = {},
   permissions = {},
 }) {
+  const { t } = useLang();
   const itemsPerPage = 100;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -44,7 +45,7 @@ export default function AdminTable({
   const hasImageColumn = columns.includes('image');
 
   const handleDeleteClick = (id) => {
-    if (confirm(getText('confirmDelete'))) {
+    if (confirm(t('confirmDelete'))) {
       onDelete(id);
     }
   };
@@ -58,9 +59,9 @@ export default function AdminTable({
               <thead className={styles.adminTable__thead}>
                 <tr>
                   {(permissions.edit1 || permissions.delete1) && (
-                    <th className={styles.adminTable__th}>{getText('colActions')}</th>
+                    <th className={styles.adminTable__th}>{t('colActions')}</th>
                   )}
-                  <th className={styles.adminTable__th}>№</th>
+                  <th className={styles.adminTable__th}>{t('colNumber')}</th>
                   {displayColumns.map((col, idx) => (
                     <th key={idx} className={styles.adminTable__th}>
                       {columnTitles[col] || col}
@@ -76,7 +77,7 @@ export default function AdminTable({
                         className={`${styles.adminTable__td} ${styles.actionsCell}`}
                       >
                         {permissions.delete1 && onDelete && (
-                          <button className={styles.deleteBtn} onClick={() => handleDeleteClick(row.id)} title={getText('delete')}>
+                          <button className={styles.deleteBtn} onClick={() => handleDeleteClick(row.id)} title={t('delete')}>
                             <Trash2 size={16} />
                           </button>
                         )}
@@ -149,7 +150,7 @@ export default function AdminTable({
           {/* Pagination */}
           <div className={styles.pagination}>
             <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-              <ChevronLeft size={16} /> {getText('prev')}
+              <ChevronLeft size={16} /> {t('prev')}
             </button>
             <span>
               {currentPage} / {totalPages}
@@ -158,7 +159,7 @@ export default function AdminTable({
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
             >
-              {getText('next')} <ChevronRight size={16} />
+              {t('next')} <ChevronRight size={16} />
             </button>
           </div>
         </>

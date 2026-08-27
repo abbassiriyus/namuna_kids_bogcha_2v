@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { sendDbError } from '@/lib/dbError';
 
 async function handler(req, res) {
   if (req.method === 'POST') {
@@ -13,8 +14,7 @@ async function handler(req, res) {
       );
       return res.status(201).json(result.rows[0]);
     } catch (err) {
-      console.error(err);
-      return res.status(500).json({ error: err.message });
+      return sendDbError(res, err, 'Admin yaratishda xatolik yuz berdi');
     }
   }
 
@@ -26,7 +26,7 @@ async function handler(req, res) {
         : await pool.query(`SELECT * FROM admin ORDER BY id DESC`);
       return res.status(200).json(result.rows);
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+      return sendDbError(res, err, 'Adminlar ro\'yxatini olishda xatolik yuz berdi');
     }
   }
 

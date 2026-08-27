@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import url from '../host/host';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 import { bugungiSana } from '../utils/sana';
 
 export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }) {
+  const { t } = useLang();
   const [miqdor, setMiqdor] = useState('');
   const [sana, setSana] = useState(month ? `${month}-01` : bugungiSana());
   const [izoh, setIzoh] = useState('');
@@ -24,7 +25,7 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
       setShtrafList(res.data);
     } catch (err) {
       console.error('Shtraf ro‘yxatini olishda xato:', err);
-      setError('Shtraf ro‘yxatini olishda xato yuz berdi');
+      setError(t('bonusListLoadError'));
     }
   };
 
@@ -36,7 +37,7 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
 
   const handleSave = async () => {
     if (!miqdor || !sana) {
-      setError('Miqdor va sana kiritilishi shart!');
+      setError(t('amountAndDateRequired'));
       return;
     }
 
@@ -69,7 +70,7 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
       fetchShtrafList();
       onSaved();
     } catch (err) {
-      setError('Saqlashda xato yuz berdi: ' + (err.response?.data?.error || err.message));
+      setError(t('saveError') + ': ' + (err.response?.data?.error || err.message));
     }
   };
 
@@ -81,7 +82,7 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Ushbu shtraf/bonusni o‘chirishni xohlaysizmi?')) return;
+    if (!confirm(t('confirmDeleteBonusPenalty'))) return;
 
     try {
       const token = localStorage.getItem('token');
@@ -91,7 +92,7 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
       fetchShtrafList();
       onSaved();
     } catch (err) {
-      setError('O‘chirishda xato yuz berdi: ' + (err.response?.data?.error || err.message));
+      setError(t('deleteError') + ': ' + (err.response?.data?.error || err.message));
     }
   };
 
@@ -122,22 +123,22 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
           overflowY: 'auto',
         }}
       >
-        <h3>{bola.username} {getText('bonusShtrafTitle')}</h3>
+        <h3>{bola.username} {t('bonusShtrafTitle')}</h3>
         {error && <p style={{ color: 'red' }}>{error}</p>}
 
         <div style={{ marginBottom: '20px' }}>
-          <label>{getText('bonusShtrafAmountLabel')}:</label>
+          <label>{t('bonusShtrafAmountLabel')}:</label>
           <input
             type="number"
             value={miqdor}
             onChange={(e) => setMiqdor(e.target.value)}
-            placeholder={getText('amountExample')}
+            placeholder={t('amountExample')}
             style={{ width: '95%', padding: '8px', marginTop: '5px' }}
           />
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label>{getText('date')}:</label>
+          <label>{t('date')}:</label>
           <input
             type="date"
             value={sana}
@@ -147,11 +148,11 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label>{getText('comment')} ({getText('optional')}):</label>
+          <label>{t('comment')} ({t('optional')}):</label>
           <textarea
             value={izoh}
             onChange={(e) => setIzoh(e.target.value)}
-            placeholder={getText('reasonPlaceholder')}
+            placeholder={t('reasonPlaceholder')}
             style={{ width: '95%', padding: '8px', marginTop: '5px', height: '80px' }}
           />
         </div>
@@ -167,7 +168,7 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
               borderRadius: '5px',
             }}
           >
-            {editId ? getText('update') : getText('save')}
+            {editId ? t('update') : t('save')}
           </button>
           <button
             onClick={() => {
@@ -186,21 +187,21 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
               borderRadius: '5px',
             }}
           >
-            {getText('close')}
+            {t('close')}
           </button>
         </div>
 
-        <h4>{getText('existingBonusShtraf')}</h4>
+        <h4>{t('existingBonusShtraf')}</h4>
         {shtrafList.length === 0 ? (
-          <p>{getText('noData')}</p>
+          <p>{t('noData')}</p>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{getText('amount')}</th>
-                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{getText('date')}</th>
-                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{getText('comment')}</th>
-                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{getText('actions')}</th>
+                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{t('amount')}</th>
+                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{t('date')}</th>
+                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{t('comment')}</th>
+                <th style={{ border: '1px solid #ccc', padding: '8px' }}>{t('actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -216,13 +217,13 @@ export default function BonusShtrafModal({ open, onClose, bola, month, onSaved }
                       onClick={() => handleEdit(item)}
                       style={{ marginRight: '5px', padding: '5px' }}
                     >
-                      {getText('update')}
+                      {t('update')}
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
                       style={{ padding: '5px', backgroundColor: '#f44336', color: 'white', border: 'none' }}
                     >
-                      {getText('delete')}
+                      {t('delete')}
                     </button>
                   </td>
                 </tr>

@@ -5,7 +5,7 @@ import axios from 'axios';
 import { Pencil, Trash2, Settings, Plus, Save, X, Check } from 'lucide-react';
 import LayoutComponent from '../../components/LayoutComponent';
 import PermissionTable from '../../components/PermissionModal';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import styles from '../../styles/Adminlar.module.css';
 import { useRouter } from 'next/navigation';
 import url from '../../host/host';
@@ -17,6 +17,7 @@ const TABS = [
 ];
 
 export default function AdminTabs() {
+  const { t } = useLang();
   const [activeType, setActiveType] = useState(1);
   const [admins, setAdmins] = useState([]);
   const [form, setForm] = useState({
@@ -75,13 +76,13 @@ export default function AdminTabs() {
       );
       setAdmins(sortedAdmins);
     } catch {
-      alert(getText('loadError'));
+      alert(t('loadError'));
     }
   };
 
   const fetchPermissions = async (adminId) => {
     if (!hasPermission('edit_admins')) {
-      return alert(getText('noActionPermission'));
+      return alert(t('noActionPermission'));
     }
     try {
       const res = await axios.get(`${url}/permissions/${adminId}`);
@@ -89,25 +90,25 @@ export default function AdminTabs() {
       setSelectedAdminId(adminId);
       setShowPermissionModal(true);
     } catch {
-      alert(getText('loadError'));
+      alert(t('loadError'));
     }
   };
 
   const handleSavePermissions = async () => {
     try {
       await axios.post(`${url}/permissions/${selectedAdminId}`, { permissions });
-      alert(getText('save'));
+      alert(t('save'));
       setShowPermissionModal(false);
     } catch {
-      alert(getText('saveError'));
+      alert(t('saveError'));
     }
   };
 
   const handleDelete = async (id) => {
     if (!hasPermission('delete_admins')) {
-      return alert(getText('noActionPermission'));
+      return alert(t('noActionPermission'));
     }
-    if (confirm(getText('confirmDelete'))) {
+    if (confirm(t('confirmDelete'))) {
       await axios.delete(`${url}/admin/${id}`);
       fetchAdmins();
     }
@@ -142,7 +143,7 @@ export default function AdminTabs() {
       setGroupModalAdmin(admin);
       setShowGroupModal(true);
     } catch {
-      alert(getText('loadError'));
+      alert(t('loadError'));
     }
   };
 
@@ -160,7 +161,7 @@ export default function AdminTabs() {
         setAssignedGroups((prev) => [...prev, res.data]);
       }
     } catch {
-      alert(getText('saveError'));
+      alert(t('saveError'));
     }
   };
 
@@ -168,12 +169,12 @@ export default function AdminTabs() {
     e.preventDefault();
     if (selectedAdmin) {
       if (!hasPermission('edit_admins')) {
-        return alert(getText('noActionPermission'));
+        return alert(t('noActionPermission'));
       }
       await axios.put(`${url}/admin/${selectedAdmin.id}`, form);
     } else {
       if (!hasPermission('create_admins')) {
-        return alert(getText('noActionPermission'));
+        return alert(t('noActionPermission'));
       }
       await axios.post(`${url}/admin`, form);
     }
@@ -184,7 +185,7 @@ export default function AdminTabs() {
   return (
     <LayoutComponent>
       <div className={styles.wrapper}>
-        <h2>{getText('admins')}</h2>
+        <h2>{t('admins')}</h2>
 
         <div className={styles.tabs}>
           {TABS.map((tab) => (
@@ -193,7 +194,7 @@ export default function AdminTabs() {
               onClick={() => setActiveType(tab.type)}
               className={`${styles.tab} ${activeType === tab.type ? styles.tabActive : ''}`}
             >
-              {getText(tab.labelKey)}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>
@@ -201,11 +202,11 @@ export default function AdminTabs() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>{getText('colId')}</th>
-              <th>{getText('colFullName')}</th>
-              <th>{getText('colPhone')}</th>
-              <th>{getText('colActiveStatus')}</th>
-              <th>{getText('actions')}</th>
+              <th>{t('colId')}</th>
+              <th>{t('colFullName')}</th>
+              <th>{t('colPhone')}</th>
+              <th>{t('colActiveStatus')}</th>
+              <th>{t('actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -223,23 +224,23 @@ export default function AdminTabs() {
                 </td>
                 <td className={styles.actions}>
                   {hasPermission('edit_admins') && (
-                    <button onClick={() => handleOpenEdit(a)} title={getText('edit')}>
+                    <button onClick={() => handleOpenEdit(a)} title={t('edit')}>
                       <Pencil size={16} />
                     </button>
                   )}
                   {hasPermission('delete_admins') && (
-                    <button onClick={() => handleDelete(a.id)} title={getText('delete')}>
+                    <button onClick={() => handleDelete(a.id)} title={t('delete')}>
                       <Trash2 size={16} color="var(--color-danger)" />
                     </button>
                   )}
                   {activeType === 3 && hasPermission('edit_admins') && (
-                    <button onClick={() => fetchPermissions(a.id)} title={getText('permissionsManageTitle')}>
-                      <Settings size={16} /> {getText('permissionsManageTitle')}
+                    <button onClick={() => fetchPermissions(a.id)} title={t('permissionsManageTitle')}>
+                      <Settings size={16} /> {t('permissionsManageTitle')}
                     </button>
                   )}
                   {activeType === 2 && hasPermission('edit_admins') && (
-                    <button onClick={() => openGroupModal(a)} title={getText('groups')}>
-                      <Settings size={16} /> {getText('groups')}
+                    <button onClick={() => openGroupModal(a)} title={t('groups')}>
+                      <Settings size={16} /> {t('groups')}
                     </button>
                   )}
                 </td>
@@ -251,10 +252,10 @@ export default function AdminTabs() {
         {showGroupModal && (
           <div className={styles.modalOverlay}>
             <div className={styles.modal}>
-              <h3>{groupModalAdmin?.username} — {getText('assignedGroupsTitle')}</h3>
+              <h3>{groupModalAdmin?.username} — {t('assignedGroupsTitle')}</h3>
               <div className={styles.form}>
                 {allGuruhlar.length === 0 ? (
-                  <p>{getText('groupsNotFound')}</p>
+                  <p>{t('groupsNotFound')}</p>
                 ) : (
                   allGuruhlar.map((g) => (
                     <label key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -269,7 +270,7 @@ export default function AdminTabs() {
                 )}
               </div>
               <div className={styles.modalActions}>
-                <button type="button" onClick={() => setShowGroupModal(false)}><X size={16} /> {getText('close')}</button>
+                <button type="button" onClick={() => setShowGroupModal(false)}><X size={16} /> {t('close')}</button>
               </div>
             </div>
           </div>
@@ -278,7 +279,7 @@ export default function AdminTabs() {
         {showPermissionModal && (
           <div className={styles.modalOverlay}>
             <div className={styles.modal}>
-              <h3>{getText('permissionsManageTitle')} (ID: {selectedAdminId})</h3>
+              <h3>{t('permissionsManageTitle')} (ID: {selectedAdminId})</h3>
               <PermissionTable
                 permissions={permissions}
                 setPermissions={setPermissions}
@@ -291,30 +292,30 @@ export default function AdminTabs() {
 
         {hasPermission('create_admins') && (
           <button className={styles.addBtn} onClick={handleOpenCreate}>
-            <Plus size={16} /> {getText('add')} {getText('admins')}
+            <Plus size={16} /> {t('add')} {t('admins')}
           </button>
         )}
 
         {showAdminModal && (
           <div className={styles.modalOverlay}>
             <div className={styles.modal}>
-              <h3>{selectedAdmin ? getText('edit') + ' ' + getText('admins') : getText('add') + ' ' + getText('admins')}</h3>
+              <h3>{selectedAdmin ? t('edit') + ' ' + t('admins') : t('add') + ' ' + t('admins')}</h3>
               <form onSubmit={handleSaveAdmin} className={styles.form}>
                 <input
-                  placeholder={getText('usernamePlaceholder')}
+                  placeholder={t('usernamePlaceholder')}
                   value={form.username}
                   onChange={(e) => setForm({ ...form, username: e.target.value })}
                   required
                 />
                 <input
-                  placeholder={getText('colPhone')}
+                  placeholder={t('colPhone')}
                   value={form.phone_number}
                   onChange={(e) => setForm({ ...form, phone_number: e.target.value })}
                   required
                 />
                 <input
                   type="password"
-                  placeholder={getText('password')}
+                  placeholder={t('password')}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   required={!selectedAdmin}
@@ -323,9 +324,9 @@ export default function AdminTabs() {
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: parseInt(e.target.value) })}
                 >
-                  <option value={1}>{getText('role.superAdmin')}</option>
-                  <option value={2}>{getText('role.teacher')}</option>
-                  <option value={3}>{getText('role.extraAdmin')}</option>
+                  <option value={1}>{t('role.superAdmin')}</option>
+                  <option value={2}>{t('role.teacher')}</option>
+                  <option value={3}>{t('role.extraAdmin')}</option>
                 </select>
                 <label>
                   <input
@@ -333,11 +334,11 @@ export default function AdminTabs() {
                     checked={form.is_active}
                     onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
                   />
-                  {getText('colActiveStatus')}
+                  {t('colActiveStatus')}
                 </label>
                 <div className={styles.modalActions}>
-                  <button type="submit"><Save size={16} /> {getText('save')}</button>
-                  <button type="button" onClick={() => setShowAdminModal(false)}><X size={16} /> {getText('cancel')}</button>
+                  <button type="submit"><Save size={16} /> {t('save')}</button>
+                  <button type="button" onClick={() => setShowAdminModal(false)}><X size={16} /> {t('cancel')}</button>
                 </div>
               </form>
             </div>

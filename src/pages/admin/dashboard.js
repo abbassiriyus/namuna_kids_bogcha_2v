@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import url from '../../host/host';
 import LayoutComponent from '../../components/LayoutComponent';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import styles from '../../styles/Dashboard.module.css';
 import { bugungiSana, toLocalDate } from '../../utils/sana';
 import {
@@ -14,6 +14,7 @@ import {
 } from 'recharts';
  import UmumiySumma from "../../components/umumiySumma"
 export default function Dashboard() {
+  const { t } = useLang();
   const [bolaStats, setBolaStats] = useState({ active: 0, inactive: 0 });
   const [xodimStats, setXodimStats] = useState({ xodimlar: 0, guruhlar: 0 });
   const [year, setYear] = useState(() => new Date().getFullYear().toString());
@@ -100,7 +101,7 @@ export default function Dashboard() {
         monthlyCounts[month] = (monthlyCounts[month] || 0) + 1;
       });
 
-      const months = getText('years');
+      const months = t('years');
       const data = months.map((oy, idx) => {
         const monthKey = (idx + 1).toString().padStart(2, '0');
         return { oy, soni: monthlyCounts[monthKey] || 0 };
@@ -139,7 +140,7 @@ export default function Dashboard() {
         monthlyTotals[month].naqt_prichislena += item.naqt_prichislena || 0;
       });
 
-      const months = getText('years');
+      const months = t('years');
 
       const data = months.map((oy, idx) => {
         const monthKey = (idx + 1).toString().padStart(2, '0');
@@ -170,7 +171,7 @@ export default function Dashboard() {
       const responses = await Promise.all(
         months.map(m => axios.get(`${url}/bola_kun_all?month=${m}&year=${year}`, authHeader))
       );
-      const monthNames = getText('years');
+      const monthNames = t('years');
       const data = responses.map((res, idx) => ({
         oy: monthNames[idx],
         darslar: res.data.length
@@ -258,7 +259,7 @@ export default function Dashboard() {
   const axisTick = { fill: '#64748b', fontSize: 11 };
 
   // Oy nomlari tanlangan tilda ('years' kaliti oy nomlari ro'yxatini saqlaydi).
-  const UZ_MONTHS = getText('years') || [
+  const UZ_MONTHS = t('years') || [
     'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
     'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr',
   ];
@@ -307,12 +308,12 @@ export default function Dashboard() {
       <div className={styles.container}>
         <div className={styles.topbar}>
           <div>
-            <span className={styles.kicker}>Overview</span>
-            <h1 className={styles.title}>Dashboard</h1>
+            <span className={styles.kicker}>{t('overview')}</span>
+            <h1 className={styles.title}>{t('dashboard')}</h1>
           </div>
 
           <div className={styles.inputRow}>
-            <label htmlFor="year">{getText('dashYear')}:</label>
+            <label htmlFor="year">{t('dashYear')}:</label>
             <input
               type="number"
               id="year"
@@ -324,7 +325,7 @@ export default function Dashboard() {
             />
             {/* Oy tanlash avval umuman yo'q edi — kunlik va guruh ma'lumotlari
                 shu tanlovga bog'liq holda yuklanadi. */}
-            <label htmlFor="month">{getText('dashMonth')}:</label>
+            <label htmlFor="month">{t('dashMonth')}:</label>
             <select
               id="month"
               value={selectedMonth}
@@ -341,48 +342,48 @@ export default function Dashboard() {
         {/* Ixcham KPI qatori: har bir plitkada asosiy son va uning izohi */}
         <div className={styles.cardGrid}>
           <div className={`${styles.card} ${styles.green}`}>
-            <h2>{getText('dashActiveChildren')}</h2>
+            <h2>{t('dashActiveChildren')}</h2>
             <p>{bolaStats.active}</p>
-            <span className={styles.cardHint}>{getText('dashInactiveShort')}: {bolaStats.inactive}</span>
+            <span className={styles.cardHint}>{t('dashInactiveShort')}: {bolaStats.inactive}</span>
           </div>
           <div className={`${styles.card} ${styles.blue}`}>
-            <h2>{getText('dashEmployees')}</h2>
+            <h2>{t('dashEmployees')}</h2>
             <p>{xodimStats.xodimlar}</p>
-            <span className={styles.cardHint}>{xodimStats.guruhlar} {getText('dashGroupsCount')}</span>
+            <span className={styles.cardHint}>{xodimStats.guruhlar} {t('dashGroupsCount')}</span>
           </div>
           <div className={`${styles.card} ${styles.green}`}>
-            <h2>{getText('dashTodayPresentChild')}</h2>
+            <h2>{t('dashTodayPresentChild')}</h2>
             <p>{todayAttendanceStats.kelgan}</p>
             <span className={styles.cardHint}>
               <span className={styles.spark} style={{ '--v': `${bugungiBolaFoiz}%` }} />
-              {bugungiBolaFoiz}% {getText('dashAttendanceShort')}
+              {bugungiBolaFoiz}% {t('dashAttendanceShort')}
             </span>
           </div>
           <div className={`${styles.card} ${styles.red}`}>
-            <h2>{getText('dashTodayAbsentChild')}</h2>
+            <h2>{t('dashTodayAbsentChild')}</h2>
             <p>{todayAttendanceStats.kelmagan}</p>
-            <span className={styles.cardHint}>{bugungiBolaJami} {getText('dashMarksTotal')}</span>
+            <span className={styles.cardHint}>{bugungiBolaJami} {t('dashMarksTotal')}</span>
           </div>
           <div className={`${styles.card} ${styles.green}`}>
-            <h2>{getText('dashTodayPresentStaff')}</h2>
+            <h2>{t('dashTodayPresentStaff')}</h2>
             <p>{todayXodimStats.kelgan}</p>
             <span className={styles.cardHint}>
               <span className={styles.spark} style={{ '--v': `${bugungiXodimFoiz}%` }} />
-              {bugungiXodimFoiz}% {getText('dashAttendanceShort')}
+              {bugungiXodimFoiz}% {t('dashAttendanceShort')}
             </span>
           </div>
           <div className={`${styles.card} ${styles.red}`}>
-            <h2>{getText('dashTodayAbsentStaff')}</h2>
+            <h2>{t('dashTodayAbsentStaff')}</h2>
             <p>{todayXodimStats.kelmagan}</p>
-            <span className={styles.cardHint}>{bugungiXodimJami} {getText('dashStaffTotal')}</span>
+            <span className={styles.cardHint}>{bugungiXodimJami} {t('dashStaffTotal')}</span>
           </div>
           <div className={`${styles.card} ${styles.purple}`}>
-            <h2>{year} {getText('dashYearAttendance')}</h2>
+            <h2>{year} {t('dashYearAttendance')}</h2>
             <p>{yilFoiz}%</p>
-            <span className={styles.cardHint}>{formatNumber(yilJamiBelgi)} {getText('dashMarksCount')}</span>
+            <span className={styles.cardHint}>{formatNumber(yilJamiBelgi)} {t('dashMarksCount')}</span>
           </div>
           <div className={`${styles.card} ${styles.blue}`}>
-            <h2>{getText('dashTopGroup')}</h2>
+            <h2>{t('dashTopGroup')}</h2>
             <p className={styles.cardSmall}>{groupRanked[0]?.guruh || '—'}</p>
             <span className={styles.cardHint}>KPI {groupRanked[0]?.kpi?.toFixed(1) ?? '—'}</span>
           </div>
@@ -391,7 +392,7 @@ export default function Dashboard() {
         <div className={styles.chartGrid}>
           <div className={styles.chartSection}>
             <div className={styles.chartHead}>
-              <h2>{getText('dashRevenue')} ({year})</h2>
+              <h2>{t('dashRevenue')} ({year})</h2>
             </div>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={daromadData} margin={{ top: 24, right: 8, left: 0, bottom: 0 }}>
@@ -404,12 +405,12 @@ export default function Dashboard() {
                   labelStyle={{ fontWeight: 700, color: '#0f172a', marginBottom: 4 }}
                   formatter={(value, name) => {
                     const labels = {
-                      naqt: getText('dashCash'),
-                      karta: getText('dashCard'),
-                      prichislena: getText('dashTransfer'),
-                      naqt_prichislena: getText('dashCashTransfer'),
+                      naqt: t('dashCash'),
+                      karta: t('dashCard'),
+                      prichislena: t('dashTransfer'),
+                      naqt_prichislena: t('dashCashTransfer'),
                     };
-                    return [formatNumber(value) + ' so‘m', labels[name] || name];
+                    return [formatNumber(value) + ' ' + t('currencySom'), labels[name] || name];
                   }}
                 />
                 <Legend
@@ -418,10 +419,10 @@ export default function Dashboard() {
                   wrapperStyle={{ fontSize: 13, color: '#52514e' }}
                   formatter={(value) => {
                     const labels = {
-                      naqt: getText('dashCash'),
-                      karta: getText('dashCard'),
-                      prichislena: getText('dashTransfer'),
-                      naqt_prichislena: getText('dashCashTransfer')
+                      naqt: t('dashCash'),
+                      karta: t('dashCard'),
+                      prichislena: t('dashTransfer'),
+                      naqt_prichislena: t('dashCashTransfer')
                     };
                     return labels[value] || value;
                   }}
@@ -443,7 +444,7 @@ export default function Dashboard() {
 
           <div className={styles.chartSection}>
             <div className={styles.chartHead}>
-              <h2>{getText('dashLessons')} ({year})</h2>
+              <h2>{t('dashLessons')} ({year})</h2>
             </div>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={darslarData} margin={{ top: 24, right: 8, left: 0, bottom: 0 }}>
@@ -454,7 +455,7 @@ export default function Dashboard() {
                   cursor={{ fill: 'rgba(37,99,235,0.05)' }}
                   contentStyle={chartTooltipStyle}
                   labelStyle={{ fontWeight: 700, color: '#0f172a' }}
-                  formatter={(value) => [formatNumber(value), 'Darslar']}
+                  formatter={(value) => [formatNumber(value), t('lessonsWord')]}
                 />
                 <Bar dataKey="darslar" name="Darslar" fill={PALETTE.darslar} radius={[4, 4, 0, 0]} barSize={22}>
                   <LabelList
@@ -471,20 +472,20 @@ export default function Dashboard() {
           {/* Tarbiyalanuvchilar davomati: ustunlar + kelish foizi tendensiyasi */}
           <div className={styles.chartSectionFull}>
             <div className={styles.chartHead}>
-              <h2>{getText('dashChildAttendance')} ({year})</h2>
+              <h2>{t('dashChildAttendance')} ({year})</h2>
               <div className={styles.chipRow}>
                 {/* Bugungi holat — yillik yig'indidan alohida ajratib ko'rsatiladi */}
                 <span className={`${styles.chip} ${styles.chipGood}`}>
-                  {getText('dashTodayPresent')}: <b>{formatNumber(todayAttendanceStats.kelgan)}</b>
+                  {t('dashTodayPresent')}: <b>{formatNumber(todayAttendanceStats.kelgan)}</b>
                 </span>
                 <span className={`${styles.chip} ${styles.chipBad}`}>
-                  {getText('dashTodayAbsent')}: <b>{formatNumber(todayAttendanceStats.kelmagan)}</b>
+                  {t('dashTodayAbsent')}: <b>{formatNumber(todayAttendanceStats.kelmagan)}</b>
                 </span>
                 <span className={styles.chip}>
-                  {getText('dashTodayAttendance')}: <b>{bugungiBolaFoiz}%</b>
+                  {t('dashTodayAttendance')}: <b>{bugungiBolaFoiz}%</b>
                 </span>
                 <span className={styles.chip}>
-                  {year} {getText('dashYearLabel')}: <b>{formatNumber(yilJami.kelgan)}</b> / {formatNumber(yilJami.kelmagan)} — <b>{yilFoiz}%</b>
+                  {year} {t('dashYearLabel')}: <b>{formatNumber(yilJami.kelgan)}</b> / {formatNumber(yilJami.kelmagan)} — <b>{yilFoiz}%</b>
                 </span>
                 {currentMonthData && (
                   <span className={styles.chip}>
@@ -525,8 +526,8 @@ export default function Dashboard() {
                   contentStyle={chartTooltipStyle}
                   labelStyle={{ fontWeight: 700, color: '#0f172a' }}
                   formatter={(value, name) => {
-                    if (name === 'foiz') return [`${value ?? 0}%`, getText('dashAttendancePercent')];
-                    return [formatNumber(value), name === 'holati1' ? getText('present') : getText('absent')];
+                    if (name === 'foiz') return [`${value ?? 0}%`, t('dashAttendancePercent')];
+                    return [formatNumber(value), name === 'holati1' ? t('present') : t('absent')];
                   }}
                 />
                 <Legend
@@ -534,7 +535,7 @@ export default function Dashboard() {
                   iconSize={8}
                   wrapperStyle={{ fontSize: 12, color: '#52514e' }}
                   formatter={(value) =>
-                    value === 'holati1' ? getText('present') : value === 'holati2' ? getText('absent') : getText('dashAttendancePercent')}
+                    value === 'holati1' ? t('present') : value === 'holati2' ? t('absent') : t('dashAttendancePercent')}
                 />
                 <Bar yAxisId="left" dataKey="holati1" name="holati1" fill="url(#kelganGrad)" radius={[5, 5, 0, 0]} barSize={16}>
                   <LabelList
@@ -570,7 +571,7 @@ export default function Dashboard() {
               lekin ekranda umuman ko'rsatilmasdi. */}
           <div className={styles.chartSection}>
             <div className={styles.chartHead}>
-              <h2>{getText('dashDailyAttendance')} — {UZ_MONTHS[Number(selectedMonth) - 1]}</h2>
+              <h2>{t('dashDailyAttendance')} — {UZ_MONTHS[Number(selectedMonth) - 1]}</h2>
             </div>
             <ResponsiveContainer width="100%" height={230}>
               <ComposedChart data={dailyDavomatData} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
@@ -586,8 +587,8 @@ export default function Dashboard() {
                 <Tooltip
                   contentStyle={chartTooltipStyle}
                   labelStyle={{ fontWeight: 700, color: '#0f172a' }}
-                  labelFormatter={(v) => `${v}-kun`}
-                  formatter={(value, name) => [formatNumber(value), name === 'holati1' ? getText('present') : getText('absent')]}
+                  labelFormatter={(v) => t('dayOfMonthLabel').replace('{d}', v)}
+                  formatter={(value, name) => [formatNumber(value), name === 'holati1' ? t('present') : t('absent')]}
                 />
                 <Area type="monotone" dataKey="holati1" name="holati1" stroke={PALETTE.good} strokeWidth={2} fill="url(#kunlikGrad)" />
                 <Line type="monotone" dataKey="holati2" name="holati2" stroke={PALETTE.critical} strokeWidth={2} dot={false} />
@@ -598,11 +599,11 @@ export default function Dashboard() {
           {/* Guruhlar reytingi — bu ham yuklanib, ko'rsatilmay qolgan edi */}
           <div className={styles.chartSection}>
             <div className={styles.chartHead}>
-              <h2>{getText('dashGroupRating')}</h2>
+              <h2>{t('dashGroupRating')}</h2>
               <span className={styles.chip}>{UZ_MONTHS[Number(selectedMonth) - 1]}</span>
             </div>
             {groupRanked.length === 0 ? (
-              <p className={styles.emptyNote}>{getText('noDataFound')}</p>
+              <p className={styles.emptyNote}>{t('noDataFound')}</p>
             ) : (
               /* Vertikal ustunlar: har bir guruh KPI'si 0–10 shkalada,
                  ustun ustida baho, tagida kelgan/kelmagan sonlari. */
@@ -641,7 +642,7 @@ export default function Dashboard() {
                       const jami = (p.holati1 || 0) + (p.holati2 || 0);
                       const foiz = jami > 0 ? Math.round((p.holati1 / jami) * 100) : 0;
                       return [
-                        `${Number(value).toFixed(1)} / 10 · ${foiz}% — ${p.holati1 || 0} ${getText('present')}, ${p.holati2 || 0} ${getText('absent')}`,
+                        `${Number(value).toFixed(1)} / 10 · ${foiz}% — ${p.holati1 || 0} ${t('present')}, ${p.holati2 || 0} ${t('absent')}`,
                         'KPI',
                       ];
                     }}
@@ -682,15 +683,15 @@ export default function Dashboard() {
 
           <div className={styles.chartSectionFull}>
             <div className={styles.chartHead}>
-              <h2>{getText('dashStaffMonthly')} ({year})</h2>
+              <h2>{t('dashStaffMonthly')} ({year})</h2>
               <div className={styles.chipRow}>
                 <span className={`${styles.chip} ${styles.chipGood}`}>
-                  {getText('dashTodayPresent')}: <b>{todayXodimStats.kelgan}</b>
+                  {t('dashTodayPresent')}: <b>{todayXodimStats.kelgan}</b>
                 </span>
                 <span className={`${styles.chip} ${styles.chipBad}`}>
-                  {getText('absent')}: <b>{todayXodimStats.kelmagan}</b>
+                  {t('absent')}: <b>{todayXodimStats.kelmagan}</b>
                 </span>
-                <span className={styles.chip}>{getText('dashAttendanceShort')}: <b>{bugungiXodimFoiz}%</b></span>
+                <span className={styles.chip}>{t('dashAttendanceShort')}: <b>{bugungiXodimFoiz}%</b></span>
               </div>
             </div>
             <ResponsiveContainer width="100%" height={230}>
@@ -702,7 +703,7 @@ export default function Dashboard() {
                   cursor={{ fill: 'rgba(124,58,237,0.06)' }}
                   contentStyle={chartTooltipStyle}
                   labelStyle={{ fontWeight: 700, color: '#0f172a' }}
-                  formatter={(value) => [formatNumber(value), getText('dashCheckedIn')]}
+                  formatter={(value) => [formatNumber(value), t('dashCheckedIn')]}
                 />
                 <Bar dataKey="soni" name="soni" fill={PALETTE.xodimDavomat} radius={[4, 4, 0, 0]} barSize={22}>
                   <LabelList

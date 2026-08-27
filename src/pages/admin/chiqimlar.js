@@ -8,15 +8,17 @@ import AdminTable from '../../components/AdminTable';
 import ChiqimModal from '../../components/ChiqimModal';
 import ChiqimFilter from '../../components/ChiqimFilter';
 import ErrorModal from '../../components/ErrorModal';
+import Loader from '../../components/Loader';
 import axios from 'axios';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import { saveAs } from 'file-saver';
 import styles from '../../styles/ChiqimOmbor.module.css'; // Assuming a CSS module for styling
 import { exportToExcel } from '../../utils/exportExcel';
 import { toLocalDate } from '../../utils/sana';
 
 export default function ChiqimOmborPage() {
+  const { t } = useLang();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -222,7 +224,7 @@ export default function ChiqimOmborPage() {
       await fetchData(startDate, endDate, productId);
     } catch (err) {
       console.error('Filterlashda xatolik:', err.message);
-      setErrorMessage('Filterlashda xatolik yuz berdi: ' + err.message);
+      setErrorMessage(t('filterError') + ': ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -252,8 +254,8 @@ export default function ChiqimOmborPage() {
     }
 
     const headers = isAggregated
-      ? ['#', 'Mahsulot', 'Birlik', ...uniqueDates, 'Umumiy']
-      : ['#', 'Mahsulot', 'Hajm', 'Birlik', 'Izoh', 'Chiqim sanasi'];
+      ? [t('colNumber'), t('colProduct'), t('colUnit'), ...uniqueDates, t('colTotal')]
+      : [t('colNumber'), t('colProduct'), t('colVolume'), t('colUnit'), t('colComment'), t('colExpenseDate')];
     const columnWidths = isAggregated
       ? [500, 2000, 1000, ...uniqueDates.map(() => 1500), 1500]
       : [500, 2000, 1000, 1000, 4000, 1800];
@@ -324,7 +326,7 @@ export default function ChiqimOmborPage() {
         {
           children: [
             new Paragraph({
-              text: 'Chiqimlar ro‘yxati',
+              text: t('expensesList'),
               heading: 'Heading1',
               alignment: AlignmentType.CENTER,
             }),
@@ -339,7 +341,7 @@ export default function ChiqimOmborPage() {
       saveAs(blob, 'chiqimlar.docx');
     }).catch((err) => {
       console.error('Word eksportida xatolik:', err);
-      setErrorMessage('Word hujjatini eksport qilishda xatolik yuz berdi!');
+      setErrorMessage(t('wordExportError'));
     });
   };
 
@@ -350,8 +352,8 @@ const handleExportToExcel = async () => {
     }
 
     const headers = isAggregated
-      ? ['#', 'Mahsulot', 'Birlik', ...uniqueDates, 'Umumiy']
-      : ['#', 'Mahsulot', 'Hajm', 'Birlik', 'Izoh', 'Chiqim sanasi'];
+      ? [t('colNumber'), t('colProduct'), t('colUnit'), ...uniqueDates, t('colTotal')]
+      : [t('colNumber'), t('colProduct'), t('colVolume'), t('colUnit'), t('colComment'), t('colExpenseDate')];
 
     const rows = displayedData.map((item, index) =>
       isAggregated
@@ -382,7 +384,7 @@ const handleSave = async (form) => {
   if (!Array.isArray(form)) {
     // Yagona obyekt uchun tekshirish
     if (!form.sklad_product_id || !form.hajm || parseFloat(form.hajm) <= 0) {
-      setErrorMessage('Mahsulot va hajm maydonlari to‘ldirilishi shart!');
+      setErrorMessage(t('productAndVolumeRequired'));
       return;
     }
   } else {
@@ -390,7 +392,7 @@ const handleSave = async (form) => {
     for (let i = 0; i < form.length; i++) {
       const row = form[i];
       if (!row.sklad_product_id || !row.hajm || parseFloat(row.hajm) <= 0) {
-        setErrorMessage(`${i + 1}-qator: Mahsulot va hajm maydonlari to‘ldirilishi shart!`);
+        setErrorMessage(t('rowProductAndVolumeRequired').replace('{n}', i + 1));
         return;
       }
     }
@@ -398,11 +400,11 @@ const handleSave = async (form) => {
 
   // Ruxsatlarni tekshirish
   if (!Array.isArray(form) && !permissions.create_kitchen_expenses && !form.id) {
-    setErrorMessage("Sizda chiqimni yaratish uchun ruxsat yo‘q!");
+    setErrorMessage(t('noCreateExpensePermission'));
     return;
   }
   if (!Array.isArray(form) && !permissions.edit_kitchen_expenses && form.id) {
-    setErrorMessage("Sizda chiqimni tahrirlash uchun ruxsat yo‘q!");
+    setErrorMessage(t('noEditExpensePermission'));
     return;
   }
 
@@ -424,7 +426,7 @@ const handleSave = async (form) => {
     setEditingItem(null);
   } catch (err) {
     console.error('Saqlashda xatolik:', err.response?.data || err.message);
-    setErrorMessage(err.response?.data?.error || 'Saqlashda xatolik yuz berdi. Ma\'lumotlarni tekshirib qayta urinib ko\'ring.');
+    setErrorMessage(err.response?.data?.error || t('saveErrorCheckData'));
   } finally {
     setLoading(false);
   }
@@ -432,7 +434,7 @@ const handleSave = async (form) => {
 
   const handleEdit = (item) => {
     if (!permissions.edit_kitchen_expenses) {
-      setErrorMessage("Sizda chiqimni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMessage(t('noEditExpensePermission'));
       return;
     }
     setEditingItem(item);
@@ -441,7 +443,7 @@ const handleSave = async (form) => {
 
   const handleDelete = async (id) => {
     if (!permissions.delete_kitchen_expenses) {
-      setErrorMessage("Sizda chiqimni o‘chirish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noDeleteExpensePermission'));
       return;
     }
     try {
@@ -450,7 +452,7 @@ const handleSave = async (form) => {
       await fetchData(filter.startDate, filter.endDate, filter.productId);
     } catch (err) {
       console.error('O‘chirishda xatolik:', err.message);
-      setErrorMessage('Chiqimni o‘chirishda xatolik yuz berdi: ' + err.message);
+      setErrorMessage(t('expenseDeleteError') + ': ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -461,7 +463,7 @@ const handleSave = async (form) => {
       {canView ? (
         <>
           <AdminHeader
-            title="Ishlatilayapgan maxsulotlar"
+            title={t('usedProducts')}
             onCreate={
               permissions.create_kitchen_expenses
                 ? () => {
@@ -481,12 +483,12 @@ const handleSave = async (form) => {
               id="aggregateToggle"
             />
             <label htmlFor="aggregateToggle">
-              {isAggregated ? 'Umumiy (Sanalar bo‘yicha)' : 'Yakka'}
+              {isAggregated ? t('totalByDates') : 'Yakka'}
             </label>
           </div>
 
           {loading ? (
-            <div className={styles.loading}>Yuklanmoqda...</div>
+            <Loader />
           ) : (
             <>
               <ChiqimFilter
@@ -499,7 +501,7 @@ const handleSave = async (form) => {
               />
 
               <AdminTable
-                title="Chiqimlar ro'yxati"
+                title={t('expensesList')}
                 columns={
                   isAggregated
                     ? ['product_nomi', 'hajm_birlik', ...uniqueDates, 'umumiy']
@@ -508,20 +510,20 @@ const handleSave = async (form) => {
                 columnTitles={
                   isAggregated
                     ? {
-                        product_nomi: getText('colProduct'),
-                        hajm_birlik: getText('colUnit'),
+                        product_nomi: t('colProduct'),
+                        hajm_birlik: t('colUnit'),
                         ...uniqueDates.reduce((acc, date) => ({ ...acc, [date]: date }), {}),
-                        umumiy: getText('colTotal'),
+                        umumiy: t('colTotal'),
                       }
                     : {
-                        id: getText('colId'),
-                        product_nomi: getText('colProduct'),
-                        hajm: getText('colVolume'),
-                        hajm_birlik: getText('colUnit'),
-                        description: getText('colComment'),
-                        chiqim_sana: getText('colExpenseDate'),
-                        created_at: getText('colCreatedDate'),
-                        actions: getText('colActions'),
+                        id: t('colId'),
+                        product_nomi: t('colProduct'),
+                        hajm: t('colVolume'),
+                        hajm_birlik: t('colUnit'),
+                        description: t('colComment'),
+                        chiqim_sana: t('colExpenseDate'),
+                        created_at: t('colCreatedDate'),
+                        actions: t('colActions'),
                       }
                 }
                 data={displayedData.map((item) => ({

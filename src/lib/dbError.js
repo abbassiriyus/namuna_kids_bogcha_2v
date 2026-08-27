@@ -29,9 +29,10 @@ const COLUMN_LABELS = {
   chiqim_sana: 'Chiqim sanasi',
   name: 'Nomi',
   nomi: 'Nomi',
-  username: 'Ism',
+  username: 'Login',
   metrka: 'Metrika raqami',
   phone: 'Telefon',
+  phone_number: 'Telefon raqami',
   oylik: 'Oylik',
   oylik_toliv: 'Oylik to‘lov',
   balans: 'Balans',
@@ -48,8 +49,18 @@ function toUserError(err, fallback = 'Amalni bajarishda xatolik yuz berdi') {
   switch (kind) {
     case 'notNull':
       return { status: 400, message: `${label(err.column)} to‘ldirilishi shart` };
-    case 'unique':
+    case 'unique': {
+      // Postgres DETAIL maydoni server tili bo'yicha turlicha bo'ladi, masalan:
+      //   en: `Key (username)=(admin3) already exists.`
+      //   ru: `Ключ "(username)=(admin3)" уже существует.`
+      // Faqat til-mustaqil "(ustun)=(qiymat)" qismini ajratib olamiz.
+      const m = /\(([^()=]+)\)=\(([^()]+)\)/.exec(err.detail || '');
+      if (m) {
+        const [, col, val] = m;
+        return { status: 400, message: `${label(col)} band: “${val}” allaqachon mavjud` };
+      }
       return { status: 400, message: 'Bunday yozuv allaqachon mavjud (takrorlanmas qiymat)' };
+    }
     case 'foreignKey':
       return {
         status: 400,
@@ -71,7 +82,10 @@ function toUserError(err, fallback = 'Amalni bajarishda xatolik yuz berdi') {
 function sendDbError(res, err, fallback) {
   const { status, message } = toUserError(err, fallback);
   if (status === 500) console.error(fallback || 'DB xatolik:', err.message);
-  return res.status(status).json({ error: message });
+  // Frontendlarning bir qismi `.error`, boshqa qismi `.message`ni o'qiydi —
+  // ikkalasini ham jo'natib, qaysi birini ishlatishidan qat'i nazar aniq
+  // xabar ko'rinishini ta'minlaymiz.
+  return res.status(status).json({ error: message, message });
 }
 
 module.exports = { toUserError, sendDbError };

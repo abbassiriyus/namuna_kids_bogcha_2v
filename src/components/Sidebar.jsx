@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import styles from '../styles/Sidebar.module.css';
-import { getText } from '../i18n/translations';
 import { useLang } from '../i18n/LanguageContext';
 import * as Icons from 'lucide-react';
 import url from '../host/host.js';
@@ -13,7 +12,7 @@ export default function Sidebar() {
   const router = useRouter();
   // Til butun ilova bo'ylab bitta joydan boshqariladi, shuning uchun bu yerda
   // almashtirilganda barcha sahifalar va modallar ham darhol tarjima bo'ladi.
-  const { lang, toggleLang } = useLang();
+  const { t, toggleLang } = useLang();
   const [oshxonaOpen, setOshxonaOpen] = useState(false);
   const [maishiyOpen, setMaishiyOpen] = useState(false);
   const [visiblePermissions, setVisiblePermissions] = useState({});
@@ -115,34 +114,34 @@ export default function Sidebar() {
   const hasPermission = (key) => isSuperAdmin || !!visiblePermissions[`view_${key}`];
 
   const menu = [
-    { name: getText('dashboard', lang), icon: (Icons.Home ? <Icons.Home size={20} /> : <span />), path: '/admin/dashboard', key: 'dashboard' },
-    { name: getText('admins', lang), icon: (Icons.ShieldCheck ? <Icons.ShieldCheck size={20} /> : <span />), path: '/admin/adminlar', key: 'admins' },
-    { name: getText('students', lang), icon: (Icons.Users ? <Icons.Users size={20} /> : <span />), path: '/admin/tarbiyalanuvchi', key: 'students' },
-    { name: getText('testStudent', lang), icon: (Icons.UserPlus ? <Icons.UserPlus size={20} /> : <span />), path: '/admin/sinov', key: 'prp' },
-    { name: getText('groups', lang), icon: (Icons.PieChart ? <Icons.PieChart size={20} /> : <span />), path: '/admin/guruhlar', key: 'groups' },
-    { name: getText('trialAttendance', lang), icon: (Icons.ClipboardCheck ? <Icons.ClipboardCheck size={20} /> : <span />), path: '/admin/sinovDavomat', key: 'sinovdavomat' },
-    { name: getText('attendance', lang), icon: (Icons.CalendarCheck ? <Icons.CalendarCheck size={20} /> : <span />), path: '/admin/DavomatPage', key: 'attendance' },
-    { name: getText('employeeAttendance', lang), icon: (Icons.Fingerprint ? <Icons.Fingerprint size={20} /> : <span />), path: '/admin/XodimDavomat', key: 'employees' },
-    { name: getText('childDay', lang), icon: (Icons.Calendar ? <Icons.Calendar size={20} /> : <span />), path: '/admin/DarslarPage', key: 'lessons' },
-    { name: getText('payments', lang), icon: (Icons.DollarSign ? <Icons.DollarSign size={20} /> : <span />), path: '/admin/tolovlar', key: 'payments' },
-    { name: getText('employees', lang), icon: (Icons.Briefcase ? <Icons.Briefcase size={20} /> : <span />), path: '/admin/hodimlar', key: 'employees' },
-    { name: getText('salaries', lang), icon: (Icons.FileText ? <Icons.FileText size={20} /> : <span />), path: '/admin/oyliklar', key: 'salaries' },
-    { name: getText('positions', lang), icon: (Icons.IdCard ? <Icons.IdCard size={20} /> : <span />), path: '/admin/lavozim', key: 'positions' },
-    { name: getText('menuMeals', lang), icon: (Icons.Utensils ? <Icons.Utensils size={20} /> : <span />), path: '/admin/taomnoma', key: 'meals' },
-    { name: getText('expenses', lang), icon: (Icons.Wallet ? <Icons.Wallet size={20} /> : <span />), path: '/admin/qoshimcha' },
-    { name: 'Tarix', icon: (Icons.Clock ? <Icons.Clock size={20} /> : <span />), path: '/admin/tarix', key: 'tarix' },
+    { name: t('dashboard'), icon: (Icons.Home ? <Icons.Home size={20} /> : <span />), path: '/admin/dashboard', key: 'dashboard' },
+    { name: t('admins'), icon: (Icons.ShieldCheck ? <Icons.ShieldCheck size={20} /> : <span />), path: '/admin/adminlar', key: 'admins' },
+    { name: t('students'), icon: (Icons.Users ? <Icons.Users size={20} /> : <span />), path: '/admin/tarbiyalanuvchi', key: 'students' },
+    { name: t('testStudent'), icon: (Icons.UserPlus ? <Icons.UserPlus size={20} /> : <span />), path: '/admin/sinov', key: 'prp' },
+    { name: t('groups'), icon: (Icons.PieChart ? <Icons.PieChart size={20} /> : <span />), path: '/admin/guruhlar', key: 'groups' },
+    { name: t('trialAttendance'), icon: (Icons.ClipboardCheck ? <Icons.ClipboardCheck size={20} /> : <span />), path: '/admin/sinovDavomat', key: 'sinovdavomat' },
+    { name: t('attendance'), icon: (Icons.CalendarCheck ? <Icons.CalendarCheck size={20} /> : <span />), path: '/admin/DavomatPage', key: 'attendance' },
+    { name: t('employeeAttendance'), icon: (Icons.Fingerprint ? <Icons.Fingerprint size={20} /> : <span />), path: '/admin/XodimDavomat', key: 'employees' },
+    { name: t('childDay'), icon: (Icons.Calendar ? <Icons.Calendar size={20} /> : <span />), path: '/admin/DarslarPage', key: 'lessons' },
+    { name: t('payments'), icon: (Icons.DollarSign ? <Icons.DollarSign size={20} /> : <span />), path: '/admin/tolovlar', key: 'payments' },
+    { name: t('employees'), icon: (Icons.Briefcase ? <Icons.Briefcase size={20} /> : <span />), path: '/admin/hodimlar', key: 'employees' },
+    { name: t('salaries'), icon: (Icons.FileText ? <Icons.FileText size={20} /> : <span />), path: '/admin/oyliklar', key: 'salaries' },
+    { name: t('positions'), icon: (Icons.IdCard ? <Icons.IdCard size={20} /> : <span />), path: '/admin/lavozim', key: 'positions' },
+    { name: t('menuMeals'), icon: (Icons.Utensils ? <Icons.Utensils size={20} /> : <span />), path: '/admin/taomnoma', key: 'meals' },
+    { name: t('expenses'), icon: (Icons.Wallet ? <Icons.Wallet size={20} /> : <span />), path: '/admin/qoshimcha' },
+    { name: t('historyTitle'), icon: (Icons.Clock ? <Icons.Clock size={20} /> : <span />), path: '/admin/tarix', key: 'tarix' },
   ];
 
   const oshxonaMenu = [
-    { name: getText('kitchenIncomes', lang), path: '/admin/kirimlar', key: 'kitchen_incomes' },
-    { name: getText('kitchenExpenses', lang), path: '/admin/chiqimlar', key: 'kitchen_expenses' },
-    { name: getText('storage', lang), path: '/admin/SkladProductPage', key: 'kitchen_storage' },
+    { name: t('kitchenIncomes'), path: '/admin/kirimlar', key: 'kitchen_incomes' },
+    { name: t('kitchenExpenses'), path: '/admin/chiqimlar', key: 'kitchen_expenses' },
+    { name: t('storage'), path: '/admin/SkladProductPage', key: 'kitchen_storage' },
   ];
 
   const maishiyMenu = [
-    { name: getText('kitchenIncomes', lang), path: '/admin/maishiy-kirim', key: 'household_incomes' },
-    { name: getText('kitchenExpenses', lang), path: '/admin/maishiy-chiqim', key: 'household_expenses' },
-    { name: getText('storage', lang), path: '/admin/maishiy-ombor', key: 'household_storage' },
+    { name: t('kitchenIncomes'), path: '/admin/maishiy-kirim', key: 'household_incomes' },
+    { name: t('kitchenExpenses'), path: '/admin/maishiy-chiqim', key: 'household_expenses' },
+    { name: t('storage'), path: '/admin/maishiy-ombor', key: 'household_storage' },
   ];
 
   const renderSubmenu = (open, menuList) =>
@@ -170,7 +169,7 @@ export default function Sidebar() {
   if (loading) {
     return (
       <div className={styles.sidebar}>
-        <div className={styles.loading}>⏳ Yuklanmoqda...</div>
+        <div className={styles.loading}>⏳ {t('loadingShort')}</div>
       </div>
     );
   }
@@ -185,14 +184,14 @@ export default function Sidebar() {
         <div className={styles.brandWrap}>
           <div className={styles.logo}>B</div>
           <div className={styles.brandText}>
-            <h2 className={styles.title}>{getText('appTitle', lang)}</h2>
-            <span className={styles.subtitle}>{getText('panel', lang)}</span>
+            <h2 className={styles.title}>{t('appTitle')}</h2>
+            <span className={styles.subtitle}>{t('panel')}</span>
           </div>
           <button
             type="button"
             className={styles.collapseBtn}
             onClick={toggleCollapsed}
-            title={collapsed ? getText('expandSidebar', lang) : getText('collapseSidebar', lang)}
+            title={collapsed ? t('expandSidebar') : t('collapseSidebar')}
           >
             {Icons.ChevronLeft ? <Icons.ChevronLeft size={16} className={collapsed ? styles.rotated : ''} /> : <span />}
           </button>
@@ -201,10 +200,10 @@ export default function Sidebar() {
         <div className={styles.userCardRow}>
           <div className={styles.userCard}>
             <span className={styles.userDot} />
-            <span className={styles.label}>{getText('online', lang)}</span>
+            <span className={styles.label}>{t('online')}</span>
           </div>
           <button type="button" className={styles.langToggle} onClick={toggleLanguage}>
-            {getText('toggleLang', lang)}
+            {t('toggleLang')}
           </button>
         </div>
 
@@ -218,8 +217,8 @@ export default function Sidebar() {
                 ? <Icons.Loader2 size={20} className={styles.navSpinner} />
                 : (Icons.UserCircle ? <Icons.UserCircle size={20} /> : <span />)}
             </span>
-            <span className={styles.label}>{getText('profile', lang)}</span>
-            <span className={styles.tooltip}>{getText('profile', lang)}</span>
+            <span className={styles.label}>{t('profile')}</span>
+            <span className={styles.tooltip}>{t('profile')}</span>
           </li>
 
           {menu.filter((m) => hasPermission(m.key)).map((item, i) => {
@@ -248,8 +247,8 @@ export default function Sidebar() {
                     <>
                       <li onClick={() => !collapsed && setOshxonaOpen(!oshxonaOpen)} className={styles.item}>
                         <span className={styles.iconWrap}>{Icons.ChefHat ? <Icons.ChefHat size={20} /> : <span />}</span>
-                        <span className={styles.label}>{getText('kitchen', lang)}</span>
-                        <span className={styles.tooltip}>{getText('kitchen', lang)}</span>
+                        <span className={styles.label}>{t('kitchen')}</span>
+                        <span className={styles.tooltip}>{t('kitchen')}</span>
                         {oshxonaOpen ? (Icons.ChevronDown ? <Icons.ChevronDown size={16} className={styles.arrow} /> : <span />) : (Icons.ChevronRight ? <Icons.ChevronRight size={16} className={styles.arrow} /> : <span />)}
                       </li>
               {renderSubmenu(oshxonaOpen, oshxonaMenu)}
@@ -260,8 +259,8 @@ export default function Sidebar() {
             <>
               <li onClick={() => !collapsed && setMaishiyOpen(!maishiyOpen)} className={styles.item}>
                 <span className={styles.iconWrap}>{Icons.Box ? <Icons.Box size={20} /> : <span />}</span>
-                <span className={styles.label}>{getText('household', lang)}</span>
-                <span className={styles.tooltip}>{getText('household', lang)}</span>
+                <span className={styles.label}>{t('household')}</span>
+                <span className={styles.tooltip}>{t('household')}</span>
                 {maishiyOpen ? (Icons.ChevronDown ? <Icons.ChevronDown size={16} className={styles.arrow} /> : <span />) : (Icons.ChevronRight ? <Icons.ChevronRight size={16} className={styles.arrow} /> : <span />)}
               </li>
               {renderSubmenu(maishiyOpen, maishiyMenu)}

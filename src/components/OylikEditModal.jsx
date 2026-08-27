@@ -4,9 +4,10 @@ import { Check, X } from "lucide-react";
 import styles from "../styles/BolaModal.module.css";
 import axios from "axios";
 import url from "../host/host";
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function OylikEditModal({ open, onClose, xodim, onSaved }) {
+  const { t } = useLang();
   const [bonus, setBonus] = useState('');
   const [jarima, setJarima] = useState('');
   const [kunlik, setKunlik] = useState('');
@@ -23,10 +24,10 @@ export default function OylikEditModal({ open, onClose, xodim, onSaved }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       onSaved();
-      alert(getText('oylik.saved'));
+      alert(t('oylik.saved'));
     } catch (err) {
       console.error(err);
-      alert(getText('oylik.error'));
+      alert(t('oylik.error'));
     }
   };
 
@@ -35,12 +36,12 @@ const handleOylikTolash = async () => {
     const summa = parseFloat(oylikNarx);
 
     if (!oylikNarx || isNaN(summa)) {
-      alert(getText('oylik.invalidPaidAmount'));
+      alert(t('oylik.invalidPaidAmount'));
       return;
     }
 
     if (summa > xodim.total) {
-      alert(getText('oylik.exceedsTotal').replace('{total}', xodim.total));
+      alert(t('oylik.exceedsTotal').replace('{total}', xodim.total));
       return;
     }
 
@@ -52,10 +53,10 @@ const handleOylikTolash = async () => {
     });
 
     onSaved();
-    alert(getText('oylik.paidSaved'));
+    alert(t('oylik.paidSaved'));
   } catch (err) {
     console.error(err);
-    alert(getText('oylik.error'));
+    alert(t('oylik.error'));
   }
 };
 
@@ -65,44 +66,44 @@ const handleOylikTolash = async () => {
   return (
     <div className={styles.modal}>
       <div className={styles.modal__content}>
-        <h3 className={styles.modal__title}>{getText('oylik.actionsTitle')} {xodim.name}</h3>
+        <h3 className={styles.modal__title}>{t('oylik.actionsTitle')} {xodim.name}</h3>
 
         <div className={styles.modal__form}>
-          <label>{getText('oylik.addBonusLabel')}</label>
+          <label>{t('oylik.addBonusLabel')}</label>
           <input type="number" value={bonus} onChange={e => setBonus(e.target.value)} />
-          <button onClick={() => handlePost('bonus', bonus)}>{getText('add')}</button>
+          <button onClick={() => handlePost('bonus', bonus)}>{t('add')}</button>
         </div>
 
         <div className={styles.modal__form}>
-          <label>{getText('oylik.addPenaltyLabel')}</label>
+          <label>{t('oylik.addPenaltyLabel')}</label>
           <input type="number" value={jarima} onChange={e => setJarima(e.target.value)} />
-          <button onClick={() => handlePost('jarima', jarima)}>{getText('add')}</button>
+          <button onClick={() => handlePost('jarima', jarima)}>{t('add')}</button>
         </div>
 
         <div className={styles.modal__form}>
-          <label>{getText('oylik.addDailyLabel')}</label>
+          <label>{t('oylik.addDailyLabel')}</label>
           <input type="number" value={kunlik} onChange={e => setKunlik(e.target.value)} />
-          <button onClick={() => handlePost('kunlik', kunlik)}>{getText('add')}</button>
+          <button onClick={() => handlePost('kunlik', kunlik)}>{t('add')}</button>
         </div>
 
         <div className={styles.modal__form}>
-          <label>{getText('oylik.paidAmountLabel')}</label>
+          <label>{t('oylik.paidAmountLabel')}</label>
           <input
             type="number"
             value={oylikNarx}
             onChange={e => setOylikNarx(e.target.value)}
-            placeholder={getText('oylik.paidAmountPlaceholder')}
+            placeholder={t('oylik.paidAmountPlaceholder')}
           />
           <button
             onClick={handleOylikTolash}
             style={{ background: '#4caf50', color: '#fff', padding: '8px', marginTop: '0.5rem' }}
           >
-            <Check size={16} /> {getText('oylik.payButton')}
+            <Check size={16} /> {t('oylik.payButton')}
           </button>
         </div>
 
         <div className={styles.modal__buttons}>
-          <button onClick={onClose}><X size={16} /> {getText('close')}</button>
+          <button onClick={onClose}><X size={16} /> {t('close')}</button>
         </div>
       </div>
     </div>

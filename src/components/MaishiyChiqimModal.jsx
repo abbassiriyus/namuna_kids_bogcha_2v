@@ -5,8 +5,10 @@ import axios from 'axios';
 import url from '../host/host';
 import ErrorModal from './ErrorModal';
 import { toLocalDate } from '../utils/sana';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function ChiqimModal({ isOpen, onClose, onSave, products = [], initialData = null }) {
+  const { t } = useLang();
   const [rows, setRows] = useState([{ sklad_product_id: '', hajm: '', description: '' }]);
   const [chiqimSana, setChiqimSana] = useState('');
   const [availableHajm, setAvailableHajm] = useState({}); // product_id => hajm
@@ -92,7 +94,7 @@ useEffect(() => {
   };
 
   const handleSubmit = () => {
-    if (!chiqimSana) return setModalError('Sana tanlanmagan');
+    if (!chiqimSana) return setModalError(t('dateNotSelected'));
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -100,12 +102,12 @@ useEffect(() => {
       const max = availableHajm[row.sklad_product_id] || 0;
       const qator = `${i + 1}-qator: `;
 
-      if (!row.sklad_product_id) return setModalError(qator + 'Mahsulot tanlanmagan');
+      if (!row.sklad_product_id) return setModalError(qator + t('productNotSelected'));
       if (!row.hajm || entered <= 0 || Number.isNaN(entered)) {
-        return setModalError(qator + 'Hajm kiritilmagan yoki 0 dan katta emas');
+        return setModalError(qator + t('volumeInvalid'));
       }
       if (entered > max) {
-        return setModalError(`${qator}Omborda faqat ${max} birlik mavjud`);
+        return setModalError(`${qator}${t('onlyAvailableInStorage').replace('{max}', max)}`);
       }
     }
 
@@ -130,10 +132,10 @@ useEffect(() => {
     <div className={styles.modal}>
       <div className={styles.modal__content}>
         <h3 className={styles.modal__title}>
-          {initialData ? 'Chiqimni tahrirlash' : 'Yangi chiqim(lar) qo‘shish'}
+          {initialData ? t('editExpense') : t('addExpenses')}
         </h3>
 
-        <label>Chiqim sanasi:</label>
+        <label>{t('expenseDateLabel')}</label>
         <input
           type="date"
           value={chiqimSana}
@@ -156,7 +158,7 @@ useEffect(() => {
                   className={styles.input}
                   style={{ flex: 1 }}
                 >
-                  <option value="">Mahsulot tanlang</option>
+                  <option value="">{t('selectProductPlaceholder')}</option>
                   {products.sort((a, b) => a.nomi.localeCompare(b.nomi)).map(p => (
                     <option key={p.id} value={p.id}>{p.nomi}</option>
                   ))}
@@ -167,7 +169,7 @@ useEffect(() => {
                   name="hajm"
                   value={row.hajm}
                   onChange={(e) => handleChange(index, e)}
-                  placeholder="Hajm"
+                  placeholder={t('colVolume')}
                   className={styles.input}
                   style={{ flex: 1 }}
                 />
@@ -183,7 +185,7 @@ useEffect(() => {
                       color: 'red',
                       cursor: 'pointer',
                     }}
-                    title="O‘chirish"
+                    title={t('delete')}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -191,7 +193,7 @@ useEffect(() => {
               </div>
 
 {/* Izoh / Guruh tanlash */}
-<label style={{ marginTop: '8px' }}>Izoh (guruh):</label>
+<label style={{ marginTop: '8px' }}>{t('commentGroupLabel')}</label>
 <select
   name="description"
   value={row.description.startsWith('custom:') ? 'other' : row.description}
@@ -204,7 +206,7 @@ useEffect(() => {
   className={styles.input}
   style={{ width: '96%' }}
 >
-  <option value="">Guruh tanlang</option>
+  <option value="">{t('selectGroupPlaceholder')}</option>
   {groupOptions.map((group) => (
     <option key={group.id} value={group.name}>{group.name}</option>
   ))}
@@ -219,7 +221,7 @@ useEffect(() => {
 {row.description.startsWith('custom:') && (
   <input
     type="text"
-    placeholder="Qo‘shimcha izoh kiriting"
+    placeholder={t('extraCommentPlaceholder')}
     className={styles.input}
     style={{ width: '96%', marginTop: '5px' }}
     value={row.description.replace('custom:', '')}
@@ -259,7 +261,7 @@ useEffect(() => {
 
         <div className={styles.modal__buttons}>
           <button onClick={handleSubmit}><Check size={16} /> Saqlash</button>
-          <button onClick={onClose}><X size={16} /> Bekor qilish</button>
+          <button onClick={onClose}><X size={16} /> {t('cancel')}</button>
         </div>
       </div>
       <ErrorModal message={modalError} onClose={() => setModalError('')} />

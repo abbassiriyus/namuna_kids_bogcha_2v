@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { Save, X } from 'lucide-react';
 import styles from '../styles/PermissionModal.module.css';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function PermissionModal({ permissions, setPermissions, onSave, onClose }) {
+  const { t } = useLang();
   const groupedPermissions = {
     dashboard: ['view_dashboard'],
     admins: ['view_admins', 'create_admins', 'edit_admins', 'delete_admins'],
@@ -37,18 +38,18 @@ export default function PermissionModal({ permissions, setPermissions, onSave, o
     <div className={styles.overlay}>
       <div className={styles.modal}>
         <div className={styles.header}>
-          <h2>{getText('permissionsManageTitle')}</h2>
-          <button className={styles.closeBtn} onClick={onClose} title={getText('close')}><X size={18} /></button>
+          <h2>{t('permissionsManageTitle')}</h2>
+          <button className={styles.closeBtn} onClick={onClose} title={t('close')}><X size={18} /></button>
         </div>
 
         <div className={styles.content}>
           {Object.entries(groupedPermissions).map(([categoryKey, keys]) => (
             <div key={categoryKey} className={styles.category}>
-              <h3>{getText(categoryKey)}</h3>
+              <h3>{t(categoryKey)}</h3>
               <div className={styles.permissions}>
                 {keys.map(key => (
                   <label key={key} className={styles.switchRow}>
-                    <span>{getText(`permission.${key}`) || key}</span>
+                    <span>{t(`permission.${key}`) || key}</span>
                     <label className={styles.switch}>
                       <input
                         type="checkbox"
@@ -70,8 +71,8 @@ export default function PermissionModal({ permissions, setPermissions, onSave, o
         </div>
 
         <div className={styles.footer}>
-          <button onClick={onSave} className={styles.saveBtn}><Save size={16} /> {getText('save')}</button>
-          <button onClick={onClose} className={styles.cancelBtn}><X size={16} /> {getText('cancel')}</button>
+          <button onClick={onSave} className={styles.saveBtn}><Save size={16} /> {t('save')}</button>
+          <button onClick={onClose} className={styles.cancelBtn}><X size={16} /> {t('cancel')}</button>
         </div>
       </div>
     </div>

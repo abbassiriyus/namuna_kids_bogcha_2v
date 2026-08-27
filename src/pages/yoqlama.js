@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import styles from '../styles/Login.module.css';
 import url from '../host/host';
+import { useLang } from '../i18n/LanguageContext';
 import {
   Home, Users, Calendar, DollarSign, FileText, Briefcase,
   PieChart, Utensils, Wallet, ChefHat, Box, ShieldCheck, Loader2
@@ -41,6 +42,7 @@ const maishiyMenu = [
 ];
 
 export default function Login() {
+  const { t } = useLang();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -120,14 +122,14 @@ export default function Login() {
         {error && <p className={styles.error}>{error}</p>}
         <input
           type="text"
-          placeholder="Foydalanuvchi nomi"
+          placeholder={t('username')}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           disabled={isLoading}
         />
         <input
           type="password"
-          placeholder="Parol"
+          placeholder={t('password')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={isLoading}

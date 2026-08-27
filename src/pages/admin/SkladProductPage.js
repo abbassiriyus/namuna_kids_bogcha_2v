@@ -8,13 +8,14 @@ import SkladModal from '../../components/SkladModal';
 import ErrorModal from '../../components/ErrorModal';
 import axios from 'axios';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import styles from '../../styles/SkladProduct.module.css';
 import { saveAs } from 'file-saver';
 import { exportToExcel } from '../../utils/exportExcel';
 import { Plus, FileText, FileSpreadsheet } from 'lucide-react';
 
 export default function SkladProductPage() {
+  const { t } = useLang();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -106,7 +107,7 @@ export default function SkladProductPage() {
         localStorage.removeItem('token');
         router.push('/');
       } else {
-        setErrorMessage(getText('loadError'));
+        setErrorMessage(t('loadError'));
       }
     } finally {
       setLoading(false);
@@ -119,20 +120,20 @@ export default function SkladProductPage() {
 
   const handleDelete = async (id) => {
     if (!permissions.delete_kitchen_storage) {
-      setErrorMessage(getText('noActionPermission'));
+      setErrorMessage(t('noActionPermission'));
       return;
     }
     try {
       await axios.delete(`${url}/sklad_product/${id}`, authHeader);
       await fetchData();
     } catch (err) {
-      setErrorMessage(err.response?.data?.error || getText('deleteError'));
+      setErrorMessage(err.response?.data?.error || t('deleteError'));
     }
   };
 
   const handleEdit = (item) => {
     if (!permissions.edit_kitchen_storage) {
-      setErrorMessage(getText('noActionPermission'));
+      setErrorMessage(t('noActionPermission'));
       return;
     }
     setEditingItem(item);
@@ -142,7 +143,7 @@ export default function SkladProductPage() {
   const handleSave = async (form) => {
     const allowed = editingItem ? permissions.edit_kitchen_storage : permissions.create_kitchen_storage;
     if (!allowed) {
-      setErrorMessage(getText('noActionPermission'));
+      setErrorMessage(t('noActionPermission'));
       return;
     }
 
@@ -156,7 +157,7 @@ export default function SkladProductPage() {
       setEditingItem(null);
       await fetchData();
     } catch (err) {
-      setErrorMessage(err.response?.data?.error || getText('saveError'));
+      setErrorMessage(err.response?.data?.error || t('saveError'));
     }
   };
 
@@ -164,13 +165,13 @@ export default function SkladProductPage() {
     const filteredExportData = filteredData.filter(item => Number(item.mavjud_hajm) > 0);
 
     if (!filteredExportData.length) {
-      setErrorMessage(getText('exportNothing'));
+      setErrorMessage(t('exportNothing'));
       return;
     }
 
     const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, WidthType, AlignmentType, ShadingType } = await import('docx');
 
-    const headers = ['#', getText('colName'), getText('colAvailableInStorage'), getText('colUnit')];
+    const headers = ['#', t('colName'), t('colAvailableInStorage'), t('colUnit')];
     const columnWidths = [500, 2000, 1500, 1500, 1000, 2000];
 
     const createCell = (text, width, align = AlignmentType.CENTER, bold = false) =>
@@ -208,7 +209,7 @@ export default function SkladProductPage() {
         {
           children: [
             new Paragraph({
-              text: getText('storageListTitle'),
+              text: t('storageListTitle'),
               heading: 'Heading1',
               alignment: AlignmentType.CENTER,
             }),
@@ -224,18 +225,18 @@ export default function SkladProductPage() {
 
     Packer.toBlob(doc)
       .then((blob) => saveAs(blob, 'sklad_mahsulotlari.docx'))
-      .catch(() => setErrorMessage(getText('exportWordError')));
+      .catch(() => setErrorMessage(t('exportWordError')));
   };
 
   const handleExportToExcel = async () => {
     const filteredExportData = filteredData.filter(item => Number(item.mavjud_hajm) > 0);
 
     if (!filteredExportData.length) {
-      setErrorMessage(getText('exportNothing'));
+      setErrorMessage(t('exportNothing'));
       return;
     }
 
-    const headers = ['#', getText('colName'), getText('colAvailableInStorage'), getText('colUnit')];
+    const headers = ['#', t('colName'), t('colAvailableInStorage'), t('colUnit')];
     const rows = filteredExportData.map((item, index) => [
       index + 1,
       item.nomi || '',
@@ -246,7 +247,7 @@ export default function SkladProductPage() {
     try {
       await exportToExcel({ headers, rows, filename: 'sklad_mahsulotlari' });
     } catch {
-      setErrorMessage(getText('exportExcelError'));
+      setErrorMessage(t('exportExcelError'));
     }
   };
 
@@ -261,43 +262,43 @@ export default function SkladProductPage() {
       {canView ? (
         <>
           <div className={styles.headerWrapper}>
-            <h2 className={styles.title}>{getText('storageProducts')}</h2>
+            <h2 className={styles.title}>{t('storageProducts')}</h2>
             <input
               type="text"
               className={styles.searchInput}
-              placeholder={getText('searchProduct')}
+              placeholder={t('searchProduct')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <div className={styles.buttonGroup}>
               {permissions.create_kitchen_storage && (
                 <button onClick={() => setModalOpen(true)} className={styles.addButton}>
-                  <Plus size={16} /> {getText('newProduct')}
+                  <Plus size={16} /> {t('newProduct')}
                 </button>
               )}
               <button onClick={handleExportToWord} className={styles.exportButton}>
-                <FileText size={16} /> {getText('exportWord')}
+                <FileText size={16} /> {t('exportWord')}
               </button>
               <button onClick={handleExportToExcel} className={styles.exportButton}>
-                <FileSpreadsheet size={16} /> {getText('exportExcel')}
+                <FileSpreadsheet size={16} /> {t('exportExcel')}
               </button>
             </div>
           </div>
 
           {loading ? (
-            <p>{getText('loadingData')}</p>
+            <p>{t('loadingData')}</p>
           ) : (
             <AdminTable
-              title="Sklad"
+              title={t('storageTitle')}
               columns={['id', 'nomi', 'hajm', 'mavjud_hajm', 'hajm_birlik', 'created_at', 'actions']}
               columnTitles={{
-                id: getText('colId'),
-                nomi: getText('colName'),
-                hajm: getText('colInitialVolume'),
-                mavjud_hajm: getText('colAvailableInStorage'),
-                hajm_birlik: getText('colUnit'),
-                created_at: getText('colAddedDate'),
-                actions: getText('colActions'),
+                id: t('colId'),
+                nomi: t('colName'),
+                hajm: t('colInitialVolume'),
+                mavjud_hajm: t('colAvailableInStorage'),
+                hajm_birlik: t('colUnit'),
+                created_at: t('colAddedDate'),
+                actions: t('colActions'),
               }}
               data={filteredData.map((item) => ({
                 ...item,
@@ -329,7 +330,7 @@ export default function SkladProductPage() {
           <ErrorModal message={errorMessage} onClose={() => setErrorMessage('')} />
         </>
       ) : (
-        <p style={{ padding: '20px', color: 'red' }}>{getText('noPermission')}</p>
+        <p style={{ padding: '20px', color: 'red' }}>{t('noPermission')}</p>
       )}
     </LayoutComponent>
   );

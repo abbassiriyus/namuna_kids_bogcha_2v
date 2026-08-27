@@ -4,11 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import url from "../host/host";
 import styles from "../styles/BolaModal.module.css";
-import { getText } from "../i18n/translations";
+import { useLang } from "../i18n/LanguageContext";
 
 const bugun = () => new Date().toISOString().slice(0, 10);
 
 export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
+  const { t } = useLang();
     const [sana, setSana] = useState(bugun);
     const [bolalarSoni, setBolalarSoni] = useState("");
     const [ingredients, setIngredients] = useState([]);
@@ -23,7 +24,7 @@ export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
         axios
             .get(`${url}/taom/${taomId}/ingredient`)
             .then((res) => setIngredients(res.data))
-            .catch(() => setError(getText('loadError')));
+            .catch(() => setError(t('loadError')));
     }, [open, taomId]);
 
     const soni = Number(bolalarSoni) || 0;
@@ -56,7 +57,7 @@ export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
             setOpen(false);
             onSaved && onSaved();
         } catch (err) {
-            setError(err.response?.data?.error || getText('saveError'));
+            setError(err.response?.data?.error || t('saveError'));
         } finally {
             setSaving(false);
         }
@@ -67,10 +68,10 @@ export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
     return (
         <div className={styles.modal}>
             <div className={styles.modal__content}>
-                <h3 className={styles.modal__title}>{getText('useMeal')}</h3>
+                <h3 className={styles.modal__title}>{t('useMeal')}</h3>
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <label className={styles.label}>
-                        {getText('date')}:
+                        {t('date')}:
                         <input
                             type="date"
                             className={styles.input}
@@ -80,7 +81,7 @@ export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
                         />
                     </label>
                     <label className={styles.label}>
-                        {getText('todayChildrenQuestion')}
+                        {t('todayChildrenQuestion')}
                         <input
                             type="number"
                             min="1"
@@ -93,16 +94,16 @@ export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
                     </label>
 
                     {ingredients.length === 0 ? (
-                        <p style={{ color: '#b45309', margin: '8px 0' }}>{getText('addIngredientFirst')}</p>
+                        <p style={{ color: '#b45309', margin: '8px 0' }}>{t('addIngredientFirst')}</p>
                     ) : (
                         <div style={{ margin: '8px 0', maxHeight: 220, overflowY: 'auto' }}>
-                            <strong style={{ display: 'block', marginBottom: 6 }}>{getText('calculation')}</strong>
+                            <strong style={{ display: 'block', marginBottom: 6 }}>{t('calculation')}</strong>
                             <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ textAlign: 'left', color: '#64748b' }}>
-                                        <th style={{ padding: '4px 6px' }}>{getText('colName')}</th>
-                                        <th style={{ padding: '4px 6px' }}>{getText('totalNeeded')}</th>
-                                        <th style={{ padding: '4px 6px' }}>{getText('availableInStorage')}</th>
+                                        <th style={{ padding: '4px 6px' }}>{t('colName')}</th>
+                                        <th style={{ padding: '4px 6px' }}>{t('totalNeeded')}</th>
+                                        <th style={{ padding: '4px 6px' }}>{t('availableInStorage')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -122,15 +123,15 @@ export default function UseTaomModal({ open, setOpen, taomId, onSaved }) {
                         </div>
                     )}
 
-                    {yetmaydi && <p style={{ color: '#dc2626', margin: '4px 0' }}>{getText('notEnoughStock')}</p>}
+                    {yetmaydi && <p style={{ color: '#dc2626', margin: '4px 0' }}>{t('notEnoughStock')}</p>}
                     {error && <p style={{ color: '#dc2626', margin: '4px 0' }}>{error}</p>}
 
                     <div className={styles.modal__buttons}>
                         <button type="submit" className={styles.saveButton} disabled={!saqlashMumkin}>
-                            {saving ? getText('saving') : getText('save')}
+                            {saving ? t('saving') : t('save')}
                         </button>
                         <button type="button" onClick={() => setOpen(false)} className={styles.cancelButton}>
-                            {getText('cancel')}
+                            {t('cancel')}
                         </button>
                     </div>
                 </form>

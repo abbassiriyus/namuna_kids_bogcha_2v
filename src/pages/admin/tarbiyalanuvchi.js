@@ -6,13 +6,15 @@ import axios from 'axios';
 import LayoutComponent from '../../components/LayoutComponent';
 import AdminTable from '../../components/AdminTableTarbiyachi';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import BolaModal from '../../components/BolaModal.jsx';
 import AdminHeader from '../../components/AdminHeader.jsx';
 import BolaPaymentModal from '../../components/BolaPaymentModal';
+import Loader from '../../components/Loader';
 import styles from '../../styles/Tarbiyalanuvchilar.module.css'; // Assuming a CSS module
 
 export default function Tarbiyalanuvchilar() {
+  const { t } = useLang();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -53,7 +55,7 @@ export default function Tarbiyalanuvchilar() {
 
   const fetchData = async (token, adminId, type) => {
     if (!token) {
-      setErrorMessage('Tizimga kirish uchun token topilmadi!');
+      setErrorMessage(t('noTokenError'));
       router.push('/login');
       return;
     }
@@ -113,10 +115,10 @@ export default function Tarbiyalanuvchilar() {
       });
       if (error.response?.status === 401 || error.response?.status === 403) {
         localStorage.removeItem('token');
-        setErrorMessage('Sessiya tugadi. Iltimos, qayta kiring.');
+        setErrorMessage(t('sessionExpired'));
         router.push('/login');
       } else {
-        setErrorMessage('Ma\'lumotlarni yuklashda xatolik yuz berdi: ' + error.message);
+        setErrorMessage(t('loadError') + ': ' + error.message);
       }
     } finally {
       setLoading(false);
@@ -125,7 +127,7 @@ export default function Tarbiyalanuvchilar() {
 
   const handleToggleActive = async (id, currentValue) => {
     if (!permissions.edit_students) {
-      setErrorMessage("Sizda tarbiyalanuvchi holatini o'zgartirish uchun ruxsat yo'q!");
+      setErrorMessage(t('noEditStudentPermission'));
       return;
     }
     try {
@@ -138,7 +140,7 @@ export default function Tarbiyalanuvchilar() {
       await fetchData(token, adminId, type);
     } catch (error) {
       console.error('is_active yangilashda xatolik:', error.message);
-      setErrorMessage('Holatni yangilashda xatolik yuz berdi: ' + error.message);
+      setErrorMessage(t('statusUpdateError') + ': ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -146,30 +148,30 @@ export default function Tarbiyalanuvchilar() {
 
   const handleUpdate = async (updatedData) => {
     if (!permissions.edit_students) {
-      throw new Error("Sizda tarbiyalanuvchi ma'lumotlarini yangilash uchun ruxsat yo'q!");
+      throw new Error(t('noEditStudentPermission'));
     }
     if (!token) {
-      throw new Error('Token topilmadi!');
+      throw new Error(t('tokenNotFound'));
     }
     await axios.put(`${url}/bola/${updatedData.id}`, updatedData, authHeader);
   };
 
   const handleCreate = async (newData) => {
     if (!permissions.create_students) {
-      throw new Error("Sizda tarbiyalanuvchi yaratish uchun ruxsat yo'q!");
+      throw new Error(t('noCreateStudentPermission'));
     }
     if (!token) {
-      throw new Error('Token topilmadi!');
+      throw new Error(t('tokenNotFound'));
     }
     await axios.post(`${url}/bola`, newData, authHeader);
   };
 
   const handleDelete = async (id) => {
     if (!permissions.delete_students) {
-      setErrorMessage("Sizda tarbiyalanuvchi o'chirish uchun ruxsat yo'q!");
+      setErrorMessage(t('noDeleteStudentPermission'));
       return;
     }
-    if (!confirm("Haqiqatan ham bu tarbiyalanuvchini o‘chirmoqchimisiz? Bu amaliyot yomon oqibatlarga olib kelishi mumkin!")) {
+    if (!confirm(t('confirmDeleteGeneric'))) {
       return;
     }
     try {
@@ -178,7 +180,7 @@ export default function Tarbiyalanuvchilar() {
       await fetchData(token, adminId, type);
     } catch (err) {
       console.error('O‘chirishda xatolik:', err.message);
-      setErrorMessage('Tarbiyalanuvchini o‘chirishda xatolik yuz berdi: ' + err.message);
+      setErrorMessage(t('deleteStudentError') + ': ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -186,7 +188,7 @@ export default function Tarbiyalanuvchilar() {
 
   const handleSave = async (formData) => {
     if (!formData.username || !formData.guruh_id) {
-      setErrorMessage('F.I.Sh va guruh maydonlari to‘ldirilishi shart!');
+      setErrorMessage(t('fillNameGroupFields'));
       return;
     }
     try {
@@ -200,7 +202,7 @@ export default function Tarbiyalanuvchilar() {
       setShowModal(false);
     } catch (err) {
       console.error('Saqlashda xatolik:', err.message);
-      setErrorMessage('Saqlashda xatolik yuz berdi: ' + err.message);
+      setErrorMessage(t('saveError') + ': ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -209,7 +211,7 @@ export default function Tarbiyalanuvchilar() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       if (!token) {
-        setErrorMessage('Tizimga kirish uchun token topilmadi!');
+        setErrorMessage(t('noTokenError'));
         router.push('/login');
         return;
       }
@@ -217,7 +219,7 @@ export default function Tarbiyalanuvchilar() {
         fetchData(token, adminId, type);
       } catch (error) {
         console.error('Admin data parsing error:', error);
-        setErrorMessage('Ma\'lumotlarni yuklashda xatolik: ' + error.message);
+        setErrorMessage(t('loadError') + ': ' + error.message);
         router.push('/login');
       }
     }
@@ -247,35 +249,35 @@ export default function Tarbiyalanuvchilar() {
   }, [data, selectedGroup, isActiveFilter, searchTerm]);
 
   const columnTitles = {
-    username: getText('colFullName'),
-    metrka: getText('colMetrka'),
-    is_active: getText('colActiveStatus'),
-    guruh_id: getText('colGroup'),
-    tugilgan_kun: getText('colBirthDate'),
-    oylik_toliv: getText('colMonthlyFee'),
-    balans: getText('colBalance'),
-    holati: getText('colStatus'),
-    ota_fish: getText('colFatherName'),
-    ota_phone: getText('colFatherPhone'),
-    ota_pasport: getText('colFatherPassport'),
-    ona_fish: getText('colMotherName'),
-    ona_phone: getText('colMotherPhone'),
-    ona_pasport: getText('colMotherPassport'),
-    qoshimcha_phone: getText('colExtraPhone'),
-    address: getText('colAddress'),
-    description: getText('colComment'),
-    created_at: getText('colCreatedDate'),
-    updated_at: getText('colUpdatedDate'),
+    username: t('colFullName'),
+    metrka: t('colMetrka'),
+    is_active: t('colActiveStatus'),
+    guruh_id: t('colGroup'),
+    tugilgan_kun: t('colBirthDate'),
+    oylik_toliv: t('colMonthlyFee'),
+    balans: t('colBalance'),
+    holati: t('colStatus'),
+    ota_fish: t('colFatherName'),
+    ota_phone: t('colFatherPhone'),
+    ota_pasport: t('colFatherPassport'),
+    ona_fish: t('colMotherName'),
+    ona_phone: t('colMotherPhone'),
+    ona_pasport: t('colMotherPassport'),
+    qoshimcha_phone: t('colExtraPhone'),
+    address: t('colAddress'),
+    description: t('colComment'),
+    created_at: t('colCreatedDate'),
+    updated_at: t('colUpdatedDate'),
   };
 
   return (
     <LayoutComponent>
       {loading ? (
-        <div className={styles.loading}>Yuklanmoqda...</div>
+        <Loader />
       ) : canView ? (
         <>
           <AdminHeader
-            title="Tarbiyalanuvchilar"
+            title={t('students')}
             onCreate={
               permissions.create_students
                 ? () => {
@@ -290,12 +292,12 @@ export default function Tarbiyalanuvchilar() {
           {permissions.view_students && (
             <div className={styles.filterContainer}>
               <div className={styles.filterGroup}>
-                <label>Guruh bo‘yicha filter:</label>
+                <label>{t('filterByGroup')}</label>
                 <select
                   value={selectedGroup}
                   onChange={(e) => setSelectedGroup(e.target.value)}
                 >
-                  <option value="">Barchasi</option>
+                  <option value="">{t('all')}</option>
                   {groups.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
@@ -305,31 +307,31 @@ export default function Tarbiyalanuvchilar() {
               </div>
 
               <div className={styles.filterGroup}>
-                <label>Holat bo‘yicha filter:</label>
+                <label>{t('filterByStatus')}</label>
                 <select
                   value={isActiveFilter}
                   onChange={(e) => setIsActiveFilter(e.target.value)}
                 >
-                  <option value="">Barchasi</option>
-                  <option value="true">Aktiv</option>
-                  <option value="false">Faol emas</option>
+                  <option value="">{t('all')}</option>
+                  <option value="true">{t('activeLabel')}</option>
+                  <option value="false">{t('inactiveLabel')}</option>
                 </select>
               </div>
 
               <div className={styles.filterGroup}>
-                <label>Qidiruv (F.I.Sh, metirka, ota/ona ismi, manzil...)</label>
+                <label>{t('searchStudentsLabel')}</label>
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Matn kiriting..."
+                  placeholder={t('enterTextPlaceholder')}
                 />
               </div>
             </div>
           )}
 
           <div className={styles.resultCount}>
-            Natijada: <span>{filteredData.length}</span> ta tarbiyalanuvchi ko‘rsatildi.
+            {t('resultsCountStudents').replace('{count}', filteredData.length)}
           </div>
 
           <AdminTable
@@ -355,7 +357,7 @@ export default function Tarbiyalanuvchilar() {
                       onChange={() => handleToggleActive(row.id, row.is_active)}
                     />
                   )
-                : (row) => (row.is_active ? 'Aktiv' : 'Faol emas'),
+                : (row) => (row.is_active ? t('activeLabel') : t('inactiveLabel')),
             }}
             customActions={{
               '💰': permissions.view_payments
@@ -393,7 +395,7 @@ export default function Tarbiyalanuvchilar() {
         </>
       ) : (
         <div className={styles.errorMessage}>
-          Sizda tarbiyalanuvchilarni ko‘rish uchun ruxsat yo‘q!
+          {t('noPermission')}
         </div>
       )}
     </LayoutComponent>

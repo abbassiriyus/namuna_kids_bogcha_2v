@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import LayoutComponent from '../../components/LayoutComponent';
 import ErrorModal from '../../components/ErrorModal';
+import Loader from '../../components/Loader';
 import url from '../../host/host';
 import styles from '../../styles/Calendar.module.css';
+import { useLang } from '../../i18n/LanguageContext';
 
 export default function DarslarPage() {
+  const { t } = useLang();
   const router = useRouter();
   const today = new Date();
   const [yearMonth, setYearMonth] = useState(
@@ -69,7 +72,7 @@ export default function DarslarPage() {
         }
         router.push('/login');
       } else {
-        setErrorMessage('Dars kunlarini yuklashda xatolik yuz berdi!');
+        setErrorMessage(t('lessonsLoadError'));
       }
     } finally {
       setLoading(false);
@@ -198,7 +201,7 @@ export default function DarslarPage() {
             </h2>
 
             {loading ? (
-              <p style={{ padding: '10px' }}>Yuklanmoqda...</p>
+              <Loader />
             ) : (
               <div className={styles.calendar__grid}>
                 {days.map((day, idx) => {

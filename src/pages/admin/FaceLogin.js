@@ -8,11 +8,13 @@ import url from '../../host/host';
 import styles from '../../styles/FaceLogin.module.css';
 import { getDavomatMood, formatMinutes } from '../../utils/davomatMood';
 import FaceCaptureModal from '../../components/FaceCaptureModal';
+import { useLang } from '../../i18n/LanguageContext';
 
 const SCAN_INTERVAL_MS = 600;
 const RESET_DELAY_MS = 3500;
 
 export default function FaceLogin() {
+  const { t } = useLang();
   const webcamRef = useRef();
   const faceapiRef = useRef(null);
   const scanningRef = useRef(false); // guards against overlapping detections
@@ -111,7 +113,7 @@ export default function FaceLogin() {
       console.error('Yuzni aniqlashda xatolik:', err);
       cooldownRef.current = true;
       setScanState('notmatched');
-      setStatus('Xatolik yuz berdi');
+      setStatus(t('errorOccurred'));
       setTimeout(() => {
         cooldownRef.current = false;
         setScanState('scanning');
@@ -151,7 +153,7 @@ export default function FaceLogin() {
           : `Xush kelibsiz, ${recognized.name}! Kelish belgilandi (${timeText})`,
       });
     } catch (err) {
-      setActionResult({ type: 'error', text: err.response?.data?.message || 'Xatolik yuz berdi' });
+      setActionResult({ type: 'error', text: err.response?.data?.message || t('errorOccurred') });
     } finally {
       setActionLoading(false);
       setTimeout(reset, RESET_DELAY_MS);
@@ -251,15 +253,15 @@ export default function FaceLogin() {
               {todayState === 'done' ? (
                 <>
                   <button className={styles.undoLink} onClick={() => handleUndo('end')} disabled={undoLoading}>
-                    <RotateCcw size={13} /> {undoLoading ? 'Bekor qilinmoqda...' : 'Ketish vaqti xato — shuni bekor qilish'}
+                    <RotateCcw size={13} /> {undoLoading ? t('cancelling') : 'Ketish vaqti xato — shuni bekor qilish'}
                   </button>
                   <button className={styles.undoLink} onClick={() => handleUndo('all')} disabled={undoLoading}>
-                    <RotateCcw size={13} /> {undoLoading ? 'Bekor qilinmoqda...' : 'Kelish vaqti ham xato — hammasini bekor qilish'}
+                    <RotateCcw size={13} /> {undoLoading ? t('cancelling') : 'Kelish vaqti ham xato — hammasini bekor qilish'}
                   </button>
                 </>
               ) : (
                 <button className={styles.undoLink} onClick={() => handleUndo('all')} disabled={undoLoading}>
-                  <RotateCcw size={13} /> {undoLoading ? 'Bekor qilinmoqda...' : 'Kelish vaqti xato — bekor qilish'}
+                  <RotateCcw size={13} /> {undoLoading ? t('cancelling') : 'Kelish vaqti xato — bekor qilish'}
                 </button>
               )}
             </div>
@@ -274,7 +276,7 @@ export default function FaceLogin() {
             <Users size={16} /> Bugungi davomat ({roster.length})
           </span>
           <div className={styles.rosterHeadBtns}>
-            <button className={styles.rosterBtn} onClick={loadRoster} disabled={rosterLoading} title="Yangilash">
+            <button className={styles.rosterBtn} onClick={loadRoster} disabled={rosterLoading} title={t('refresh')}>
               <RefreshCw size={14} className={rosterLoading ? styles.spin : ''} />
             </button>
             <button className={styles.rosterBtn} onClick={() => setShowRoster((v) => !v)}>
@@ -287,15 +289,15 @@ export default function FaceLogin() {
           rosterLoading && roster.length === 0 ? (
             <p className={styles.status}><Loader2 size={14} className={styles.spin} /> Yuklanmoqda...</p>
           ) : roster.length === 0 ? (
-            <p className={styles.status}>Xodimlar topilmadi</p>
+            <p className={styles.status}>{t('employeesNotFound')}</p>
           ) : (
             <div className={styles.rosterScroll}>
               <table className={styles.rosterTable}>
                 <thead>
                   <tr>
-                    <th>Xodim</th>
-                    <th>Reja</th>
-                    <th>Kelgan</th>
+                    <th>{t('colEmployee')}</th>
+                    <th>{t('colPlan')}</th>
+                    <th>{t('colAttended')}</th>
                     <th>Ketgan</th>
                     <th>Kechikkan</th>
                     <th>Kayfiyat</th>
@@ -315,7 +317,7 @@ export default function FaceLogin() {
                       <tr key={x.id}>
                         <td>
                           {x.name}
-                          {!x.face_bor && <span className={styles.noFaceTag} title="Face ID saqlanmagan">yuz yo‘q</span>}
+                          {!x.face_bor && <span className={styles.noFaceTag} title={t('faceNotSaved')}>{t('noFaceShort')}</span>}
                         </td>
                         <td>
                           {(x.plan_start || '--:--').slice(0, 5)}–{(x.plan_end || '--:--').slice(0, 5)}

@@ -4,15 +4,17 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import LayoutComponent from '../../components/LayoutComponent';
 import AdminTable from '../../components/AdminTable';
 import GuruhModal from '../../components/GuruhModal';
 import AdminHeader from '../../components/AdminHeader';
 import ErrorModal from '../../components/ErrorModal';
+import Loader from '../../components/Loader';
 import { useUserType } from '../../utils/useUserType';
 
 export default function GuruhlarPage() {
+  const { t } = useLang();
   // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
   const { isSuperAdmin } = useUserType();
   const router = useRouter();
@@ -95,7 +97,7 @@ export default function GuruhlarPage() {
         }
         router.push('/');
       } else {
-        setErrorMessage('Ma\'lumotlarni yuklashda xatolik yuz berdi!');
+        setErrorMessage(t('loadError'));
       }
     } finally {
       setLoading(false);
@@ -104,7 +106,7 @@ export default function GuruhlarPage() {
 
   const handleCreate = async (newData) => {
     if (!permissions.create_groups) {
-      setErrorMessage("Sizda guruh yaratish uchun ruxsat yo'q!");
+      setErrorMessage(t('noEditGroupPermission'));
       return;
     }
     try {
@@ -119,13 +121,13 @@ export default function GuruhlarPage() {
       fetchData();
     } catch (err) {
       console.error('Yaratishda xatolik:', err);
-      setErrorMessage('Guruh yaratishda xatolik yuz berdi!');
+      setErrorMessage(t('groupCreateError'));
     }
   };
 
   const handleUpdate = async (updatedData) => {
     if (!permissions.edit_groups) {
-      setErrorMessage("Sizda guruh ma'lumotlarini yangilash uchun ruxsat yo'q!");
+      setErrorMessage(t('noEditGroupPermission'));
       return;
     }
     try {
@@ -140,16 +142,16 @@ export default function GuruhlarPage() {
       fetchData();
     } catch (err) {
       console.error('Yangilashda xatolik:', err);
-      setErrorMessage('Guruh yangilashda xatolik yuz berdi!');
+      setErrorMessage(t('groupUpdateError'));
     }
   };
 
   const handleDelete = async (id) => {
     if (!permissions.delete_groups) {
-      setErrorMessage("Sizda guruh o'chirish uchun ruxsat yo'q!");
+      setErrorMessage(t('noDeleteGroupPermission'));
       return;
     }
-    if (confirm('Haqiqatan ham bu tarbiyalanuvchini o‘chirmoqchimisiz? Bu amaliyot yomon oqibatlarga olib kelishi mumkin!')) {
+    if (confirm(t('confirmDeleteGeneric'))) {
       try {
         const token = localStorage.getItem('token') ? localStorage.getItem('token') : null;
         if (!token) {
@@ -162,7 +164,7 @@ export default function GuruhlarPage() {
         fetchData();
       } catch (err) {
         console.error('O‘chirishda xatolik:', err);
-        setErrorMessage('Guruh o‘chirishda xatolik yuz berdi!');
+        setErrorMessage(t('groupDeleteError'));
       }
     }
   };
@@ -177,7 +179,7 @@ export default function GuruhlarPage() {
       setShowModal(false);
     } catch (err) {
       console.error('Saqlashda xatolik:', err);
-      setErrorMessage(err.message || 'Saqlashda xatolik yuz berdi!');
+      setErrorMessage(err.message || t('saveError'));
     }
   };
 
@@ -193,11 +195,11 @@ export default function GuruhlarPage() {
   }, []);
 
   const columnTitles = {
-    name: getText('colGroupName'),
-    xodim_id: getText('colTeacher'),
-    created_at: getText('colCreatedAt'),
-    updated_at: getText('colUpdatedAt'),
-    actions: getText('colActions'),
+    name: t('colGroupName'),
+    xodim_id: t('colTeacher'),
+    created_at: t('colCreatedAt'),
+    updated_at: t('colUpdatedAt'),
+    actions: t('colActions'),
   };
 
   const filteredData = data.filter((g) => {
@@ -215,7 +217,7 @@ export default function GuruhlarPage() {
       {isSuperAdmin || permissions.view_groups ? (
         <>
           <AdminHeader
-            title="Guruhlar"
+            title={t('groups')}
             onCreate={
               permissions.create_groups
                 ? () => {
@@ -231,7 +233,7 @@ export default function GuruhlarPage() {
           <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', maxWidth: '600px' }}>
             <input
               type="text"
-              placeholder="Guruh nomi yoki tarbiya beruvchi bo‘yicha qidiruv..."
+              placeholder={t('searchGroupPlaceholder')}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               style={{
@@ -266,7 +268,7 @@ export default function GuruhlarPage() {
               onFocus={(e) => (e.currentTarget.style.borderColor = '#0070f3')}
               onBlur={(e) => (e.currentTarget.style.borderColor = '#ccc')}
             >
-              <option value="">Barchasi (Tarbiya beruvchi)</option>
+              <option value="">{t('allTeachers')}</option>
               {xodimlar.map((x) => (
                 <option key={x.id} value={x.id}>
                   {x.name}
@@ -276,11 +278,11 @@ export default function GuruhlarPage() {
           </div>
 
           {loading ? (
-            <p style={{ padding: '10px', fontSize: '18px', color: '#555' }}>Yuklanmoqda...</p>
+            <Loader />
           ) : (
             <>
               <AdminTable
-                title="Guruhlar ro‘yxati"
+                title={t('groupsList')}
                 columns={Object.keys(columnTitles)}
                 columnTitles={columnTitles}
                 data={filteredData}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import { Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 import styles from '../styles/AdminTable.module.css';
 
 export default function AdminTable({
@@ -16,6 +16,7 @@ export default function AdminTable({
   customActions = {},
   permissions = {},
 }) {
+  const { t } = useLang();
   const itemsPerPage = 100;
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -50,9 +51,9 @@ export default function AdminTable({
               <thead className={styles['admin-table__thead']}>
                 <tr>
                   {(permissions.delete_students || permissions.view_payments) && (
-                    <th className={styles['admin-table__th']}>{getText('colActions')}</th>
+                    <th className={styles['admin-table__th']}>{t('colActions')}</th>
                   )}
-                  <th className={styles['admin-table__th']}>{getText('colNumber')}</th>
+                  <th className={styles['admin-table__th']}>{t('colNumber')}</th>
                   {mainColumns.map((col, idx) => (
                     <th key={idx} className={styles['admin-table__th']}>
                       {columnTitles[col] || col}
@@ -68,7 +69,7 @@ export default function AdminTable({
                         className={`${styles['admin-table__td']} ${styles['sticky-actions']}`}
                       >
                         {permissions.delete_students && onDelete && (
-                          <button className={styles.deleteBtn} onClick={() => onDelete(row.id)} title="O'chirish">
+                          <button className={styles.deleteBtn} onClick={() => onDelete(row.id)} title={t('delete')}>
                             <Trash2 size={16} />
                           </button>
                         )}
@@ -116,7 +117,7 @@ export default function AdminTable({
           {permissions.view_students && (
             <div className={styles['pagination']}>
               <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-                <ChevronLeft size={16} /> {getText('pagination.prev')}
+                <ChevronLeft size={16} /> {t('pagination.prev')}
               </button>
               <span>
                 {currentPage} / {totalPages}
@@ -125,7 +126,7 @@ export default function AdminTable({
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >
-                {getText('pagination.next')} <ChevronRight size={16} />
+                {t('pagination.next')} <ChevronRight size={16} />
               </button>
             </div>
           )}
@@ -134,7 +135,7 @@ export default function AdminTable({
           {selectedRow && permissions.view_students && (
             <div className={styles.modal}>
               <div className={styles['modal__content']}>
-                <div className={styles['modal__header']}>{getText('detailsTitle')}</div>
+                <div className={styles['modal__header']}>{t('detailsTitle')}</div>
                 <table className={styles['modal__table']}>
                   <tbody>
                     {additionalColumns.map((col, i) => (
@@ -150,7 +151,7 @@ export default function AdminTable({
                   </tbody>
                 </table>
                 <button className={styles['modal__close-btn']} onClick={() => setSelectedRow(null)}>
-                  {getText('close')}
+                  {t('close')}
                 </button>
               </div>
             </div>
@@ -158,7 +159,7 @@ export default function AdminTable({
         </>
       ) : (
         <div className={styles.errorMessage}>
-          {getText('noPermission')}
+          {t('noPermission')}
         </div>
       )}
     </div>

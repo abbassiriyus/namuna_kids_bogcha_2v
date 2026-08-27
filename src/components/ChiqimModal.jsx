@@ -5,11 +5,12 @@ import { Trash2, Plus, Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 import ErrorModal from './ErrorModal';
 import { toLocalDate } from '../utils/sana';
 
 export default function ChiqimModal({ isOpen, onClose, onSave, products = [], initialData = null }) {
+  const { t } = useLang();
   const [rows, setRows] = useState([{ sklad_product_id: '', hajm: '', description: '' }]);
   const [chiqimSana, setChiqimSana] = useState('');
   const [availableHajm, setAvailableHajm] = useState({}); // product_id => hajm
@@ -95,7 +96,7 @@ const handleChange = (index, e) => {
 };
 const handleSubmit = () => {
   if (!chiqimSana) {
-    return setModalError('Sana tanlanmagan');
+    return setModalError(t('dateNotSelected'));
   }
 
   // Faqat to‘ldirilgan qatorlarni olish
@@ -104,7 +105,7 @@ const handleSubmit = () => {
   );
 
   if (validRows.length === 0) {
-    return setModalError('Kamida bitta to‘ldirilgan qator bo‘lishi kerak');
+    return setModalError(t('atLeastOneRow'));
   }
 
   for (let i = 0; i < validRows.length; i++) {
@@ -114,15 +115,17 @@ const handleSubmit = () => {
     const max = availableHajm[productId] || 0;
 
     if (!productId || isNaN(productId)) {
-      return setModalError(`${i + 1}-qator: Mahsulot tanlanmagan`);
+      return setModalError(t('rowProductNotSelected').replace('{n}', i + 1));
     }
 
     if (entered <= 0 || isNaN(entered)) {
-      return setModalError(`${i + 1}-qator: Hajm noto‘g‘ri yoki kiritilmagan`);
+      return setModalError(t('rowInvalidVolume').replace('{n}', i + 1));
     }
 
     if (entered > max) {
-      return setModalError(`${i + 1}-qator: Omborda faqat ${max} birlik mavjud`);
+      return setModalError(
+        t('rowOnlyAvailable').replace('{n}', i + 1).replace('{max}', max)
+      );
     }
   }
 
@@ -151,10 +154,10 @@ const handleSubmit = () => {
     <div className={styles.modal}>
       <div className={styles.modal__content}>
         <h3 className={styles.modal__title}>
-          {initialData ? getText('editExpense') : getText('addExpenses')}
+          {initialData ? t('editExpense') : t('addExpenses')}
         </h3>
 
-        <label>{getText('expenseDate')}:</label>
+        <label>{t('expenseDate')}:</label>
         <input
           type="date"
           value={chiqimSana}
@@ -177,7 +180,7 @@ const handleSubmit = () => {
                   className={styles.input}
                   style={{ flex: 1 }}
                 >
-                  <option value="">{getText('selectProduct')}</option>
+                  <option value="">{t('selectProduct')}</option>
                   {products.sort((a, b) => a.nomi.localeCompare(b.nomi)).map(p => (
                     <option key={p.id} value={p.id}>{p.nomi}</option>
                   ))}
@@ -188,7 +191,7 @@ const handleSubmit = () => {
                   name="hajm"
                   value={row.hajm}
                   onChange={(e) => handleChange(index, e)}
-                  placeholder={getText('volume')}
+                  placeholder={t('volume')}
                   className={styles.input}
                   style={{ flex: 1 }}
                 />
@@ -204,7 +207,7 @@ const handleSubmit = () => {
                       color: 'red',
                       cursor: 'pointer',
                     }}
-                    title={getText('delete')}
+                    title={t('delete')}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -215,14 +218,14 @@ const handleSubmit = () => {
                 name="description"
                 value={row.description}
                 onChange={(e) => handleChange(index, e)}
-                placeholder={getText('comment')}
+                placeholder={t('comment')}
                 className={styles.textarea}
                 style={{ marginTop: '8px', width: '96%' }}
               />
 
               {mavjud !== undefined && (
                 <p style={{ marginTop: '4px', color: 'gray' }}>
-                  <strong>{getText('availableVolume')}:</strong> {mavjud} {product?.hajm_birlik || ''}
+                  <strong>{t('availableVolume')}:</strong> {mavjud} {product?.hajm_birlik || ''}
                 </p>
               )}
             </div>
@@ -243,12 +246,12 @@ const handleSubmit = () => {
             fontWeight: 'bold',
           }}
         >
-          <Plus size={16} /> {getText('addRow')}
+          <Plus size={16} /> {t('addRow')}
         </button>
 
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> {getText('save')}</button>
-          <button onClick={onClose}><X size={16} /> {getText('cancel')}</button>
+          <button onClick={handleSubmit}><Check size={16} /> {t('save')}</button>
+          <button onClick={onClose}><X size={16} /> {t('cancel')}</button>
         </div>
       </div>
       <ErrorModal message={modalError} onClose={() => setModalError('')} />

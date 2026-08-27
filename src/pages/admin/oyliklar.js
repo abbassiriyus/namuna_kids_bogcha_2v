@@ -9,12 +9,14 @@ import OylikDeleteModal from '../../components/OylikDeleteModal';
 import ErrorModal from '../../components/ErrorModal';
 import axios from 'axios';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { bugungiOy } from '../../utils/sana';
 import { useUserType } from '../../utils/useUserType';
+import Loader from '../../components/Loader';
 
 export default function OyliklarPage() {
+  const { t } = useLang();
   // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
   const { isSuperAdmin } = useUserType();
   const router = useRouter();
@@ -154,7 +156,7 @@ export default function OyliklarPage() {
 
   const handleEdit = (row) => {
     if (!permissions.edit_salaries) {
-      setErrorMsg("Sizda oylikni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMsg(t('noEditSalaryPermission'));
       return;
     }
     setSelectedXodim(row);
@@ -164,7 +166,7 @@ export default function OyliklarPage() {
 
   const handleDelete = (row) => {
     if (!permissions.delete_salaries) {
-      setErrorMsg("Sizda oylikni o‘chirish uchun ruxsat yo‘q!");
+      setErrorMsg(t('noDeleteSalaryPermission'));
       return;
     }
     setSelectedXodim(row);
@@ -173,16 +175,16 @@ export default function OyliklarPage() {
   };
 
   const columnTitles = {
-    id: getText('colId'),
-    name: getText('colFullName'),
-    oylik: getText('colSalary'),
-    bonus: getText('colBonus'),
-    jarima: getText('colPenalty'),
-    kunlik: getText('colDaily'),
-    total: getText('colShouldPay'),
-    tolangan: getText('colPaid'),
-    qoldiq: getText('colRemainder'),
-    holat: getText('colStatus'),
+    id: t('colId'),
+    name: t('colFullName'),
+    oylik: t('colSalary'),
+    bonus: t('colBonus'),
+    jarima: t('colPenalty'),
+    kunlik: t('colDaily'),
+    total: t('colShouldPay'),
+    tolangan: t('colPaid'),
+    qoldiq: t('colRemainder'),
+    holat: t('colStatus'),
   };
 
   const formatSum = (value) =>
@@ -217,7 +219,7 @@ export default function OyliklarPage() {
               fontWeight: 600,
               padding: 0,
             }}
-            title="To‘lovlar tafsilotini ko‘rish"
+            title={t('viewPaymentDetails')}
           >
             {ochiq ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             {formatSum(row.tolangan)} ({tolovlar.length} ta)
@@ -290,7 +292,7 @@ export default function OyliklarPage() {
           </div>
 
           {loading ? (
-            <p>Yuklanmoqda...</p>
+            <Loader />
           ) : (
             <AdminTable
               title={`Oylik / Bonus / Jarima ro‘yxati — ${selectedMonth}`}

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
+  const { t } = useLang();
   const [formData, setFormData] = useState(bola || {});
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
@@ -40,7 +41,7 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
     const newErrors = {};
     requiredFields.forEach((field) => {
       if (!formData[field] || formData[field].toString().trim() === '') {
-        newErrors[field] = getText('requiredField');
+        newErrors[field] = t('requiredField');
       }
     });
 
@@ -53,7 +54,7 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
       await onSave(formData);
       onClose();
     } catch (err) {
-      const msg = err?.response?.data?.error || 'Saqlashda xatolik yuz berdi';
+      const msg = err?.response?.data?.error || t('saveError');
       setServerError(msg);
     }
   };
@@ -61,7 +62,7 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
   return (
     <div className={styles.modal}>
       <div className={styles.modal__content}>
-        <h3 className={styles.modal__title}>{getText('editStudent')}</h3>
+        <h3 className={styles.modal__title}>{t('editStudent')}</h3>
         <div className={styles.modal__form}>
 
           {serverError && (
@@ -70,12 +71,12 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
             </div>
           )}
 
-          <Input name="username" placeholder={getText('colFullName')} value={formData.username} onChange={handleChange} error={errors.username} />
-          <Input name="metrka" placeholder={getText('colMetrka')} value={formData.metrka} onChange={handleChange} error={errors.metrka} />
+          <Input name="username" placeholder={t('colFullName')} value={formData.username} onChange={handleChange} error={errors.username} />
+          <Input name="metrka" placeholder={t('colMetrka')} value={formData.metrka} onChange={handleChange} error={errors.metrka} />
           <Select name="guruh_id" value={formData.guruh_id} onChange={handleChange} options={guruhlar} error={errors.guruh_id} />
           <Input name="tugilgan_kun" type="date" value={formData.tugilgan_kun?.slice(0, 10)} onChange={handleChange} error={errors.tugilgan_kun} />
-          <Input name="oylik_toliv" type="number" placeholder={getText('colMonthlyFee')} value={formData.oylik_toliv} onChange={handleChange} error={errors.oylik_toliv} />
-          <Input name="balans" type="number" placeholder={getText('colBalance')} value={formData.balans} onChange={handleChange} />
+          <Input name="oylik_toliv" type="number" placeholder={t('colMonthlyFee')} value={formData.oylik_toliv} onChange={handleChange} error={errors.oylik_toliv} />
+          <Input name="balans" type="number" placeholder={t('colBalance')} value={formData.balans} onChange={handleChange} />
           
           {/* 🔽 Yangi holati select */}
           <Select
@@ -83,30 +84,30 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
             value={formData.holati}
             onChange={handleChange}
             options={[
-              { id: 'boshlangich', name: getText('statusInitial') },
-              { id: 'qabul_qilindi', name: getText('statusAccepted') },
-              { id: 'kelmay_qoydi', name: getText('statusStopped') }
+              { id: 'boshlangich', name: t('statusInitial') },
+              { id: 'qabul_qilindi', name: t('statusAccepted') },
+              { id: 'kelmay_qoydi', name: t('statusStopped') }
             ]}
             error={errors.holati}
           />
 
-          <h4>{getText('fatherInfo')}</h4>
-          <Input name="ota_fish" placeholder={getText('colFatherName')} value={formData.ota_fish} onChange={handleChange} error={errors.ota_fish} />
-          <Input name="ota_phone" placeholder={getText('colFatherPhone')} value={formData.ota_phone} onChange={handleChange} error={errors.ota_phone} />
-          <Input name="ota_pasport" placeholder={getText('colFatherPassport')} value={formData.ota_pasport} onChange={handleChange} />
+          <h4>{t('fatherInfo')}</h4>
+          <Input name="ota_fish" placeholder={t('colFatherName')} value={formData.ota_fish} onChange={handleChange} error={errors.ota_fish} />
+          <Input name="ota_phone" placeholder={t('colFatherPhone')} value={formData.ota_phone} onChange={handleChange} error={errors.ota_phone} />
+          <Input name="ota_pasport" placeholder={t('colFatherPassport')} value={formData.ota_pasport} onChange={handleChange} />
 
-          <h4>{getText('motherInfo')}</h4>
-          <Input name="ona_fish" placeholder={getText('colMotherName')} value={formData.ona_fish} onChange={handleChange} error={errors.ona_fish} />
-          <Input name="ona_phone" placeholder={getText('colMotherPhone')} value={formData.ona_phone} onChange={handleChange} error={errors.ona_phone} />
-          <Input name="ona_pasport" placeholder={getText('colMotherPassport')} value={formData.ona_pasport} onChange={handleChange} />
+          <h4>{t('motherInfo')}</h4>
+          <Input name="ona_fish" placeholder={t('colMotherName')} value={formData.ona_fish} onChange={handleChange} error={errors.ona_fish} />
+          <Input name="ona_phone" placeholder={t('colMotherPhone')} value={formData.ona_phone} onChange={handleChange} error={errors.ona_phone} />
+          <Input name="ona_pasport" placeholder={t('colMotherPassport')} value={formData.ona_pasport} onChange={handleChange} />
 
-          <Input name="qoshimcha_phone" placeholder={getText('colExtraPhone')} value={formData.qoshimcha_phone} onChange={handleChange} />
-          <Input name="address" placeholder={getText('colAddress')} value={formData.address} onChange={handleChange} />
+          <Input name="qoshimcha_phone" placeholder={t('colExtraPhone')} value={formData.qoshimcha_phone} onChange={handleChange} />
+          <Input name="address" placeholder={t('colAddress')} value={formData.address} onChange={handleChange} />
 
           <div>
             <textarea
               name="description"
-              placeholder={getText('comment')}
+              placeholder={t('comment')}
               value={formData.description || ''}
               onChange={handleChange}
               style={{ width: '100%', padding: '8px', marginTop: '4px' }}
@@ -115,8 +116,8 @@ export default function BolaModal({ bola, onClose, onSave, guruhlar = [] }) {
         </div>
 
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> {getText('save')}</button>
-          <button onClick={onClose}><X size={16} /> {getText('cancel')}</button>
+          <button onClick={handleSubmit}><Check size={16} /> {t('save')}</button>
+          <button onClick={onClose}><X size={16} /> {t('cancel')}</button>
         </div>
       </div>
     </div>
@@ -158,7 +159,7 @@ function Select({ name, value, onChange, options, error }) {
           width: '100%'
         }}
       >
-        <option value="">{getText('selectPlaceholder')}</option>
+        <option value="">{t('selectPlaceholder')}</option>
         {options.map((g) => (
           <option key={g.id} value={g.id}>{g.name}</option>
         ))}

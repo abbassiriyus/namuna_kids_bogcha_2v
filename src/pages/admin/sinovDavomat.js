@@ -11,8 +11,11 @@ import DavomatModal from '../../components/DavomatModal';
 import ErrorModal from '../../components/ErrorModal';
 import styles from '../../styles/DavomatPage.module.css';
 import { bugungiOy, bugungiSana, toLocalDate } from '../../utils/sana';
+import Loader from '../../components/Loader';
+import { useLang } from '../../i18n/LanguageContext';
 
 export default function SinovDavomat() {
+  const { t } = useLang();
   const router = useRouter();
   const [month, setMonth] = useState(() => bugungiOy());
   const [bolalar, setBolalar] = useState([]);
@@ -44,7 +47,7 @@ export default function SinovDavomat() {
     } catch (err) {
       console.error('Guruhlar olishda xatolik:', err);
       if (err.response?.status === 403) {
-        setErrorMessage('Guruhlarni olish uchun ruxsat yo‘q');
+        setErrorMessage(t('noGroupsPermission'));
       }
     } finally {
       setLoading(false);
@@ -66,7 +69,7 @@ export default function SinovDavomat() {
     } catch (err) {
       console.error('Dars kunlarini olishda xatolik:', err);
       if (err.response?.status === 403) {
-        setErrorMessage('Dars kunlarini olish uchun ruxsat yo‘q');
+        setErrorMessage(t('noLessonsPermission'));
       }
     } finally {
       setLoading(false);
@@ -81,9 +84,9 @@ export default function SinovDavomat() {
     } catch (err) {
       console.error('Davomatlarni olishda xatolik:', err);
       if (err.response?.status === 403 && err.config.url.includes('bola_kun_prp')) {
-        setErrorMessage('Davomatlarni olish uchun ruxsat yo‘q');
+        setErrorMessage(t('noAttendancePermission'));
       } else {
-        setErrorMessage('Davomatlarni olishda noma’lum xatolik yuz berdi');
+        setErrorMessage(t('attendanceUnknownError'));
       }
     } finally {
       setLoading(false);
@@ -121,7 +124,7 @@ export default function SinovDavomat() {
     } catch (err) {
       console.error('Xatolik bolalarni olishda:', err);
       if (err.response?.status === 403 && err.config.url.includes('bola_kun_prp')) {
-        setErrorMessage('Bolalarni olish uchun ruxsat yo‘q');
+        setErrorMessage(t('noChildrenPermission'));
       }
     } finally {
       setLoading(false);
@@ -149,7 +152,7 @@ export default function SinovDavomat() {
     } catch (err) {
       console.error('Ruxsatlarni olishda xatolik:', err);
       if (err.response?.status === 403) {
-        setErrorMessage('Ruxsatlarni olish uchun ruxsat yo‘q');
+        setErrorMessage(t('noPermissionsFetchPermission'));
       }
     } finally {
       setLoading(false);
@@ -206,7 +209,7 @@ useEffect(() => {
     } catch (err) {
       console.error('Bosqichni yangilashda xatolik:', err);
       if (err.response?.status === 403) {
-        setErrorMessage('Bosqichni yangilash uchun ruxsat yo‘q');
+        setErrorMessage(t('noStageUpdatePermission'));
       }
     } finally {
       setLoading(false);
@@ -252,7 +255,7 @@ useEffect(() => {
             />
             <input
               type="text"
-              placeholder="Ism yoki familiya..."
+              placeholder={t('nameSurnamePlaceholder')}
               className={styles.searchInput}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -278,7 +281,7 @@ useEffect(() => {
           </div>
 
           {loading ? (
-            <p style={{ padding: '10px' }}>Yuklanmoqda...</p>
+            <Loader />
           ) : (
             <div className={styles.tableWrapper}>
               <table className={styles.table}>
@@ -304,7 +307,7 @@ useEffect(() => {
                             value={bola.holati || ''}
                             onChange={(e) => updateBolaStage(bola.id, e.target.value)}
                           >
-                            <option value="">Tanlang</option>
+                            <option value="">{t('selectPlaceholder')}</option>
                             <option value="boshlangich">Boshlang‘ich</option>
                             <option value="qabul_qilindi">Qabul qilindi</option>
                             <option value="kelmay_qoydi">Kelmay qo‘ydi</option>
@@ -364,9 +367,9 @@ useEffect(() => {
                   setSelected(null);
                 } catch (err) {
                   if (err.response?.status === 403 && err.config.url.includes('bola_kun_prp')) {
-                    setErrorMessage('Davomatni saqlash uchun ruxsat yo‘q');
+                    setErrorMessage(t('noAttendanceSavePermission'));
                   } else {
-                    setErrorMessage('Davomatni saqlashda noma’lum xatolik yuz berdi');
+                    setErrorMessage(t('attendanceSaveUnknownError'));
                   }
                 } finally {
                   setLoading(false);

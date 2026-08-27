@@ -7,9 +7,10 @@ import { Plus, Trash2, Pencil } from 'lucide-react';
 import IngredientModal from '../components/IngredientModal';
 import styles from '../styles/IngredientList.module.css';
 import UseTaomModal from './UseTaomModal';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function IngredientList({ taomId, onUsed }) {
+  const { t } = useLang();
   const [ingredients, setIngredients] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
@@ -45,28 +46,28 @@ export default function IngredientList({ taomId, onUsed }) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h4 className={styles.title}>{getText('requiredProducts')}</h4>
+        <h4 className={styles.title}>{t('requiredProducts')}</h4>
         <div className={styles.buttonGroup}>
           <button
             className={styles.actionButton}
             onClick={() => { setSelectedIngredient(null); setOpen(true); }}
           >
             <Plus size={16} />
-            <span>{getText('add')}</span>
+            <span>{t('add')}</span>
           </button>
           <button
             className={styles.useButton}
             onClick={() => setOpenUseModal(true)}
             disabled={ingredients.length === 0}
-            title={ingredients.length === 0 ? getText('addIngredientFirst') : undefined}
+            title={ingredients.length === 0 ? t('addIngredientFirst') : undefined}
           >
-            <span>{getText('useToday')}</span>
+            <span>{t('useToday')}</span>
           </button>
         </div>
       </div>
 
       {ingredients.length === 0 ? (
-        <p className={styles.empty}>{getText('noIngredients')}</p>
+        <p className={styles.empty}>{t('noIngredients')}</p>
       ) : (
         <ul className={styles.list}>
           {ingredients.map((item) => (
@@ -74,21 +75,21 @@ export default function IngredientList({ taomId, onUsed }) {
               <span className={styles.itemText}>
                 {item.nomi} – {item.miqdor} {item.hajm_birlik}
                 <small className={styles.stock}>
-                  {' '}({getText('availableInStorage')}: {item.mavjud} {item.hajm_birlik})
+                  {' '}({t('availableInStorage')}: {item.mavjud} {item.hajm_birlik})
                 </small>
               </span>
               <span className={styles.itemActions}>
                 <button
                   className={styles.editButton}
                   onClick={() => { setSelectedIngredient(item); setOpen(true); }}
-                  aria-label={getText('edit')}
+                  aria-label={t('edit')}
                 >
                   <Pencil size={16} />
                 </button>
                 <button
                   className={styles.deleteButton}
                   onClick={() => handleDelete(item.id)}
-                  aria-label={getText('delete')}
+                  aria-label={t('delete')}
                 >
                   <Trash2 size={16} />
                 </button>

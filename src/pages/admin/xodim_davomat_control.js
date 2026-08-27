@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import url from "../../host/host";
+import { useLang } from '../../i18n/LanguageContext';
 
 export default function XodimOneDayManager() {
+  const { t } = useLang();
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const [loading, setLoading] = useState(false);
   const [xodimlar, setXodimlar] = useState([]);
@@ -62,7 +64,7 @@ export default function XodimOneDayManager() {
       setXodimlar(res.data || []);
     } catch (e) {
       console.error(e);
-      alert("Xodimlarni olishda xatolik!");
+      alert(t('employeesLoadError'));
     }
   };
 
@@ -95,7 +97,7 @@ export default function XodimOneDayManager() {
 
   // EndTime → NULL
   const handleNullEndTime = async () => {
-    if (!latest) return alert("Yozuv topilmadi");
+    if (!latest) return alert(t('recordNotFound'));
     if (!confirm(`Oxirgi yozuv (id=${latest.id}) end_time ni NULL qilinsinmi?`)) return;
     try {
       setLoading(true);
@@ -116,7 +118,7 @@ export default function XodimOneDayManager() {
 
   // Delete
   const handleDelete = async () => {
-    if (!latest) return alert("Yozuv topilmadi");
+    if (!latest) return alert(t('recordNotFound'));
     if (!confirm(`Oxirgi yozuv (id=${latest.id}) o‘chirilsinmi?`)) return;
     try {
       setLoading(true);
@@ -141,7 +143,7 @@ export default function XodimOneDayManager() {
         value={selectedXodim}
         onChange={(e) => setSelectedXodim(e.target.value)}
       >
-        <option value="">-- Xodim tanlang --</option>
+        <option value="">{t('selectEmployeePlaceholder')}</option>
         {xodimlar.map((x) => (
           <option key={x.id} value={x.id}>
             {x.name} (id: {x.id})
@@ -162,7 +164,7 @@ export default function XodimOneDayManager() {
             </div>
           ) : (
             <div style={styles.latestBox}>
-              <span style={styles.info}>Bu xodim uchun yozuv topilmadi</span>
+              <span style={styles.info}>{t('noRecordForEmployee')}</span>
             </div>
           )}
 

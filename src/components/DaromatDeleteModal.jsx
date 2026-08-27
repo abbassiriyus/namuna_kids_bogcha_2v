@@ -5,9 +5,10 @@ import { Save, X, Pencil, Trash2 } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function DaromatDeleteModal({ open, onClose, bolaId, month, onDeleted }) {
+  const { t } = useLang();
   const [items, setItems] = useState([]);
   const [editItem, setEditItem] = useState(null);
   const [editForm, setEditForm] = useState({ naqt: '', karta: '', prichislena: '', naqt_prichislena: '' });
@@ -86,10 +87,10 @@ export default function DaromatDeleteModal({ open, onClose, bolaId, month, onDel
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h3>{getText('incomeRecords')} ({month})</h3>
+        <h3>{t('incomeRecords')} ({month})</h3>
 
         {items.length === 0 ? (
-          <p>{getText('noData')}</p>
+          <p>{t('noData')}</p>
         ) : (
           <ul style={{ maxHeight: '300px', overflowY: 'auto', padding: 0 }}>
             {items.map(item => (
@@ -111,7 +112,7 @@ export default function DaromatDeleteModal({ open, onClose, bolaId, month, onDel
                         <button onClick={handleSaveEdit} style={{ backgroundColor: '#15803d', color: 'white' }}>
                           <Save size={16} /> Saqlash
                         </button>
-                        <button onClick={() => setEditItem(null)}><X size={16} /> Bekor qilish</button>
+                        <button onClick={() => setEditItem(null)}><X size={16} /> {t('cancel')}</button>
                       </div>
                     </div>
                   </>
@@ -132,7 +133,7 @@ export default function DaromatDeleteModal({ open, onClose, bolaId, month, onDel
         )}
 
         <div className={styles.modal__buttons} style={{ marginTop: 20 }}>
-          <button onClick={onClose}>Yopish</button>
+          <button onClick={onClose}>{t('close')}</button>
         </div>
       </div>
     </div>

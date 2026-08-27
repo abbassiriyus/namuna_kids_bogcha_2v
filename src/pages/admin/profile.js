@@ -7,14 +7,16 @@ import { UserCircle, Save, KeyRound, ShieldCheck, CheckCircle2, XCircle } from '
 import LayoutComponent from '../../components/LayoutComponent';
 import styles from '../../styles/Profile.module.css';
 import url from '../../host/host';
+import { useLang } from '../../i18n/LanguageContext';
 
-const TYPE_LABELS = {
-  1: 'Super Admin',
-  2: 'Tarbiyachi',
-  3: "Qo'shimcha Admin",
+const TYPE_LABEL_KEYS = {
+  1: 'roleSuperAdmin',
+  2: 'roleTeacher',
+  3: 'roleExtraAdmin',
 };
 
 export default function Profile() {
+  const { t } = useLang();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [savingInfo, setSavingInfo] = useState(false);
@@ -50,7 +52,7 @@ export default function Profile() {
       })
       .catch((err) => {
         console.error('Profilni yuklashda xatolik:', err);
-        setInfoMessage({ type: 'error', text: "Profil ma'lumotlarini yuklab bo'lmadi" });
+        setInfoMessage({ type: 'error', text: t('profileLoadError') });
       })
       .finally(() => setLoading(false));
   }, []);
@@ -82,10 +84,10 @@ export default function Profile() {
       );
       setAdmin(res.data);
       syncLocalAdmin(res.data);
-      setInfoMessage({ type: 'success', text: "Shaxsiy ma'lumotlar saqlandi" });
+      setInfoMessage({ type: 'success', text: t('profileSaved') });
     } catch (err) {
       console.error('Profilni saqlashda xatolik:', err);
-      setInfoMessage({ type: 'error', text: err.response?.data?.message || 'Saqlashda xatolik yuz berdi' });
+      setInfoMessage({ type: 'error', text: err.response?.data?.message || t('saveError') });
     } finally {
       setSavingInfo(false);
     }
@@ -96,11 +98,11 @@ export default function Profile() {
     setPasswordMessage(null);
 
     if (!passwordForm.password) {
-      setPasswordMessage({ type: 'error', text: 'Yangi parolni kiriting' });
+      setPasswordMessage({ type: 'error', text: t('enterNewPassword') });
       return;
     }
     if (passwordForm.password !== passwordForm.passwordConfirm) {
-      setPasswordMessage({ type: 'error', text: 'Yangi parollar bir xil emas' });
+      setPasswordMessage({ type: 'error', text: t('passwordsDoNotMatch') });
       return;
     }
 
@@ -114,10 +116,10 @@ export default function Profile() {
       setAdmin(res.data);
       syncLocalAdmin(res.data);
       setPasswordForm({ password: '', passwordConfirm: '' });
-      setPasswordMessage({ type: 'success', text: 'Parol muvaffaqiyatli yangilandi' });
+      setPasswordMessage({ type: 'success', text: t('passwordUpdated') });
     } catch (err) {
       console.error('Parolni yangilashda xatolik:', err);
-      setPasswordMessage({ type: 'error', text: err.response?.data?.message || 'Parolni yangilashda xatolik yuz berdi' });
+      setPasswordMessage({ type: 'error', text: err.response?.data?.message || t('passwordUpdateError') });
     } finally {
       setSavingPassword(false);
     }
@@ -128,27 +130,27 @@ export default function Profile() {
       <div className={styles.wrapper}>
         <h1 className={styles.title}>
           <UserCircle size={22} style={{ verticalAlign: 'middle', marginRight: 8 }} />
-          Mening profilim
+          {t('myProfile')}
         </h1>
-        <p className={styles.subtitle}>O&apos;zingizning login, telefon va parolingizni shu yerda yangilang</p>
+        <p className={styles.subtitle}>{t('profileSubtitle')}</p>
 
         {loading ? (
-          <p>Yuklanmoqda...</p>
+          <p>{t('loadingShort')}</p>
         ) : (
           <>
             <div className={styles.card}>
               {admin && (
                 <div className={styles.badgeRow}>
                   <span className={styles.badge}>
-                    <ShieldCheck size={14} /> {TYPE_LABELS[admin.type] || 'Admin'}
+                    <ShieldCheck size={14} /> {TYPE_LABEL_KEYS[admin.type] ? t(TYPE_LABEL_KEYS[admin.type]) : 'Admin'}
                   </span>
                   {admin.is_active ? (
                     <span className={`${styles.badge} ${styles.badgeActive}`}>
-                      <CheckCircle2 size={14} /> Faol
+                      <CheckCircle2 size={14} /> {t('activeBadge')}
                     </span>
                   ) : (
                     <span className={`${styles.badge} ${styles.badgeInactive}`}>
-                      <XCircle size={14} /> Nofaol
+                      <XCircle size={14} /> {t('inactiveBadge')}
                     </span>
                   )}
                 </div>
@@ -162,7 +164,7 @@ export default function Profile() {
 
               <form className={styles.form} onSubmit={handleInfoSubmit}>
                 <div className={styles.field}>
-                  <label>Foydalanuvchi nomi</label>
+                  <label>{t('username')}</label>
                   <input
                     type="text"
                     name="username"
@@ -173,7 +175,7 @@ export default function Profile() {
                 </div>
 
                 <div className={styles.field}>
-                  <label>Telefon raqam</label>
+                  <label>{t('phoneNumber')}</label>
                   <input
                     type="text"
                     name="phone_number"
@@ -184,18 +186,18 @@ export default function Profile() {
                 </div>
 
                 <div className={styles.field}>
-                  <label>Tavsif</label>
+                  <label>{t('descriptionLabel')}</label>
                   <input
                     type="text"
                     name="description"
                     value={form.description}
                     onChange={handleChange}
-                    placeholder="Ixtiyoriy"
+                    placeholder={t('optionalPlaceholder')}
                   />
                 </div>
 
                 <button type="submit" className={styles.saveBtn} disabled={savingInfo}>
-                  <Save size={16} /> {savingInfo ? 'Saqlanmoqda...' : "Ma'lumotlarni yangilash"}
+                  <Save size={16} /> {savingInfo ? t('saving') : t('updateInfoButton')}
                 </button>
               </form>
             </div>
@@ -203,7 +205,7 @@ export default function Profile() {
             <div className={styles.card} style={{ marginTop: 20 }}>
               <h2 className={styles.cardTitle}>
                 <KeyRound size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-                Parolni yangilash
+                {t('updatePasswordTitle')}
               </h2>
 
               {passwordMessage && (
@@ -214,7 +216,7 @@ export default function Profile() {
 
               <form className={styles.form} onSubmit={handlePasswordSubmit}>
                 <div className={styles.field}>
-                  <label>Yangi parol</label>
+                  <label>{t('newPassword')}</label>
                   <input
                     type="password"
                     name="password"
@@ -225,7 +227,7 @@ export default function Profile() {
                 </div>
 
                 <div className={styles.field}>
-                  <label>Yangi parolni tasdiqlash</label>
+                  <label>{t('confirmNewPassword')}</label>
                   <input
                     type="password"
                     name="passwordConfirm"
@@ -236,7 +238,7 @@ export default function Profile() {
                 </div>
 
                 <button type="submit" className={styles.saveBtn} disabled={savingPassword}>
-                  <KeyRound size={16} /> {savingPassword ? 'Yangilanmoqda...' : 'Parolni yangilash'}
+                  <KeyRound size={16} /> {savingPassword ? t('updating') : t('updatePasswordTitle')}
                 </button>
               </form>
             </div>

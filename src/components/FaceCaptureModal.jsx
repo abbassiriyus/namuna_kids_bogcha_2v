@@ -5,12 +5,13 @@ import Webcam from 'react-webcam';
 import axios from 'axios';
 import url from '../host/host';
 import styles from '../styles/FaceCaptureModal.module.css';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 // Har qanday xodim uchun yuz tanish (Face ID) ma'lumotini yozib olish yoki
 // yangilash uchun umumiy modal. Hodimlar sahifasida ham, Davomat sahifasida
 // ham xuddi shu komponent ishlatiladi — yuz olish mantig'i bitta joyda.
 export default function FaceCaptureModal({ employee, onClose, authHeader }) {
+  const { t } = useLang();
   const webcamRef = useRef();
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [capturing, setCapturing] = useState(false);
@@ -49,7 +50,7 @@ export default function FaceCaptureModal({ employee, onClose, authHeader }) {
         .withFaceDescriptor();
 
       if (!detection) {
-        setMessage({ type: 'error', text: 'Yuz topilmadi. Kameraga yaqinroq turing.' });
+        setMessage({ type: 'error', text: t('face.notFound') });
         return;
       }
 
@@ -58,7 +59,7 @@ export default function FaceCaptureModal({ employee, onClose, authHeader }) {
       setMessage({ type: 'success', text: 'Yuz muvaffaqiyatli saqlandi!' });
     } catch (err) {
       console.error('Yuzni saqlashda xatolik:', err);
-      setMessage({ type: 'error', text: 'Xatolik yuz berdi. Qaytadan urinib ko‘ring.' });
+      setMessage({ type: 'error', text: t('face.saveError') });
     } finally {
       setCapturing(false);
     }
@@ -69,11 +70,11 @@ export default function FaceCaptureModal({ employee, onClose, authHeader }) {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
-        <h3>{employee.name} — {getText('face.saveTitle')}</h3>
+        <h3>{employee.name} — {t('face.saveTitle')}</h3>
         <div className={styles.videoBox}>
           <Webcam ref={webcamRef} screenshotFormat="image/jpeg" />
         </div>
-        {!modelsLoaded && <p className={styles.hint}>{getText('face.loading')}</p>}
+        {!modelsLoaded && <p className={styles.hint}>{t('face.loading')}</p>}
         {message && (
           <p className={`${styles.message} ${message.type === 'success' ? styles.messageSuccess : styles.messageError}`}>
             {message.text}
@@ -81,9 +82,9 @@ export default function FaceCaptureModal({ employee, onClose, authHeader }) {
         )}
         <div className={styles.modalButtons}>
           <button onClick={handleCapture} disabled={!modelsLoaded || capturing}>
-            {capturing ? getText('face.saving') : getText('face.saveButton')}
+            {capturing ? t('face.saving') : t('face.saveButton')}
           </button>
-          <button onClick={onClose}>{getText('close')}</button>
+          <button onClick={onClose}>{t('close')}</button>
         </div>
       </div>
     </div>

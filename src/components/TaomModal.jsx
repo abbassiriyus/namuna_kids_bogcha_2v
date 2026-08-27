@@ -5,9 +5,10 @@ import { Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function TaomModal({ open, setOpen, taom, onSaved }) {
+  const { t } = useLang();
   const [nomi, setNomi] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -21,7 +22,7 @@ export default function TaomModal({ open, setOpen, taom, onSaved }) {
 
   const handleSubmit = async () => {
     if (!nomi.trim()) {
-      setError(getText('fillAllFields'));
+      setError(t('fillAllFields'));
       return;
     }
 
@@ -36,7 +37,7 @@ export default function TaomModal({ open, setOpen, taom, onSaved }) {
       setOpen(false);
       onSaved();
     } catch (err) {
-      setError(err.response?.data?.error || getText('saveError'));
+      setError(err.response?.data?.error || t('saveError'));
     } finally {
       setSaving(false);
     }
@@ -47,22 +48,22 @@ export default function TaomModal({ open, setOpen, taom, onSaved }) {
   return (
     <div className={styles.modal}>
       <div className={styles.modal__content}>
-        <h3 className={styles.modal__title}>{isEdit ? getText('editMeal') : getText('createMenu')}</h3>
+        <h3 className={styles.modal__title}>{isEdit ? t('editMeal') : t('createMenu')}</h3>
         <div className={styles.modal__form}>
           <input
             name="nomi"
             value={nomi}
             onChange={(e) => setNomi(e.target.value)}
-            placeholder={getText('mealName')}
+            placeholder={t('mealName')}
             autoFocus
           />
         </div>
         {error && <p style={{ color: '#dc2626', margin: '4px 0' }}>{error}</p>}
         <div className={styles.modal__buttons}>
           <button onClick={handleSubmit} disabled={saving}>
-            <Check size={16} /> {saving ? getText('saving') : getText('save')}
+            <Check size={16} /> {saving ? t('saving') : t('save')}
           </button>
-          <button onClick={() => setOpen(false)}><X size={16} /> {getText('cancel')}</button>
+          <button onClick={() => setOpen(false)}><X size={16} /> {t('cancel')}</button>
         </div>
       </div>
     </div>

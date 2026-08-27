@@ -5,9 +5,10 @@ import { Trash2, X } from "lucide-react";
 import styles from "../styles/BolaModal.module.css";
 import axios from "axios";
 import url from "../host/host";
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function OylikDeleteModal({ open, onClose, xodim, selectedMonth, onSaved }) {
+  const { t } = useLang();
   const [bonus, setBonus] = useState([]);
   const [jarima, setJarima] = useState([]);
   const [kunlik, setKunlik] = useState([]);
@@ -32,7 +33,7 @@ export default function OylikDeleteModal({ open, onClose, xodim, selectedMonth, 
       setOylikType(oylikRes.data.filter(o => o.xodim_id === xodim));
     } catch (err) {
       console.error("Ma'lumotlarni olishda xatolik:", err);
-      alert(getText('loadError'));
+      alert(t('loadError'));
     }
   };
 
@@ -45,7 +46,7 @@ export default function OylikDeleteModal({ open, onClose, xodim, selectedMonth, 
       onSaved();
     } catch (err) {
       console.error(err);
-      alert(getText('deleteError'));
+      alert(t('deleteError'));
     }
   };
 
@@ -58,66 +59,66 @@ export default function OylikDeleteModal({ open, onClose, xodim, selectedMonth, 
   return (
     <div className={styles.modal}>
       <div className={styles.modal__content}>
-        <h3 className={styles.modal__title}>{getText('manageSalary')}: {xodim?.name}</h3>
+        <h3 className={styles.modal__title}>{t('manageSalary')}: {xodim?.name}</h3>
 
         <div className={styles.modal__section}>
-          <strong>{getText('bonusLabel')}:</strong>
+          <strong>{t('bonusLabel')}:</strong>
           {bonus.length > 0 ? (
             bonus.map((b) => (
               <div key={b.id} className={styles.modal__row}>
-                <span>{b.narx} {getText('currencySom')}</span>
-                <button onClick={() => handleDelete("bonus", b.id)} title={getText('delete')}><Trash2 size={16} /></button>
+                <span>{b.narx} {t('currencySom')}</span>
+                <button onClick={() => handleDelete("bonus", b.id)} title={t('delete')}><Trash2 size={16} /></button>
               </div>
             ))
           ) : (
-            <p>{getText('noBonus')}</p>
+            <p>{t('noBonus')}</p>
           )}
         </div>
 
         <div className={styles.modal__section}>
-          <strong>{getText('penaltyTitle')}:</strong>
+          <strong>{t('penaltyTitle')}:</strong>
           {jarima.length > 0 ? (
             jarima.map((j) => (
               <div key={j.id} className={styles.modal__row}>
-                <span>{j.narx} {getText('currencySom')}</span>
-                <button onClick={() => handleDelete("jarima", j.id)} title={getText('delete')}><Trash2 size={16} /></button>
+                <span>{j.narx} {t('currencySom')}</span>
+                <button onClick={() => handleDelete("jarima", j.id)} title={t('delete')}><Trash2 size={16} /></button>
               </div>
             ))
           ) : (
-            <p>{getText('noPenalty')}</p>
+            <p>{t('noPenalty')}</p>
           )}
         </div>
 
         <div className={styles.modal__section}>
-          <strong>{getText('dailyTitle')}:</strong>
+          <strong>{t('dailyTitle')}:</strong>
           {kunlik.length > 0 ? (
             kunlik.map((k) => (
               <div key={k.id} className={styles.modal__row}>
-                <span>{k.narx} {getText('currencySom')}</span>
-                <button onClick={() => handleDelete("kunlik", k.id)} title={getText('delete')}><Trash2 size={16} /></button>
+                <span>{k.narx} {t('currencySom')}</span>
+                <button onClick={() => handleDelete("kunlik", k.id)} title={t('delete')}><Trash2 size={16} /></button>
               </div>
             ))
           ) : (
-            <p>{getText('noDaily')}</p>
+            <p>{t('noDaily')}</p>
           )}
         </div>
 
         <div className={styles.modal__section}>
-          <strong>{getText('paidSalaries')}:</strong>
+          <strong>{t('paidSalaries')}:</strong>
           {oylikType.length > 0 ? (
             oylikType.map((o) => (
               <div key={o.id} className={styles.modal__row}>
-                <span>{o.narx} {getText('currencySom')}</span>
-                <button onClick={() => handleDelete("oylik_type", o.id)} title={getText('delete')}><Trash2 size={16} /></button>
+                <span>{o.narx} {t('currencySom')}</span>
+                <button onClick={() => handleDelete("oylik_type", o.id)} title={t('delete')}><Trash2 size={16} /></button>
               </div>
             ))
           ) : (
-            <p>{getText('noPayment')}</p>
+            <p>{t('noPayment')}</p>
           )}
         </div>
 
         <div className={styles.modal__buttons}>
-          <button onClick={onClose}><X size={16} /> {getText('close')}</button>
+          <button onClick={onClose}><X size={16} /> {t('close')}</button>
         </div>
       </div>
     </div>

@@ -5,8 +5,10 @@ import url from '../host/host';
 import { saveAs } from 'file-saver';
 import styles from '../styles/umumiySumma.module.css';
 import { exportToExcel } from '../utils/exportExcel';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function UmumiySumma() {
+  const { t } = useLang();
   const [year, setYear] = useState('2025');
   const [month, setMonth] = useState('6');
   const [data, setData] = useState(null);
@@ -52,7 +54,7 @@ export default function UmumiySumma() {
     // Tokenni localStorage dan olish
     const token = localStorage.getItem('token');
     if (!token) {
-      setError('Autentifikatsiya tokeni topilmadi');
+      setError(t('authTokenNotFound'));
       setLoading(false);
       return;
     }
@@ -164,7 +166,7 @@ export default function UmumiySumma() {
       let qoshimchaRows = await qoshimchaRes.json();
       console.log('Qoshimcha Rows (before filter):', qoshimchaRows); // Debugging
       if (!qoshimchaRes.ok) {
-        throw new Error(qoshimchaRows.error || 'Qo‘shimcha xarajat ma’lumotlarini olishda xato');
+        throw new Error(qoshimchaRows.error || t('extraExpensesLoadError'));
       }
 
       // Frontendda sana bo‘yicha filtr qilish
@@ -192,7 +194,7 @@ export default function UmumiySumma() {
       let oylikRows = await oylikRes.json();
       console.log('Oylik Rows (before filter):', oylikRows); // Debugging
       if (!oylikRes.ok) {
-        throw new Error(oylikRows.error || 'Xodimlar oyligi ma’lumotlarini olishda xato');
+        throw new Error(oylikRows.error || t('salariesLoadError'));
       }
 
       // Frontendda sana bo‘yicha filtr qilish
@@ -259,7 +261,7 @@ export default function UmumiySumma() {
       ShadingType,
     } = await import('docx');
 
-    const headers = ['Kategoriya', 'Naqt (so‘m)', 'Karta (so‘m)', 'Bank (so‘m)', 'Naqt bank (so‘m)', 'Jami (so‘m)'];
+    const headers = ['Kategoriya', 'Naqt (so‘m)', 'Karta (so‘m)', 'Bank (so‘m)', 'Naqt bank (so‘m)', t('colTotalSom')];
     const columnWidths = [2000, 1500, 1500, 1500, 1500, 1500];
 
     const createCell = (text, width, align = AlignmentType.CENTER, bold = false) =>
@@ -311,7 +313,7 @@ export default function UmumiySumma() {
         ],
       },
       {
-        category: 'Qo‘shimcha xarajatlar',
+        category: t('extraExpenses'),
         values: [
           data.qoshimcha?.total_naqt || 0,
           data.qoshimcha?.total_karta || 0,
@@ -321,7 +323,7 @@ export default function UmumiySumma() {
         ],
       },
       {
-        category: 'Xodimlar oyligi',
+        category: t('employeeSalaries'),
         values: [
           data.oylik?.total_naqt || 0,
           data.oylik?.total_karta || 0,
@@ -386,7 +388,7 @@ export default function UmumiySumma() {
       .then((blob) => saveAs(blob, `umumiy_hisobot_${year}_${month.padStart(2, '0')}.docx`))
       .catch((err) => {
         console.error('Word eksportida xatolik:', err);
-        setError('Word hujjatini eksport qilishda xatolik yuz berdi: ' + err.message);
+        setError(t('wordExportError') + ': ' + err.message);
       });
   };
 
@@ -397,7 +399,7 @@ export default function UmumiySumma() {
       return;
     }
 
-    const headers = ['Kategoriya', 'Naqt (so‘m)', 'Karta (so‘m)', 'Bank (so‘m)', 'Naqt bank (so‘m)', 'Jami (so‘m)'];
+    const headers = ['Kategoriya', 'Naqt (so‘m)', 'Karta (so‘m)', 'Bank (so‘m)', 'Naqt bank (so‘m)', t('colTotalSom')];
 
     const categories = [
       {
@@ -431,7 +433,7 @@ export default function UmumiySumma() {
         ],
       },
       {
-        category: 'Qo‘shimcha xarajatlar',
+        category: t('extraExpenses'),
         values: [
           data.qoshimcha?.total_naqt || 0,
           data.qoshimcha?.total_karta || 0,
@@ -441,7 +443,7 @@ export default function UmumiySumma() {
         ],
       },
       {
-        category: 'Xodimlar oyligi',
+        category: t('employeeSalaries'),
         values: [
           data.oylik?.total_naqt || 0,
           data.oylik?.total_karta || 0,
@@ -481,13 +483,13 @@ export default function UmumiySumma() {
       await exportToExcel({ headers, rows, filename: `umumiy_hisobot_${year}_${month.padStart(2, '0')}` });
     } catch (err) {
       console.error('Excel eksportida xatolik:', err);
-      setError('Excel faylini eksport qilishda xatolik yuz berdi: ' + err.message);
+      setError(t('exportExcelError') + ': ' + err.message);
     }
   };
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Umumiy Daromad va Chiqim</h1>
+      <h1 className={styles.title}>{t('totalIncomeExpense')}</h1>
       <div className={styles.form}>
         <div className={styles.formGroup}>
           <label className={styles.label}>Yil:</label>
@@ -520,7 +522,7 @@ export default function UmumiySumma() {
           disabled={loading}
         >
           {loading && <span className={styles.loader}></span>}
-          {loading ? 'Yuklanmoqda...' : 'Hisoblash'}
+          {loading ? t('loadingShort') : t('calculate')}
         </button>
         <button
           onClick={handleExportToWord}

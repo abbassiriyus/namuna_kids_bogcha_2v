@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import styles from '../styles/Login.module.css';
 import url from '../host/host';
-import { getText } from '../i18n/translations';
 import { useLang } from '../i18n/LanguageContext';
 import {
   Home, Users, Calendar, DollarSign, FileText, Briefcase,
@@ -48,7 +47,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false); // login muvaffaqiyatli, sahifa almashmoqda
-  const { lang, toggleLang: toggleLanguage } = useLang();
+  const { t, toggleLang: toggleLanguage } = useLang();
   const router = useRouter();
 
   const handleLogin = async (e) => {
@@ -58,7 +57,7 @@ export default function Login() {
     const trimmedPassword = password.trim();
 
     if (!trimmedUsername || !trimmedPassword) {
-      setError(getText('loginErrorEmpty', lang));
+      setError(t('loginErrorEmpty'));
       return;
     }
 
@@ -75,7 +74,7 @@ export default function Login() {
       const type = Number(admin?.type ?? 0);
 
       if (!token) {
-        setError(getText('loginErrorWrong', lang));
+        setError(t('loginErrorWrong'));
         return;
       }
 
@@ -118,7 +117,7 @@ export default function Login() {
         return;
       }
 
-      setError(getText('loginErrorNoAccess', lang));
+      setError(t('loginErrorNoAccess'));
       setIsLoading(false);
     } catch (err) {
       const codeKeys = {
@@ -127,7 +126,7 @@ export default function Login() {
         wrongPassword: 'loginErrorWrongPassword',
       };
       const key = codeKeys[err?.response?.data?.code];
-      setError(key ? getText(key, lang) : getText('loginErrorServer', lang));
+      setError(key ? t(key) : t('loginErrorServer'));
       setIsLoading(false);
     }
   };
@@ -141,12 +140,12 @@ export default function Login() {
       <section className={styles.authShell}>
         <div className={styles.brandPanel}>
           <div className={styles.logoBadge}>B</div>
-          <span className={styles.kicker}>{getText('appTitle', lang)}</span>
-          <h1>{getText('loginHeroTitle', lang)}</h1>
-          <p>{getText('loginHeroText', lang)}</p>
+          <span className={styles.kicker}>{t('appTitle')}</span>
+          <h1>{t('loginHeroTitle')}</h1>
+          <p>{t('loginHeroText')}</p>
 
           <ul className={styles.features}>
-            {getText('loginFeatures', lang).map((item) => (
+            {t('loginFeatures').map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
@@ -156,11 +155,11 @@ export default function Login() {
           <form onSubmit={handleLogin} className={styles.loginBox}>
             <div className={styles.headerRow}>
               <div className={styles.titleBlock}>
-                <span className={styles.label}>{getText('loginSubtitle', lang)}</span>
-                <h2>{getText('loginTitle', lang)}</h2>
+                <span className={styles.label}>{t('loginSubtitle')}</span>
+                <h2>{t('loginTitle')}</h2>
               </div>
               <button type="button" className={styles.langButton} onClick={toggleLanguage}>
-                {getText('toggleLang', lang)}
+                {t('toggleLang')}
               </button>
             </div>
 
@@ -171,10 +170,10 @@ export default function Login() {
             )}
 
             <label className={styles.field}>
-              <span>{getText('username', lang)}</span>
+              <span>{t('username')}</span>
               <input
                 type="text"
-                placeholder={getText('usernamePlaceholder', lang)}
+                placeholder={t('usernamePlaceholder')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={isLoading}
@@ -183,10 +182,10 @@ export default function Login() {
             </label>
 
             <label className={styles.field}>
-              <span>{getText('password', lang)}</span>
+              <span>{t('password')}</span>
               <input
                 type="password"
-                placeholder={getText('passwordPlaceholder', lang)}
+                placeholder={t('passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
@@ -198,10 +197,10 @@ export default function Login() {
               {isLoading ? (
                 <span className={styles.btnLoading}>
                   <Loader2 size={16} className={styles.spin} />
-                  {redirecting ? getText('loginRedirecting', lang) : getText('loggingIn', lang)}
+                  {redirecting ? t('loginRedirecting') : t('loggingIn')}
                 </span>
               ) : (
-                getText('loginButton', lang)
+                t('loginButton')
               )}
             </button>
           </form>

@@ -16,6 +16,8 @@ import { getDavomatMood, formatMinutes } from '../../utils/davomatMood';
 
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import Loader from '../../components/Loader';
+import { useLang } from '../../i18n/LanguageContext';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault('Asia/Tashkent');
@@ -23,6 +25,7 @@ dayjs.tz.setDefault('Asia/Tashkent');
 Modal.setAppElement('#__next');
 
 export default function XodimDavomat() {
+  const { t } = useLang();
   const router = useRouter();
   const [xodimlar, setXodimlar] = useState([]);
   const [ishKunlari, setIshKunlari] = useState([]);
@@ -72,7 +75,8 @@ export default function XodimDavomat() {
       return res.data.length > 0 ? res.data[0] : null;
     } catch (err) {
       console.error('Davomatni olishda xatolik:', err);
-      setErrorMessage("Davomat ma'lumotlarini olishda xatolik yuz berdi!");
+      const detail = err.response?.data?.message || err.response?.data?.error || err.message;
+      setErrorMessage(`${t('attendanceDataError')}: ${detail}`);
       return null;
     }
   };
@@ -83,7 +87,7 @@ export default function XodimDavomat() {
     const currentTime = new Date();
     currentTime.setSeconds(0, 0);
 
-    let arrivalLateness = 'Vaqtida';
+    let arrivalLateness = t('onTime');
     if (startTime_plan) {
       try {
         const [planHours, planMinutes] = startTime_plan.split(':').map(Number);
@@ -97,17 +101,17 @@ export default function XodimDavomat() {
         const delayMinutes = (startDate - expectedStartTime) / (1000 * 60);
 
         if (delayMinutes <= 0) {
-          arrivalLateness = 'Vaqtida';
+          arrivalLateness = t('onTime');
         } else if (delayMinutes <= 10) {
-          arrivalLateness = `${Math.round(delayMinutes)} min kech`;
+          arrivalLateness = t('minLate').replace('{m}', Math.round(delayMinutes));
         } else if (delayMinutes <= 60) {
-          arrivalLateness = `${Math.round(delayMinutes)} min kech`;
+          arrivalLateness = t('minLate').replace('{m}', Math.round(delayMinutes));
         } else {
-          arrivalLateness = `${Math.floor(delayMinutes / 60)} soat ${Math.round(delayMinutes % 60)} min kech`;
+          arrivalLateness = t('hourMinLate').replace('{h}', Math.floor(delayMinutes / 60)).replace('{m}', Math.round(delayMinutes % 60));
         }
       } catch (err) {
         console.error("Kechikish hisoblashda xato:", err);
-        arrivalLateness = 'Xato';
+        arrivalLateness = t('errorTitle');
       }
     }
 
@@ -126,16 +130,16 @@ export default function XodimDavomat() {
         if (earlyMinutes < 0) {
           const absMinutes = Math.abs(Math.round(earlyMinutes));
           if (absMinutes >= 60) {
-            departureLateness = `, -${Math.floor(absMinutes / 60)} soat ${absMinutes % 60} min erta`;
+            departureLateness = ', -' + t('hourMinEarly').replace('{h}', Math.floor(absMinutes / 60)).replace('{m}', absMinutes % 60);
           } else {
-            departureLateness = `, -${absMinutes} min erta`;
+            departureLateness = ', -' + t('minEarly').replace('{m}', absMinutes);
           }
         } else {
-          departureLateness = ', Vaqtida';
+          departureLateness = ', ' + t('onTime');
         }
       } catch (err) {
         console.error("Erta ketish hisoblashda xato:", err);
-        departureLateness = ', Xato';
+        departureLateness = ', ' + t('errorTitle');
       }
     }
 
@@ -181,7 +185,7 @@ export default function XodimDavomat() {
       }
 
       if (!permissionsData.view_employees && userType !== '1') {
-        setErrorMessage("Sizda xodimlar davomatini ko'rish uchun ruxsat yo'q!");
+        setErrorMessage(t('noEmployeeAttendancePermission'));
         setLoading(false);
         return;
       }
@@ -281,7 +285,7 @@ export default function XodimDavomat() {
         }
         router.push('/login');
       } else {
-        setErrorMessage("Ma'lumotlarni yuklashda xatolik yuz berdi!");
+        setErrorMessage(t('loadError'));
       }
     } finally {
       setLoading(false);
@@ -335,13 +339,15 @@ export default function XodimDavomat() {
   };
 
   const calculateWorkedHours = (startTime, endTime, isToday) => {
-    if (!startTime) return 'Kelmagan';
+    if (!startTime) return t('notCome');
     const start = dayjs(`2000-01-01 ${startTime}`);
     const end = endTime ? dayjs(`2000-01-01 ${endTime}`) : (isToday ? dayjs(`2000-01-01`).set('hour', dayjs().hour()).set('minute', dayjs().minute()) : start);
     const minutes = end.diff(start, 'minute');
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    return endTime ? `${hours} soat ${remainingMinutes} minut` : `${hours} soat ${remainingMinutes} minut (davom etmoqda)`;
+    return endTime
+      ? t('hourMinWorked').replace('{h}', hours).replace('{m}', remainingMinutes)
+      : t('hourMinWorkedOngoing').replace('{h}', hours).replace('{m}', remainingMinutes);
   };
 
   useEffect(() => {
@@ -363,7 +369,7 @@ export default function XodimDavomat() {
       setDavomatMode(res.data.mode);
     } catch (err) {
       console.error('Davomat rejimini o‘zgartirishda xatolik:', err);
-      setErrorMessage("Davomat rejimini o'zgartirishda xatolik yuz berdi!");
+      setErrorMessage(t('attendanceModeError'));
     } finally {
       setModeSaving(false);
     }
@@ -373,7 +379,7 @@ export default function XodimDavomat() {
     const expectedStart = xodim.start_time;
     const expectedEnd = xodim.end_time;
     const actualStart = att?.start_time || vaqtInfo?.kelgan || '-';
-    const actualEnd = att?.end_time || vaqtInfo?.ketgan || (isToday ? 'Hali ketmagan' : '-');
+    const actualEnd = att?.end_time || vaqtInfo?.ketgan || (isToday ? t('notLeftYet') : '-');
     const { lateness } = getBackgroundColorAndLateness(actualStart, actualEnd, expectedStart, expectedEnd);
     const displayDate = xodim.ish_tur === 1 ? dayjs(kun.original_sana).tz('Asia/Tashkent').format('DD-MM-YYYY') : dayjs(kun.work_day).format('DD-MM-YYYY');
 
@@ -411,7 +417,7 @@ export default function XodimDavomat() {
     }
 
     if (!todayWorkdayId) {
-      setErrorMessage('Bugungi ish kuni topilmadi!');
+      setErrorMessage(t('todayWorkdayNotFound'));
       return;
     }
 
@@ -469,7 +475,8 @@ export default function XodimDavomat() {
       await fetchData();
     } catch (err) {
       console.error('Vaqt yuborishda xatolik:', err);
-      setErrorMessage('Vaqt yuborishda xatolik yuz berdi!');
+      const detail = err.response?.data?.message || err.response?.data?.error || err.message;
+      setErrorMessage(`${t('sendTimeError')}: ${detail}`);
     } finally {
       setLoadingStates(prev => ({ ...prev, [`${type}_${xodimId}`]: false }));
     }
@@ -479,11 +486,11 @@ export default function XodimDavomat() {
     console.log("sss");
 
     if (!permissions.view_employees) {
-      setErrorMessage("Sizda ma'lumotlarni eksport qilish uchun ruxsat yo'q!");
+      setErrorMessage(t('noExportPermission'));
       return;
     }
     if (!xodimlar.length) {
-      setErrorMessage("Eksport qilish uchun ma'lumot yo'q!");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -511,21 +518,21 @@ export default function XodimDavomat() {
       });
 
     const headers = [
-      'Xodim',
-      'Ish turi',
+      t('colEmployee'),
+      t('colWorkType'),
       ...uniqueDays.map(day => dayjs(day).format('DD-MM')),
-      'Jami ish kunlari',
-      'Kelgan kunlari',
-      'Kelmagan kunlari',
-      'Oy plani (soat)',
-      'Bajargani (soat)',
+      t('colTotalWorkdays'),
+      t('colAttendedDays'),
+      t('colMissedDays'),
+      t('colMonthPlanHours'),
+      t('colFulfilledHours'),
     ];
     const headerRow = new TableRow({
       children: headers.map((text) => createCell(text)),
     });
 
     const rows = xodimlar.map((xodim) => {
-      const cells = [createCell(xodim.name), createCell(xodim.ish_tur === 1 ? 'Oddiy' : 'Maxsus')];
+      const cells = [createCell(xodim.name), createCell(xodim.ish_tur === 1 ? t('workTypeNormal') : t('workTypeSpecial'))];
       uniqueDays.forEach((day) => {
         const kunKey = day;
         const kunDavomat = ishKunlari2[xodim.id]?.find(k => (k.sana || k.work_day) === kunKey);
@@ -556,7 +563,7 @@ export default function XodimDavomat() {
         {
           children: [
             new Paragraph({
-              text: 'Xodimlar Davomat Hisoboti',
+              text: t('employeeAttendanceReport'),
               heading: 'Heading1',
               alignment: AlignmentType.CENTER,
             }),
@@ -577,7 +584,7 @@ export default function XodimDavomat() {
 
   const handleExportToExcel = async () => {
     if (!permissions.view_employees) {
-      setErrorMessage("Sizda ma'lumotlarni eksport qilish uchun ruxsat yo'q!");
+      setErrorMessage(t('noExportPermission'));
       return;
     }
     if (!xodimlar.length) {
@@ -586,18 +593,18 @@ export default function XodimDavomat() {
     }
 
     const headers = [
-      'Xodim',
-      'Ish turi',
+      t('colEmployee'),
+      t('colWorkType'),
       ...uniqueDays.map(day => dayjs(day).format('DD-MM')),
-      'Jami ish kunlari',
-      'Kelgan kunlari',
-      'Kelmagan kunlari',
-      'Oy plani (soat)',
-      'Bajargani (soat)',
+      t('colTotalWorkdays'),
+      t('colAttendedDays'),
+      t('colMissedDays'),
+      t('colMonthPlanHours'),
+      t('colFulfilledHours'),
     ];
 
     const rows = xodimlar.map((xodim) => {
-      const row = [xodim.name, xodim.ish_tur === 1 ? 'Oddiy' : 'Maxsus'];
+      const row = [xodim.name, xodim.ish_tur === 1 ? t('workTypeNormal') : t('workTypeSpecial')];
       uniqueDays.forEach((day) => {
         const kunKey = day;
         const kunDavomat = ishKunlari2[xodim.id]?.find(k => (k.sana || k.work_day) === kunKey);
@@ -628,7 +635,7 @@ export default function XodimDavomat() {
 
   const handleExportTomorrowToWord = async () => {
     if (!permissions.view_employees) {
-      setErrorMessage("Sizda ma'lumotlarni eksport qilish uchun ruxsat yo'q!");
+      setErrorMessage(t('noExportPermission'));
       return;
     }
     if (!xodimlar.length) {
@@ -664,7 +671,7 @@ export default function XodimDavomat() {
           .filter(k => k.sana === tomorrow);
       } catch (err) {
         console.error('bola_kun_all so‘rovida xato:', err);
-        setErrorMessage("Ish kunlari ma'lumotlarini olishda xatolik!");
+        setErrorMessage(t('workdayDataError'));
         throw err;
       }
 
@@ -715,7 +722,7 @@ export default function XodimDavomat() {
       }
 
       if (!tomorrowBolaKuni.length && !tomorrowMaxsusKunlar.length) {
-        setErrorMessage("Ertangi kun uchun ish kuni ma'lumotlari yo'q!");
+        setErrorMessage(t('tomorrowNoWorkdayData'));
         setLoading(false);
         return;
       }
@@ -731,13 +738,13 @@ export default function XodimDavomat() {
           ],
         });
 
-      const headers = ['Xodim', 'Ish turi', `Ertangi kun (${dayjs(tomorrow).tz('Asia/Tashkent').format('DD-MM')})`];
+      const headers = [t('colEmployee'), t('colWorkType'), t('colTomorrow').replace('{date}', dayjs(tomorrow).tz('Asia/Tashkent').format('DD-MM'))];
       const headerRow = new TableRow({
         children: headers.map((text) => createCell(text)),
       });
 
       const rows = xodimlar.map((xodim) => {
-        const cells = [createCell(xodim.name), createCell(xodim.ish_tur === 1 ? 'Oddiy' : 'Maxsus')];
+        const cells = [createCell(xodim.name), createCell(xodim.ish_tur === 1 ? t('workTypeNormal') : t('workTypeSpecial'))];
         const att = tomorrowAttendance[xodim.id];
         let cellText = '';
         if (tomorrowKunMap[xodim.id]?.length > 0) {
@@ -756,7 +763,7 @@ export default function XodimDavomat() {
           {
             children: [
               new Paragraph({
-                text: `Xodimlar Davomat Hisoboti (Ertangi kun: ${dayjs(tomorrow).tz('Asia/Tashkent').format('DD-MM-YYYY')})`,
+                text: t('attendanceReportTomorrow').replace('{date}', dayjs(tomorrow).tz('Asia/Tashkent').format('DD-MM-YYYY')),
                 heading: 'Heading1',
                 alignment: AlignmentType.CENTER,
               }),
@@ -774,7 +781,7 @@ export default function XodimDavomat() {
         saveAs(blob, `davomat_${tomorrow}.docx`);
       }).catch(err => {
         console.error('Docx faylini yaratishda xato:', err);
-        setErrorMessage("Docx faylini yaratishda xatolik yuz berdi!");
+        setErrorMessage(t('docxCreateError'));
       });
     } catch (err) {
       console.error('Ertangi kun ma\'lumotlarini eksport qilishda xato:', err);
@@ -786,7 +793,7 @@ export default function XodimDavomat() {
 
   const handleExportTomorrowToExcel = async () => {
     if (!permissions.view_employees) {
-      setErrorMessage("Sizda ma'lumotlarni eksport qilish uchun ruxsat yo'q!");
+      setErrorMessage(t('noExportPermission'));
       return;
     }
     if (!xodimlar.length) {
@@ -866,7 +873,7 @@ export default function XodimDavomat() {
         return;
       }
 
-      const headers = ['Xodim', 'Ish turi', `Ertangi kun (${dayjs(tomorrow).tz('Asia/Tashkent').format('DD-MM')})`];
+      const headers = [t('colEmployee'), t('colWorkType'), t('colTomorrow').replace('{date}', dayjs(tomorrow).tz('Asia/Tashkent').format('DD-MM'))];
 
       const rows = xodimlar.map((xodim) => {
         const att = tomorrowAttendance[xodim.id];
@@ -878,7 +885,7 @@ export default function XodimDavomat() {
             cellText = 'N/B';
           }
         }
-        return [xodim.name, xodim.ish_tur === 1 ? 'Oddiy' : 'Maxsus', cellText];
+        return [xodim.name, xodim.ish_tur === 1 ? t('workTypeNormal') : t('workTypeSpecial'), cellText];
       });
 
       await exportToExcel({ headers, rows, filename: `davomat_${tomorrow}` });
@@ -905,32 +912,32 @@ export default function XodimDavomat() {
       {userType === '1' || permissions.view_employees ? (
         <>
           <div className={styles.wrapper}>
-            <h1 className={styles.title}>Xodimlar Davomat</h1>
+            <h1 className={styles.title}>{t('employeeAttendanceTitle')}</h1>
 
             <div className={styles.statGrid}>
               <div className={`${styles.statCard} ${styles.statBlue}`}>
-                <span className={styles.statLabel}>Jami xodimlar</span>
+                <span className={styles.statLabel}>{t('totalEmployeesLabel')}</span>
                 <span className={styles.statValue}>{xodimlar.length}</span>
               </div>
               <div className={`${styles.statCard} ${styles.statGreen}`}>
-                <span className={styles.statLabel}>Bugun kelgan</span>
+                <span className={styles.statLabel}>{t('presentToday')}</span>
                 <span className={styles.statValue}>{todayKelgan}</span>
               </div>
               <div className={`${styles.statCard} ${styles.statRed}`}>
-                <span className={styles.statLabel}>Bugun kelmagan</span>
+                <span className={styles.statLabel}>{t('absentToday')}</span>
                 <span className={styles.statValue}>{todayKelmagan}</span>
               </div>
               <div className={`${styles.statCard} ${styles.statPurple}`}>
-                <span className={styles.statLabel}>O&apos;rtacha bajarilish</span>
+                <span className={styles.statLabel}>{t('avgFulfilment')}</span>
                 <span className={styles.statValue}>{avgFulfilled}%</span>
               </div>
             </div>
 
             <div className={styles.modeCard}>
               <div className={styles.modeInfo}>
-                <span className={styles.modeLabel}>Davomat rejimi ({`/xodimdavomat`}):</span>
+                <span className={styles.modeLabel}>{t('attendanceModeLabel')} ({`/xodimdavomat`}):</span>
                 <span className={styles.modeHint}>
-                  Xodimlar ishga kelish-ketishni qanday belgilashi (faqat super admin o&apos;zgartira oladi)
+                  {t('attendanceModeHint')}
                 </span>
               </div>
               <div className={styles.modeSwitch}>
@@ -940,7 +947,7 @@ export default function XodimDavomat() {
                   onClick={() => changeDavomatMode('button')}
                   disabled={userType !== '1' || modeSaving}
                 >
-                  <MousePointerClick size={15} /> Oddiy tugmalar
+                  <MousePointerClick size={15} /> {t('simpleButtons')}
                 </button>
                 <button
                   type="button"
@@ -958,7 +965,7 @@ export default function XodimDavomat() {
 
             <div className={styles.controls}>
               <label htmlFor="monthSelect" className={styles.label}>
-                Oyni tanlang:
+                {t('selectMonth')}:
               </label>
               <input
                 type="month"
@@ -975,21 +982,21 @@ export default function XodimDavomat() {
                   className={`${styles.viewBtn} ${viewMode === 'simple' ? styles.viewBtnActive : ''}`}
                   onClick={() => setViewMode('simple')}
                 >
-                  Oddiy ko&apos;rinish
+                  {t('simpleView')}
                 </button>
                 <button
                   type="button"
                   className={`${styles.viewBtn} ${viewMode === 'detailed' ? styles.viewBtnActive : ''}`}
                   onClick={() => setViewMode('detailed')}
                 >
-                  Kunlik jadval
+                  {t('dailyTable')}
                 </button>
                 <button
                   type="button"
                   className={`${styles.viewBtn} ${viewMode === 'bugun' ? styles.viewBtnActive : ''}`}
                   onClick={() => setViewMode('bugun')}
                 >
-                  Bugungi davomat
+                  {t('todayAttendanceView')}
                 </button>
               </div>
 
@@ -998,7 +1005,7 @@ export default function XodimDavomat() {
                 onClick={()=>handleExportToWord()}
                 disabled={loading || !permissions.view_employees}
               >
-                <FileText size={16} /> Export (Oylik)
+                <FileText size={16} /> {t('exportMonthly')}
               </button>
 
               <button
@@ -1006,7 +1013,7 @@ export default function XodimDavomat() {
                 onClick={()=>handleExportToExcel()}
                 disabled={loading || !permissions.view_employees}
               >
-                <FileSpreadsheet size={16} /> Excel (Oylik)
+                <FileSpreadsheet size={16} /> {t('excelMonthly')}
               </button>
 
               <button
@@ -1014,25 +1021,25 @@ export default function XodimDavomat() {
                 onClick={()=>handleExportTomorrowToExcel()}
                 disabled={loading || !permissions.view_employees}
               >
-                <FileSpreadsheet size={16} /> Excel (Ertangi kun)
+                <FileSpreadsheet size={16} /> {t('excelTomorrow')}
               </button>
             </div>
 
             {loading ? (
-              <p className={styles.loading}>Yuklanmoqda...</p>
+              <Loader />
             ) : viewMode === 'bugun' ? (
               <div className={styles.tableContainer}>
                 <table className={styles.table}>
                   <thead className={styles.table__head}>
                     <tr>
-                      <th className={`${styles.table__cell} ${styles.sticky}`}>Ism</th>
-                      <th className={styles.table__cell}>Kayfiyat</th>
-                      <th className={styles.table__cell}>Reja (kelish–ketish)</th>
-                      <th className={styles.table__cell}>Kelgan</th>
-                      <th className={styles.table__cell}>Ketgan</th>
-                      <th className={styles.table__cell}>Kechikkan</th>
-                      <th className={styles.table__cell}>Erta ketgan</th>
-                      <th className={styles.table__cell}>Holat</th>
+                      <th className={`${styles.table__cell} ${styles.sticky}`}>{t('colName')}</th>
+                      <th className={styles.table__cell}>{t('colMood')}</th>
+                      <th className={styles.table__cell}>{t('colPlanStartEnd')}</th>
+                      <th className={styles.table__cell}>{t('colAttended')}</th>
+                      <th className={styles.table__cell}>{t('colLeft')}</th>
+                      <th className={styles.table__cell}>{t('colLate')}</th>
+                      <th className={styles.table__cell}>{t('colLeftEarly')}</th>
+                      <th className={styles.table__cell}>{t('colStatus')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1056,7 +1063,7 @@ export default function XodimDavomat() {
                           </td>
                           <td className={styles.table__cell}>{info.kelgan ? info.kelgan.slice(0, 5) : '-'}</td>
                           <td className={styles.table__cell}>
-                            {info.ketgan ? info.ketgan.slice(0, 5) : (info.kelgan ? 'Ishda' : '-')}
+                            {info.ketgan ? info.ketgan.slice(0, 5) : (info.kelgan ? t('atWork') : '-')}
                           </td>
                           <td className={styles.table__cell}>{formatMinutes(mood.kechikish)}</td>
                           <td className={styles.table__cell}>{formatMinutes(mood.ertaKetish)}</td>
@@ -1074,13 +1081,13 @@ export default function XodimDavomat() {
                 <table className={styles.table}>
                   <thead className={styles.table__head}>
                     <tr>
-                      <th className={`${styles.table__cell} ${styles.sticky}`}>Ism</th>
-                      <th className={styles.table__cell}>Ish turi</th>
-                      <th className={styles.table__cell}>Bugungi holat</th>
-                      <th className={styles.table__cell}>Kelgan kunlari</th>
-                      <th className={styles.table__cell}>Kelmagan kunlari</th>
-                      <th className={styles.table__cell}>Oy plani (soat)</th>
-                      <th className={styles.table__cell}>Bajargani (soat)</th>
+                      <th className={`${styles.table__cell} ${styles.sticky}`}>{t('colName')}</th>
+                      <th className={styles.table__cell}>{t('colWorkType')}</th>
+                      <th className={styles.table__cell}>{t('colTodayStatus')}</th>
+                      <th className={styles.table__cell}>{t('colAttendedDays')}</th>
+                      <th className={styles.table__cell}>{t('colMissedDays')}</th>
+                      <th className={styles.table__cell}>{t('colMonthPlanHours')}</th>
+                      <th className={styles.table__cell}>{t('colFulfilledHours')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1090,7 +1097,7 @@ export default function XodimDavomat() {
                       return (
                         <tr key={xodim.id}>
                           <td className={`${styles.table__cell} ${styles.sticky}`}>{xodim.name}</td>
-                          <td className={styles.table__cell}>{xodim.ish_tur === 1 ? 'Oddiy' : 'Maxsus'}</td>
+                          <td className={styles.table__cell}>{xodim.ish_tur === 1 ? t('workTypeNormal') : t('workTypeSpecial')}</td>
                           <td className={styles.table__cell}>
                             {todayInfo?.kelgan ? (
                               <div className={styles.actions}>
@@ -1104,7 +1111,7 @@ export default function XodimDavomat() {
                                     onClick={() => sendTime(xodim.id, 'ketgan')}
                                     disabled={loading || !permissions.edit_employees || loadingStates[`ketgan_${xodim.id}`]}
                                   >
-                                    {loadingStates[`ketgan_${xodim.id}`] ? 'Saqlanmoqda...' : <><LogOut size={14} /> Ishdan ketdim</>}
+                                    {loadingStates[`ketgan_${xodim.id}`] ? t('saving') : <><LogOut size={14} /> {t('checkOut')}</>}
                                   </button>
                                 )}
                               </div>
@@ -1114,7 +1121,7 @@ export default function XodimDavomat() {
                                 onClick={() => sendTime(xodim.id, 'kelgan')}
                                 disabled={loading || !permissions.edit_employees || loadingStates[`kelgan_${xodim.id}`]}
                               >
-                                {loadingStates[`kelgan_${xodim.id}`] ? 'Saqlanmoqda...' : <><Check size={14} /> Ishga keldim</>}
+                                {loadingStates[`kelgan_${xodim.id}`] ? t('saving') : <><Check size={14} /> {t('checkIn')}</>}
                               </button>
                             )}
                           </td>
@@ -1133,18 +1140,18 @@ export default function XodimDavomat() {
                 <table className={styles.table}>
                   <thead className={styles.table__head}>
                     <tr>
-                      <th className={`${styles.table__cell} ${styles.sticky}`}>Ism</th>
-                      <th className={`${styles.table__cell}`}>Ish turi</th>
+                      <th className={`${styles.table__cell} ${styles.sticky}`}>{t('colName')}</th>
+                      <th className={`${styles.table__cell}`}>{t('colWorkType')}</th>
                       {uniqueDays.map((day) => (
                         <th key={day} className={styles.table__cell}>
                           {dayjs(day).format('DD-MM')}
                         </th>
                       ))}
-                      <th className={styles.table__cell}>Jami ish kunlari</th>
-                      <th className={styles.table__cell}>Kelgan kunlari</th>
-                      <th className={styles.table__cell}>Kelmagan kunlari</th>
-                      <th className={styles.table__cell}>Oy plani (soat)</th>
-                      <th className={styles.table__cell}>Bajargani (soat)</th>
+                      <th className={styles.table__cell}>{t('colTotalWorkdays')}</th>
+                      <th className={styles.table__cell}>{t('colAttendedDays')}</th>
+                      <th className={styles.table__cell}>{t('colMissedDays')}</th>
+                      <th className={styles.table__cell}>{t('colMonthPlanHours')}</th>
+                      <th className={styles.table__cell}>{t('colFulfilledHours')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1156,7 +1163,7 @@ export default function XodimDavomat() {
                       return (
                         <tr key={xodim.id}>
                           <td className={`${styles.table__cell} ${styles.sticky}`}>{xodim.name}</td>
-                          <td className={`${styles.table__cell}`}>{xodim.ish_tur === 1 ? 'Oddiy' : 'Maxsus'}</td>
+                          <td className={`${styles.table__cell}`}>{xodim.ish_tur === 1 ? t('workTypeNormal') : t('workTypeSpecial')}</td>
                           {uniqueDays.map((day) => {
                             const kunKey = day;
                             const isToday = kunKey === bugun;
@@ -1190,7 +1197,7 @@ export default function XodimDavomat() {
                                           onClick={(e) => { e.stopPropagation(); sendTime(xodim.id, 'kelgan'); }}
                                           disabled={loading || !permissions.edit_employees || loadingStates[`kelgan_${xodim.id}`]}
                                         >
-                                          {loadingStates[`kelgan_${xodim.id}`] ? 'Saqlanmoqda...' : <><Check size={14} /> Ishga keldim</>}
+                                          {loadingStates[`kelgan_${xodim.id}`] ? t('saving') : <><Check size={14} /> Ishga keldim</>}
                                         </button>
                                       )}
                                     </div>
@@ -1203,7 +1210,7 @@ export default function XodimDavomat() {
                                           onClick={(e) => { e.stopPropagation(); sendTime(xodim.id, 'ketgan'); }}
                                           disabled={loading || !permissions.edit_employees || !vaqtInfo.start_time || loadingStates[`ketgan_${xodim.id}`]}
                                         >
-                                          {loadingStates[`ketgan_${xodim.id}`] ? 'Saqlanmoqda...' : <><LogOut size={14} /> Ishdan ketdim</>}
+                                          {loadingStates[`ketgan_${xodim.id}`] ? t('saving') : <><LogOut size={14} /> Ishdan ketdim</>}
                                         </button>
                                       )}
                                     </div>
@@ -1241,22 +1248,22 @@ export default function XodimDavomat() {
                   {selectedDetails.xodimName} ({selectedDetails.kun})
                 </h3>
                 <div className={styles.modalItem}>
-                  <strong>Kelish vaqti:</strong> {selectedDetails.expectedStart}
+                  <strong>{t('arrivalTimeLabel')}</strong> {selectedDetails.expectedStart}
                 </div>
                 <div className={styles.modalItem}>
-                  <strong>Aslida kelgan:</strong> {selectedDetails.actualStart}
+                  <strong>{t('actualArrivalLabel')}</strong> {selectedDetails.actualStart}
                 </div>
                 <div className={styles.modalItem}>
-                  <strong>Ketish vaqti:</strong> {selectedDetails.expectedEnd}
+                  <strong>{t('departureTimeLabel')}</strong> {selectedDetails.expectedEnd}
                 </div>
                 <div className={styles.modalItem}>
-                  <strong>Aslida ketgan:</strong> {selectedDetails.actualEnd}
+                  <strong>{t('actualDepartureLabel')}</strong> {selectedDetails.actualEnd}
                 </div>
                 <div className={styles.modalItem}>
-                  <strong>Kechikish:</strong> {selectedDetails.lateness}
+                  <strong>{t('latenessLabel')}</strong> {selectedDetails.lateness}
                 </div>
                 <button className={styles.modalCloseBtn} onClick={closeModal}>
-                  Yopish
+                  {t('close')}
                 </button>
               </div>
             )}
@@ -1264,7 +1271,7 @@ export default function XodimDavomat() {
         </>
       ) : (
         <p className={styles.noPermission}>
-          Sizda xodimlar davomatini ko&apos;rish uchun ruxsat yo&apos;q!
+          {t('noEmployeeAttendancePermission')}
         </p>
       )}
     </LayoutComponent>

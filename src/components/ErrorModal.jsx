@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import styles from '../styles/ErrorModal.module.css';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 const ErrorModal = ({ message, onClose }) => {
+  const { t } = useLang();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -16,7 +17,7 @@ const ErrorModal = ({ message, onClose }) => {
     <div className={styles.errorModal}>
       <div className={styles.errorContent}>
         <p>{message}</p>
-        <button onClick={onClose}>{getText('close')}</button>
+        <button onClick={onClose}>{t('close')}</button>
       </div>
     </div>
   );

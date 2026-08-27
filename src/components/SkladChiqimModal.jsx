@@ -4,8 +4,10 @@ import styles from '../styles/BolaModal.module.css';
 import axios from 'axios';
 import url from '../host/host';
 import ErrorModal from './ErrorModal';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function SkladKirimModal({ isOpen, onClose, onSave, products = [], initialData = null }) {
+  const { t } = useLang();
   const token = localStorage.getItem('token') ? localStorage.getItem('token') : null;
   const authHeader = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -86,14 +88,14 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const qator = `${i + 1}-qator: `;
-      if (!row.sklad_product_id) return setModalError(qator + 'Mahsulot tanlanmagan');
-      if (!row.hajm || parseFloat(row.hajm) <= 0) return setModalError(qator + 'Hajm kiritilmagan yoki 0 dan katta emas');
-      if (!row.narx || parseFloat(row.narx) <= 0) return setModalError(qator + 'Narx kiritilmagan yoki 0 dan katta emas');
-      if (!row.payment_method) return setModalError(qator + 'To‘lov turi tanlanmagan');
+      if (!row.sklad_product_id) return setModalError(qator + t('productNotSelected'));
+      if (!row.hajm || parseFloat(row.hajm) <= 0) return setModalError(qator + t('volumeInvalid'));
+      if (!row.narx || parseFloat(row.narx) <= 0) return setModalError(qator + t('priceInvalid'));
+      if (!row.payment_method) return setModalError(qator + t('paymentTypeNotSelected'));
 
       const mavjud = hajmMap[Number(row.sklad_product_id)];
       if (mavjud !== undefined && parseFloat(row.hajm) > mavjud) {
-        return setModalError(`${qator}Omborda faqat ${mavjud} birlik mavjud`);
+        return setModalError(`${qator}${t('onlyAvailableInStorage').replace('{max}', mavjud)}`);
       }
     }
 
@@ -108,7 +110,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
     <div className={styles.modal}>
       <div className={styles.modal__content}>
         <h3 className={styles.modal__title}>
-          {initialData ? 'Kirimni tahrirlash' : 'Yangi kirim(lar) qo‘shish'}
+          {initialData ? t('editIncome') : t('addIncomes')}
         </h3>
 
         {rows.map((row, index) => {
@@ -120,7 +122,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
             <div key={index} className={styles.modal__form} style={{ marginBottom: '14px' }}>
               {mavjud !== undefined && (
                 <p className={styles.modal__info}>
-                  <strong>Omborda mavjud hajm:</strong> {mavjud} {product?.hajm_birlik || ''}
+                  <strong>{t('availableInStorageLabel')}</strong> {mavjud} {product?.hajm_birlik || ''}
                 </p>
               )}
 
@@ -132,7 +134,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
                   className={styles.input}
                   style={{ flex: 1 }}
                 >
-                  <option value="">Mahsulot tanlang</option>
+                  <option value="">{t('selectProductPlaceholder')}</option>
                   {products.sort((a, b) => a.nomi.localeCompare(b.nomi)).map(p => (
                     <option key={p.id} value={p.id}>{p.nomi}</option>
                   ))}
@@ -143,7 +145,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
                   name="hajm"
                   value={row.hajm}
                   onChange={(e) => handleChange(index, e)}
-                  placeholder="Hajm"
+                  placeholder={t('colVolume')}
                   className={styles.input}
                   style={{ flex: 1 }}
                 />
@@ -153,7 +155,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
                   name="narx"
                   value={row.narx}
                   onChange={(e) => handleChange(index, e)}
-                  placeholder="Narx"
+                  placeholder={t('colPrice')}
                   className={styles.input}
                   style={{ flex: 1 }}
                 />
@@ -166,7 +168,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
                   className={styles.input}
                   style={{ flex: 1 }}
                 >
-                  <option value="">To‘lov turi</option>
+                  <option value="">{t('colPaymentType')}</option>
                   <option value="naqt">Naqt</option>
                   <option value="karta">Karta</option>
                   <option value="bank">Bank</option>
@@ -184,7 +186,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
                       color: 'red',
                       cursor: 'pointer',
                     }}
-                    title="O‘chirish"
+                    title={t('delete')}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -195,7 +197,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
                 name="description"
                 value={row.description}
                 onChange={(e) => handleChange(index, e)}
-                placeholder="Izoh"
+                placeholder={t('colComment')}
                 className={styles.textarea}
                 style={{ marginTop: '8px', width: '96%' }}
               />
@@ -224,7 +226,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
 
         <div className={styles.modal__buttons}>
           <button onClick={handleSubmit}><Check size={16} /> Saqlash</button>
-          <button onClick={onClose}><X size={16} /> Bekor qilish</button>
+          <button onClick={onClose}><X size={16} /> {t('cancel')}</button>
         </div>
       </div>
       <ErrorModal message={modalError} onClose={() => setModalError('')} />

@@ -7,17 +7,19 @@ import LayoutComponent from '../../components/LayoutComponent';
 import AdminTable from '../../components/AdminTable';
 import SkladkirimModal from '../../components/SkladkirimModal';
 import ErrorModal from '../../components/ErrorModal';
+import Loader from '../../components/Loader';
 import AdminHeader from '../../components/AdminHeader';
 import ChiqimFilter from '../../components/ChiqimFilter';
 import { saveAs } from 'file-saver';
 import axios from 'axios';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import styles from '../../styles/ChiqimlarPage.module.css';
 import { exportToExcel } from '../../utils/exportExcel';
 import { toLocalDate } from '../../utils/sana';
 
 export default function KirimlarPage() {
+  const { t } = useLang();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -121,7 +123,7 @@ export default function KirimlarPage() {
 
   const fetchData = async (start = '', end = '', productId = '') => {
     if (!token) {
-      setErrorMessage('Tizimga kirish uchun token topilmadi!');
+      setErrorMessage(t('noTokenError'));
       router.push('/login');
       return;
     }
@@ -212,7 +214,7 @@ export default function KirimlarPage() {
 
   const handleEdit = (item) => {
     if (!permissions.edit_household_incomes) {
-      setErrorMessage("Sizda kirimni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMessage(t('noEditIncomePermission'));
       return;
     }
     setEditingItem(item);
@@ -221,7 +223,7 @@ export default function KirimlarPage() {
 
   const handleDelete = async (id) => {
     if (!permissions.delete_household_incomes) {
-      setErrorMessage("Sizda kirimni o‘chirish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noDeleteIncomePermission'));
       return;
     }
     try {
@@ -230,7 +232,7 @@ export default function KirimlarPage() {
       await handleFilterSubmit();
     } catch (err) {
       console.error('O‘chirishda xatolik:', err.message);
-      setErrorMessage('Kirimni o‘chirishda xatolik yuz berdi: ' + err.message);
+      setErrorMessage(t('incomeDeleteError') + ': ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -239,14 +241,14 @@ export default function KirimlarPage() {
   const handleSave = async (form) => {
     if (!Array.isArray(form)) {
       if (!form.sklad_product_id || !form.hajm || parseFloat(form.hajm) <= 0 || !form.narx) {
-        setErrorMessage('Mahsulot, hajm va narx maydonlari to‘ldirilishi shart!');
+        setErrorMessage(t('productVolumePriceRequired'));
         return;
       }
     } else {
       for (let i = 0; i < form.length; i++) {
         const item = form[i];
         if (!item.sklad_product_id || !item.hajm || parseFloat(item.hajm) <= 0 || !item.narx) {
-          setErrorMessage(`${i + 1}-qator: Mahsulot, hajm va narx maydonlari to‘ldirilishi shart!`);
+          setErrorMessage(t('rowProductVolumePriceRequired').replace('{n}', i + 1));
           return;
         }
       }
@@ -255,13 +257,13 @@ export default function KirimlarPage() {
       setLoading(true);
       if (editingItem) {
         if (!permissions.edit_household_incomes) {
-          setErrorMessage("Sizda kirimni tahrirlash uchun ruxsat yo‘q!");
+          setErrorMessage(t('noEditIncomePermission'));
           return;
         }
         await axios.put(`${url}/kirim_maishiy/${editingItem.id}`, form, authHeader);
       } else {
         if (!permissions.create_household_incomes) {
-          setErrorMessage("Sizda kirimni yaratish uchun ruxsat yo‘q!");
+          setErrorMessage(t('noCreateIncomePermission'));
           return;
         }
         await axios.post(`${url}/kirim_maishiy/multi`, form, authHeader);
@@ -271,7 +273,7 @@ export default function KirimlarPage() {
       setModalOpen(false);
     } catch (err) {
       console.error('Saqlashda xatolik:', err.message);
-      setErrorMessage('Saqlashda xatolik yuz berdi: ' + err.message);
+      setErrorMessage(t('saveError') + ': ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -297,7 +299,7 @@ export default function KirimlarPage() {
       await fetchData(startDate, endDate, productId);
     } catch (err) {
       console.error('Filterlashda xatolik:', err.message);
-      setErrorMessage('Filterlashda xatolik yuz berdi: ' + err.message);
+      setErrorMessage(t('filterError') + ': ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -327,8 +329,8 @@ export default function KirimlarPage() {
     }
 
     const headers = isAggregated
-      ? ['#', 'Mahsulot', 'Birlik', ...uniqueDates.flatMap((date) => [`Hajm (${date})`, `Narx (${date})`]), 'Umumiy hajm', 'Umumiy narx']
-      : ['#', 'Mahsulot', 'Hajm', 'Birlik', 'Narx', 'Umumiy', 'Izoh', 'To‘lov turi', 'Vaqti'];
+      ? [t('colNumber'), t('colProduct'), t('colUnit'), ...uniqueDates.flatMap((date) => [t('colVolumeWithDate').replace('{date}', date), t('colPriceWithDate').replace('{date}', date)]), t('colTotalVolume'), t('colTotalPrice')]
+      : [t('colNumber'), t('colProduct'), t('colVolume'), t('colUnit'), t('colPrice'), t('colTotal'), t('colComment'), t('colPaymentType'), t('colTime')];
     const columnWidths = isAggregated
       ? [500, 2000, 1000, ...uniqueDates.flatMap(() => [1000, 1500]), 1500, 1500]
       : [500, 2000, 1000, 1000, 1000, 1500, 3000, 2000, 2000];
@@ -382,7 +384,7 @@ export default function KirimlarPage() {
       ? new TableRow({
           children: [
             createCell('', columnWidths[0]),
-            createCell('Jami', columnWidths[1], AlignmentType.RIGHT, true),
+            createCell(t('colTotal'), columnWidths[1], AlignmentType.RIGHT, true),
             ...Array(3).fill('').map((_, i) => createCell('', columnWidths[2 + i])),
             createCell(Number(totalSum.toFixed(2)).toLocaleString() + ' so‘m', columnWidths[5], AlignmentType.CENTER, true),
             createCell('', columnWidths[6]),
@@ -396,7 +398,7 @@ export default function KirimlarPage() {
       sections: [
         {
           children: [
-            new Paragraph({ text: 'Kirimlar ro‘yxati', heading: 'Heading1', alignment: AlignmentType.CENTER }),
+            new Paragraph({ text: t('incomesList'), heading: 'Heading1', alignment: AlignmentType.CENTER }),
             new Paragraph({ text: '' }),
             new Table({
               rows: totalRow ? [headerRow, ...bodyRows, totalRow] : [headerRow, ...bodyRows],
@@ -411,7 +413,7 @@ export default function KirimlarPage() {
       .then((blob) => saveAs(blob, 'kirimlar.docx'))
       .catch((err) => {
         console.error('Word eksportida xatolik:', err);
-        setErrorMessage('Word hujjatini eksport qilishda xatolik yuz berdi: ' + err.message);
+        setErrorMessage(t('wordExportError') + ': ' + err.message);
       });
   };
 
@@ -422,8 +424,8 @@ export default function KirimlarPage() {
     }
 
     const headers = isAggregated
-      ? ['#', 'Mahsulot', 'Birlik', ...uniqueDates.flatMap((date) => [`Hajm (${date})`, `Narx (${date})`]), 'Umumiy hajm', 'Umumiy narx']
-      : ['#', 'Mahsulot', 'Hajm', 'Birlik', 'Narx', 'Umumiy', 'Izoh', 'To‘lov turi', 'Vaqti'];
+      ? [t('colNumber'), t('colProduct'), t('colUnit'), ...uniqueDates.flatMap((date) => [t('colVolumeWithDate').replace('{date}', date), t('colPriceWithDate').replace('{date}', date)]), t('colTotalVolume'), t('colTotalPrice')]
+      : [t('colNumber'), t('colProduct'), t('colVolume'), t('colUnit'), t('colPrice'), t('colTotal'), t('colComment'), t('colPaymentType'), t('colTime')];
 
     const rows = displayedData.map((item, index) =>
       isAggregated
@@ -473,7 +475,7 @@ export default function KirimlarPage() {
       {canView ? (
         <>
           <AdminHeader
-            title="Kirimlar"
+            title={t('kitchenIncomes')}
             onCreate={permissions.create_household_incomes ? () => { setEditingItem(null); setModalOpen(true); } : null}
             canCreate={permissions.create_household_incomes}
           />
@@ -484,10 +486,10 @@ export default function KirimlarPage() {
               onChange={(e) => setIsAggregated(e.target.checked)}
               id="aggregateToggle"
             />
-            <label htmlFor="aggregateToggle">{isAggregated ? 'Umumiy (Sanalar bo‘yicha)' : 'Yakka'}</label>
+            <label htmlFor="aggregateToggle">{isAggregated ? t('totalByDates') : 'Yakka'}</label>
           </div>
           {loading ? (
-            <div className={styles.loading}>Yuklanmoqda...</div>
+            <Loader />
           ) : (
             <>
               <ChiqimFilter
@@ -499,7 +501,7 @@ export default function KirimlarPage() {
                 onSearch={handleSearch}
               />
               <AdminTable
-                title="Mahsulot kirimlari"
+                title={t('productIncomes')}
                 columns={
                   isAggregated
                     ? ['product_nomi', 'hajm_birlik', ...uniqueDates.flatMap((date) => [`hajm_${date}`, `narx_${date}`]), 'umumiy_hajm', 'umumiy_narx']
@@ -508,27 +510,27 @@ export default function KirimlarPage() {
                 columnTitles={
                   isAggregated
                     ? {
-                        product_nomi: getText('colProduct'),
-                        hajm_birlik: getText('colUnit'),
+                        product_nomi: t('colProduct'),
+                        hajm_birlik: t('colUnit'),
                         ...uniqueDates.reduce((acc, date) => ({
                           ...acc,
-                          [`hajm_${date}`]: `${getText('colVolume')} (${date})`,
-                          [`narx_${date}`]: `${getText('colPrice')} (${date})`,
+                          [`hajm_${date}`]: `${t('colVolume')} (${date})`,
+                          [`narx_${date}`]: `${t('colPrice')} (${date})`,
                         }), {}),
-                        umumiy_hajm: getText('colTotalVolume'),
-                        umumiy_narx: getText('colTotalPrice'),
+                        umumiy_hajm: t('colTotalVolume'),
+                        umumiy_narx: t('colTotalPrice'),
                       }
                     : {
-                        id: getText('colId'),
-                        product_nomi: getText('colProduct'),
-                        hajm: getText('colVolume'),
-                        hajm_birlik: getText('colUnit'),
-                        narx: getText('colPrice'),
-                        summa: getText('colTotalSum'),
-                        description: getText('colComment'),
-                        payment_method: getText('colPaymentType'),
-                        created_at: getText('colTime'),
-                        actions: getText('colActions'),
+                        id: t('colId'),
+                        product_nomi: t('colProduct'),
+                        hajm: t('colVolume'),
+                        hajm_birlik: t('colUnit'),
+                        narx: t('colPrice'),
+                        summa: t('colTotalSum'),
+                        description: t('colComment'),
+                        payment_method: t('colPaymentType'),
+                        created_at: t('colTime'),
+                        actions: t('colActions'),
                       }
                 }
                 data={formattedData}

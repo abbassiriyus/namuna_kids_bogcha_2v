@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { sendDbError } from '@/lib/dbError';
 
 async function handler(req, res) {
   if (req.method === 'GET') {
@@ -38,7 +39,7 @@ async function handler(req, res) {
       }
       return res.status(200).json(result.rows[0]);
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+      return sendDbError(res, err, 'Ma\'lumotlarni saqlashda xatolik yuz berdi');
     }
   }
 

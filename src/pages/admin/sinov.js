@@ -7,13 +7,15 @@ import LayoutComponent from '../../components/LayoutComponent';
 import AdminTable from '../../components/AdminTable';
 import ErrorModal from '../../components/ErrorModal';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import BolaModal from '../../components/BolaModal_prp.jsx';
 import AdminHeader from '../../components/AdminHeader.jsx';
 import styles from '../../styles/DavomatPage.module.css';
 import { useUserType } from '../../utils/useUserType';
+import Loader from '../../components/Loader';
 
 export default function Sinov() {
+  const { t } = useLang();
   // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
   const { isSuperAdmin } = useUserType();
   const router = useRouter();
@@ -178,7 +180,7 @@ export default function Sinov() {
 
   const handleToggleActive = async (id, currentValue) => {
     if (!permissions.edit_prp) {
-      setErrorMessage("Sizda tarbiyalanuvchi holatini o'zgartirish uchun ruxsat yo'q!");
+      setErrorMessage(t('noEditStudentPermission'));
       return;
     }
     try {
@@ -198,18 +200,18 @@ export default function Sinov() {
       if (error.response?.status === 403 && error.config?.url.includes('bola_kun_prp')) {
         setErrorMessage('Bunday amalni bajarib bo‘lmaydi');
       } else {
-        setErrorMessage('Holatni yangilashda xatolik yuz berdi!');
+        setErrorMessage(t('statusUpdateError'));
       }
     }
   };
 
   const handleUpdate = async (updatedData) => {
     if (!permissions.edit_prp) {
-      throw new Error("Sizda tarbiyalanuvchi ma'lumotlarini yangilash uchun ruxsat yo'q!");
+      throw new Error(t('noEditStudentPermission'));
     }
     const token = localStorage.getItem('token') ? localStorage.getItem('token') : null;
     if (!token) {
-      throw new Error('Token topilmadi!');
+      throw new Error(t('tokenNotFound'));
     }
     await axios.put(`${url}/bola_prp/${updatedData.id}`, updatedData, {
       headers: { Authorization: `Bearer ${token}` },
@@ -218,11 +220,11 @@ export default function Sinov() {
 
   const handleCreate = async (newData) => {
     if (!permissions.create_prp) {
-      throw new Error("Sizda tarbiyalanuvchi yaratish uchun ruxsat yo'q!");
+      throw new Error(t('noCreateStudentPermission'));
     }
     const token = localStorage.getItem('token') ? localStorage.getItem('token') : null;
     if (!token) {
-      throw new Error('Token topilmadi!');
+      throw new Error(t('tokenNotFound'));
     }
     await axios.post(`${url}/bola_prp`, newData, {
       headers: { Authorization: `Bearer ${token}` },
@@ -231,10 +233,10 @@ export default function Sinov() {
 
   const handleDelete = async (id) => {
     if (!permissions.delete_prp) {
-      setErrorMessage("Sizda tarbiyalanuvchi o'chirish uchun ruxsat yo'q!");
+      setErrorMessage(t('noDeleteStudentPermission'));
       return;
     }
-    if (confirm("Haqiqatan ham bu tarbiyalanuvchini o‘chirmoqchimisiz? Bu amaliyot yomon oqibatlarga olib kelishi mumkin!")) {
+    if (confirm(t('confirmDeleteGeneric'))) {
       try {
         const token = localStorage.getItem('token') ? localStorage.getItem('token') : null;
         const type = localStorage.getItem('type') ? localStorage.getItem('type'): null;
@@ -275,7 +277,7 @@ export default function Sinov() {
       setShowModal(false);
     } catch (err) {
       console.error('Saqlashda xatolik:', err);
-      setErrorMessage(err.message || 'Saqlashda xatolik yuz berdi!');
+      setErrorMessage(err.message || t('saveError'));
     }
   };
 
@@ -330,26 +332,26 @@ export default function Sinov() {
   };
 
   const columnTitles = {
-    username: getText('colFullName'),
-    metrka: getText('colMetrka'),
-    is_active: getText('colActiveStatus'),
-    holati: getText('colStatus'),
-    guruh_id: getText('colGroup'),
-    tugilgan_kun: getText('colBirthDate'),
-    oylik_toliv: getText('colMonthlyFee'),
-    balans: getText('colBalance'),
-    ota_fish: getText('colFatherName'),
-    ota_phone: getText('colFatherPhone'),
-    ota_pasport: getText('colFatherPassport'),
-    ona_fish: getText('colMotherName'),
-    ona_phone: getText('colMotherPhone'),
-    ona_pasport: getText('colMotherPassport'),
-    qoshimcha_phone: getText('colExtraPhone'),
-    address: getText('colAddress'),
-    description: getText('colComment'),
-    created_at: getText('colCreatedDate'),
-    updated_at: getText('colUpdatedDate'),
-    actions: getText('colActions'),
+    username: t('colFullName'),
+    metrka: t('colMetrka'),
+    is_active: t('colActiveStatus'),
+    holati: t('colStatus'),
+    guruh_id: t('colGroup'),
+    tugilgan_kun: t('colBirthDate'),
+    oylik_toliv: t('colMonthlyFee'),
+    balans: t('colBalance'),
+    ota_fish: t('colFatherName'),
+    ota_phone: t('colFatherPhone'),
+    ota_pasport: t('colFatherPassport'),
+    ona_fish: t('colMotherName'),
+    ona_phone: t('colMotherPhone'),
+    ona_pasport: t('colMotherPassport'),
+    qoshimcha_phone: t('colExtraPhone'),
+    address: t('colAddress'),
+    description: t('colComment'),
+    created_at: t('colCreatedDate'),
+    updated_at: t('colUpdatedDate'),
+    actions: t('colActions'),
   };
 
   return (
@@ -357,7 +359,7 @@ export default function Sinov() {
       {isSuperAdmin || permissions.view_prp ? (
         <>
           <AdminHeader
-            title="Tarbiyalanuvchilar"
+            title={t('students')}
             onCreate={
               permissions.create_prp
                 ? () => {
@@ -406,7 +408,7 @@ export default function Sinov() {
                     fontSize: '16px',
                   }}
                 >
-                  <option value="">Barchasi</option>
+                  <option value="">{t('all')}</option>
                   <option value="boshlangich">Boshlang‘ich</option>
                   <option value="qabul_qilindi">Qabul qilindi</option>
                   <option value="kelmay_qoydi">Kelmay qo‘ydi</option>
@@ -427,7 +429,7 @@ export default function Sinov() {
                     fontSize: '16px',
                   }}
                 >
-                  <option value="">Barchasi</option>
+                  <option value="">{t('all')}</option>
                   {groups.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
@@ -444,7 +446,7 @@ export default function Sinov() {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Matn kiriting..."
+                  placeholder={t('enterTextPlaceholder')}
                   style={{
                     padding: '8px 12px',
                     borderRadius: '6px',
@@ -476,7 +478,7 @@ export default function Sinov() {
           )}
 
           {loading ? (
-            <p style={{ padding: '10px' }}>Yuklanmoqda...</p>
+            <Loader />
           ) : permissions.view_prp ? (
             <AdminTable
               title=""
@@ -501,7 +503,7 @@ export default function Sinov() {
                         onChange={() => handleToggleActive(row.id, row.is_active)}
                       />
                     )
-                  : (row) => (row.is_active ? 'Aktiv' : 'Faol emas'),
+                  : (row) => (row.is_active ? t('activeLabel') : t('inactiveLabel')),
                 actions: permissions.edit_prp
                   ? (row) => (
                       <button

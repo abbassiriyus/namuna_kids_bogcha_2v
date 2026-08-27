@@ -1,7 +1,7 @@
 
 
 -- type admin bugalter hamshira
-CREATE TABLE admin                           (
+CREATE TABLE IF NOT EXISTS admin                           (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     phone_number VARCHAR(20) UNIQUE NOT NULL,
@@ -12,13 +12,13 @@ CREATE TABLE admin                           (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE lavozim(
+CREATE TABLE IF NOT EXISTS lavozim(
     id SERIAL PRIMARY KEY,
 name VARCHAR(100) NOT NULL,
  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE xodim(
+CREATE TABLE IF NOT EXISTS xodim(
    id SERIAL PRIMARY KEY,
    name VARCHAR(100) NOT NULL,
    phone VARCHAR(50) NOT NULL,
@@ -29,35 +29,35 @@ CREATE TABLE xodim(
    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE bonus(
+CREATE TABLE IF NOT EXISTS bonus(
   id SERIAL PRIMARY KEY,
   xodim_id INT NOT NULL,
   narx INT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE jarima(
+CREATE TABLE IF NOT EXISTS jarima(
   id SERIAL PRIMARY KEY,
   xodim_id INT NOT NULL,
   narx INT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE kunlik(
+CREATE TABLE IF NOT EXISTS kunlik(
   id SERIAL PRIMARY KEY,
   xodim_id INT NOT NULL,
   narx INT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE oylik_type (
+CREATE TABLE IF NOT EXISTS oylik_type (
   id SERIAL PRIMARY KEY,
   xodim_id INT NOT NULL,
   narx NUMERIC(12, 2) NOT NULL, -- 12 ta raqam, 2ta verguldan keyin
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE sklad_product(
+CREATE TABLE IF NOT EXISTS sklad_product(
     id SERIAL PRIMARY KEY,
     nomi VARCHAR(100) NOT NULL,  --kartoshka
     hajm NUMERIC(12, 2) NOT NULL,  --1
@@ -65,7 +65,7 @@ CREATE TABLE sklad_product(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE sklad_product_taktic(
+CREATE TABLE IF NOT EXISTS sklad_product_taktic(
     id SERIAL PRIMARY KEY,
     hajm NUMERIC(12, 2) NOT NULL, --yangi qoshilayapgan maxsulot
     sklad_product_id integer NOT NULL, --qaysi productga tegishli
@@ -75,7 +75,7 @@ CREATE TABLE sklad_product_taktic(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE chiqim_qoshimcha(
+CREATE TABLE IF NOT EXISTS chiqim_qoshimcha(
     id SERIAL PRIMARY KEY,
     price integer NOT NULL, --yangi qoshilayapgan maxsulot
     payment_method VARCHAR(20), -- naqt/karta/bank/boshqa, umumiySumma.jsx shu bo'yicha guruhlaydi
@@ -83,7 +83,7 @@ CREATE TABLE chiqim_qoshimcha(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE chiqim_ombor (
+CREATE TABLE IF NOT EXISTS chiqim_ombor (
     id SERIAL PRIMARY KEY,
     hajm NUMERIC(12, 2) NOT NULL, -- yangi qo‘shilayotgan mahsulot
     sklad_product_id INTEGER NOT NULL, -- qaysi productga tegishli
@@ -92,7 +92,7 @@ CREATE TABLE chiqim_ombor (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE chiqim_maishiy(
+CREATE TABLE IF NOT EXISTS chiqim_maishiy(
     id SERIAL PRIMARY KEY,
     hajm integer NOT NULL, --yangi qoshilayapgan maxsulot
     sklad_product_id integer NOT NULL, --qaysi productga tegishli
@@ -101,7 +101,7 @@ CREATE TABLE chiqim_maishiy(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE sklad_maishiy(
+CREATE TABLE IF NOT EXISTS sklad_maishiy(
     id SERIAL PRIMARY KEY,
     nomi VARCHAR(100) NOT NULL,  --kartoshka
     hajm integer NOT NULL,  --1
@@ -109,7 +109,7 @@ CREATE TABLE sklad_maishiy(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE kirim_maishiy(
+CREATE TABLE IF NOT EXISTS kirim_maishiy(
     id SERIAL PRIMARY KEY,
     hajm integer NOT NULL, --yangi qoshilayapgan maxsulot
     sklad_product_id integer NOT NULL, --qaysi productga tegishli
@@ -119,28 +119,28 @@ CREATE TABLE kirim_maishiy(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE guruh(
+CREATE TABLE IF NOT EXISTS guruh(
  id SERIAL PRIMARY KEY,
  name VARCHAR(50),
 xodim_id INT NOT NULL,
 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE darssana (
+CREATE TABLE IF NOT EXISTS darssana (
   id SERIAL PRIMARY KEY,
   mavzu VARCHAR(150) NOT NULL,
   sana DATE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE bola_kuni_all (
+CREATE TABLE IF NOT EXISTS bola_kuni_all (
   id SERIAL PRIMARY KEY,
   mavzu VARCHAR(150) NOT NULL,
   sana DATE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE bola_kun (
+CREATE TABLE IF NOT EXISTS bola_kun (
   id SERIAL PRIMARY KEY,
   holati INTEGER NOT NULL DEFAULT 0,
   bola_id INTEGER NOT NULL,
@@ -149,7 +149,7 @@ CREATE TABLE bola_kun (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (bola_id, darssana_id)
 );
-CREATE TABLE daromat_type (
+CREATE TABLE IF NOT EXISTS daromat_type (
   id SERIAL PRIMARY KEY,
   bola_id INT NOT NULL,
   sana DATE NOT NULL, -- oy va yil uchun (masalan 2024-06-01)
@@ -159,7 +159,7 @@ CREATE TABLE daromat_type (
   naqt_prichislena INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE bola(
+CREATE TABLE IF NOT EXISTS bola(
  id SERIAL PRIMARY KEY,
  username VARCHAR(100) NOT NULL,
  metrka VARCHAR(50) UNIQUE NOT NULL,
@@ -181,13 +181,13 @@ CREATE TABLE bola(
  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE taom (
+CREATE TABLE IF NOT EXISTS taom (
   id SERIAL PRIMARY KEY,
   nomi VARCHAR(100) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE taom_ingredient (
+CREATE TABLE IF NOT EXISTS taom_ingredient (
   id SERIAL PRIMARY KEY,
   taom_id INTEGER REFERENCES taom(id) ON DELETE CASCADE,
   sklad_product_id INTEGER REFERENCES sklad_product(id),
@@ -195,6 +195,21 @@ CREATE TABLE taom_ingredient (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Taomnoma ishlatish tarixi: qaysi kuni qaysi taom necha bolaga tayyorlangani
+-- (routes/taom/ishlatish.js). Avval faqat qo'lda yaratilgan edi, shu bois
+-- schema.sql'da yo'q edi.
+CREATE TABLE IF NOT EXISTS taom_ishlatish (
+  id SERIAL PRIMARY KEY,
+  taom_id INTEGER NOT NULL REFERENCES taom(id) ON DELETE CASCADE,
+  sana DATE NOT NULL,
+  bolalar_soni INTEGER NOT NULL CHECK (bolalar_soni > 0),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+ALTER SEQUENCE taom_ishlatish_id_seq OWNED BY taom_ishlatish.id;
+GRANT USAGE, SELECT ON SEQUENCE taom_ishlatish_id_seq TO abbasuz3_user;
+
 ALTER SEQUENCE taom_id_seq OWNED BY taom.id;
 GRANT USAGE, SELECT ON SEQUENCE taom_id_seq TO abbasuz3_user;
 
@@ -268,7 +283,7 @@ GRANT USAGE, SELECT ON SEQUENCE bola_kuni_all_id_seq TO abbasuz3_user;
 
 -- Per-admin permission flags (view_/create_/edit_/delete_<module> booleans),
 -- stored as one JSONB blob per admin since the key set is frontend-defined.
-CREATE TABLE permissions (
+CREATE TABLE IF NOT EXISTS permissions (
   id SERIAL PRIMARY KEY,
   admin_id INTEGER NOT NULL UNIQUE REFERENCES admin(id) ON DELETE CASCADE,
   data JSONB NOT NULL DEFAULT '{}',
@@ -294,7 +309,7 @@ GRANT USAGE, SELECT ON SEQUENCE tarix_id_seq TO abbasuz3_user;
 
 -- Trial/candidate children ("sinov bola"), tracked separately from `bola`
 -- until they're accepted; mirrors bola's columns (see routes/bolaPrpRoutes.js).
-CREATE TABLE bola_prp (
+CREATE TABLE IF NOT EXISTS bola_prp (
  id SERIAL PRIMARY KEY,
  username VARCHAR(100) NOT NULL,
  metrka VARCHAR(50) NOT NULL,
@@ -320,7 +335,7 @@ ALTER SEQUENCE bola_prp_id_seq OWNED BY bola_prp.id;
 GRANT USAGE, SELECT ON SEQUENCE bola_prp_id_seq TO abbasuz3_user;
 
 -- Attendance for trial children, same shape as bola_kun but against bola_prp.
-CREATE TABLE bola_kun_prp (
+CREATE TABLE IF NOT EXISTS bola_kun_prp (
   id SERIAL PRIMARY KEY,
   holati INTEGER NOT NULL DEFAULT 0,
   bola_id INTEGER NOT NULL,
@@ -332,7 +347,7 @@ ALTER SEQUENCE bola_kun_prp_id_seq OWNED BY bola_kun_prp.id;
 GRANT USAGE, SELECT ON SEQUENCE bola_kun_prp_id_seq TO abbasuz3_user;
 
 -- Manual bonus/shtraf adjustments per child (positive = shtraf, negative = bonus).
-CREATE TABLE bola_pay_control (
+CREATE TABLE IF NOT EXISTS bola_pay_control (
   id SERIAL PRIMARY KEY,
   bola_id INTEGER NOT NULL,
   miqdor NUMERIC NOT NULL,
@@ -345,7 +360,7 @@ ALTER SEQUENCE bola_pay_control_id_seq OWNED BY bola_pay_control.id;
 GRANT USAGE, SELECT ON SEQUENCE bola_pay_control_id_seq TO abbasuz3_user;
 
 -- Monthly payments recorded per child.
-CREATE TABLE bola_pay_new (
+CREATE TABLE IF NOT EXISTS bola_pay_new (
   id SERIAL PRIMARY KEY,
   bola_id INTEGER NOT NULL,
   miqdor NUMERIC NOT NULL,
@@ -364,7 +379,7 @@ ALTER TABLE xodim
   ADD COLUMN IF NOT EXISTS image VARCHAR(255);
 
 -- Custom scheduled workdays for ish_tur=2 employees (routes/xodimRoutes.js :id/workday).
-CREATE TABLE xodim_workdays (
+CREATE TABLE IF NOT EXISTS xodim_workdays (
   id SERIAL PRIMARY KEY,
   xodim_id INTEGER NOT NULL REFERENCES xodim(id) ON DELETE CASCADE,
   work_day DATE NOT NULL,
@@ -376,7 +391,7 @@ ALTER SEQUENCE xodim_workdays_id_seq OWNED BY xodim_workdays.id;
 GRANT USAGE, SELECT ON SEQUENCE xodim_workdays_id_seq TO abbasuz3_user;
 
 -- Daily clock-in/clock-out record per employee.
-CREATE TABLE xodim_one_day (
+CREATE TABLE IF NOT EXISTS xodim_one_day (
   id SERIAL PRIMARY KEY,
   xodim_id INTEGER NOT NULL REFERENCES xodim(id) ON DELETE CASCADE,
   xodim_workdays_id INTEGER,
@@ -389,7 +404,7 @@ ALTER SEQUENCE xodim_one_day_id_seq OWNED BY xodim_one_day.id;
 GRANT USAGE, SELECT ON SEQUENCE xodim_one_day_id_seq TO abbasuz3_user;
 
 -- Which guruh(s) a tarbiyachi-type admin is assigned to (pages/tarbiyachi/davomat.js).
-CREATE TABLE group_admin (
+CREATE TABLE IF NOT EXISTS group_admin (
   id SERIAL PRIMARY KEY,
   admin_id INTEGER NOT NULL REFERENCES admin(id) ON DELETE CASCADE,
   group_id INTEGER NOT NULL REFERENCES guruh(id) ON DELETE CASCADE,
@@ -402,12 +417,13 @@ GRANT USAGE, SELECT ON SEQUENCE group_admin_id_seq TO abbasuz3_user;
 -- Global toggle: how employee check-in/out is captured on /xodimdavomat
 -- ('button' = manual Ishga keldim/Ishdan ketdim buttons, 'face' = face-id kiosk).
 -- Superadmin-only setting, single row.
-CREATE TABLE davomat_settings (
+CREATE TABLE IF NOT EXISTS davomat_settings (
   id SERIAL PRIMARY KEY,
   mode VARCHAR(10) NOT NULL DEFAULT 'button' CHECK (mode IN ('button', 'face')),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO davomat_settings (mode) VALUES ('button');
+INSERT INTO davomat_settings (mode)
+  SELECT 'button' WHERE NOT EXISTS (SELECT 1 FROM davomat_settings);
 
 -- Indexes on columns actually used in WHERE filters, so lookups stay fast as
 -- data grows instead of degrading into sequential scans.

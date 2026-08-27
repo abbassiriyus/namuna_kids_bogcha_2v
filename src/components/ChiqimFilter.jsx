@@ -2,8 +2,10 @@
 import React from 'react';
 import { Search, Archive, FileSpreadsheet } from 'lucide-react';
 import styles from '../styles/ChiqimFilter.module.css';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function ChiqimFilter({ filter, onChange, onSubmit, onExport, onExportExcel, onSearch }) {
+  const { t } = useLang();
   return (
     <div className={styles.filterContainer}>
       <input
@@ -28,7 +30,7 @@ export default function ChiqimFilter({ filter, onChange, onSubmit, onExport, onE
         onChange={onChange}
         className={styles.input}
       >
-        <option value="">Barcha mahsulotlar</option>
+        <option value="">{t('allProducts')}</option>
         {(filter.products || []).map(p => (
           <option key={p.id} value={p.id}>{p.nomi}</option>
         ))}
@@ -36,7 +38,7 @@ export default function ChiqimFilter({ filter, onChange, onSubmit, onExport, onE
 
       <input
         type="text"
-        placeholder="Mahsulotni qidiring..."
+        placeholder={t('searchProductPlaceholder')}
         className={styles.searchInput}
         onChange={onSearch}  // Search inputga o'zgartirishni yuborish
       />

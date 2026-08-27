@@ -4,8 +4,10 @@ import axios from 'axios';
 import url from '../../host/host';
 import { Check, X } from 'lucide-react';
 import { bugungiSana } from '../../utils/sana';
+import { useLang } from '../../i18n/LanguageContext';
 
 export default function DavomatBugungi() {
+  const { t } = useLang();
   const [adminId, setAdminId] = useState(null);
   const [guruhlar, setGuruhlar] = useState([]);
   const [selectedGuruhId, setSelectedGuruhId] = useState('');
@@ -114,7 +116,7 @@ useEffect(() => {
 
       {guruhlar.length > 0 && (
         <div style={{ margin: '15px 0' }}>
-          <label style={{ fontWeight: '600' }}>Guruh tanlang:</label>
+          <label style={{ fontWeight: '600' }}>{t('selectGroupLabel')}</label>
           <select
             value={selectedGuruhId}
             onChange={(e) => setSelectedGuruhId(e.target.value)}

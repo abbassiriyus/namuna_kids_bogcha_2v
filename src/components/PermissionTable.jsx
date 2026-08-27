@@ -1,7 +1,7 @@
 'use client';
 
 import styles from '../styles/Adminlar.module.css';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 const MODULES = [
   'admins','students','groups','attendance','childDay','payments','employees','salaries','positions','menuMeals','extras'
@@ -14,6 +14,7 @@ const VIEW_ONLY_MODULES = [
 const ACTIONS = ['view', 'create', 'edit', 'delete'];
 
 export default function PermissionTable({ permissions, setPermissions }) {
+  const { t } = useLang();
   const handleToggle = (key) => {
     setPermissions((prev) => ({
       ...prev,
@@ -25,18 +26,18 @@ export default function PermissionTable({ permissions, setPermissions }) {
     <table className={styles.table}>
       <thead>
         <tr>
-          <th>{getText('table.module')}</th>
-          <th>{getText('table.view')}</th>
-          <th>{getText('table.create')}</th>
-          <th>{getText('table.edit')}</th>
-          <th>{getText('table.delete')}</th>
+          <th>{t('table.module')}</th>
+          <th>{t('table.view')}</th>
+          <th>{t('table.create')}</th>
+          <th>{t('table.edit')}</th>
+          <th>{t('table.delete')}</th>
         </tr>
       </thead>
       <tbody>
         {/* 4-action modullar */}
         {MODULES.map((key) => (
           <tr key={key}>
-            <td>{getText(`module.${key}`) || key}</td>
+            <td>{t(`module.${key}`) || key}</td>
             {ACTIONS.map((action) => {
               const fullKey = `${action}_${key.replace(/menuMeals/, 'meals')}`;
               return (
@@ -55,7 +56,7 @@ export default function PermissionTable({ permissions, setPermissions }) {
         {/* faqat view modullar */}
         {VIEW_ONLY_MODULES.map((key) => (
           <tr key={key}>
-            <td>{getText(`module.${key}`) || key}</td>
+            <td>{t(`module.${key}`) || key}</td>
             <td>
               <input
                 type="checkbox"

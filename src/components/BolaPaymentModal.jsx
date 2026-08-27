@@ -5,9 +5,10 @@ import axios from 'axios';
 import { X, Pencil, Trash2 } from 'lucide-react';
 import url from '../host/host';
 import styles from '../styles/BolaPaymentModal.module.css';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function BolaPaymentModal({ bola, onClose }) {
+  const { t } = useLang();
   const [payments, setPayments] = useState([]);
   const [miqdor, setMiqdor] = useState('');
   const [sana, setSana] = useState('');
@@ -68,7 +69,7 @@ export default function BolaPaymentModal({ bola, onClose }) {
   };
 
   const handleDelete = async (id) => {
-    if (confirm("To‘lovni o‘chirmoqchimisiz?")) {
+    if (confirm(t('confirmDeletePayment'))) {
       try {
         await axios.delete(`${url}/bola-pay-new/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -84,14 +85,14 @@ export default function BolaPaymentModal({ bola, onClose }) {
     <div className={styles.modalBackdrop}>
       <div className={styles.modalBox}>
         <div className={styles.modalHeader}>
-          <h2>{bola.username} — {getText('payments')}</h2>
-          <button onClick={onClose} className={styles.closeBtn} title={getText('close')}><X size={18} /></button>
+          <h2>{bola.username} — {t('payments')}</h2>
+          <button onClick={onClose} className={styles.closeBtn} title={t('close')}><X size={18} /></button>
         </div>
 
         <div className={styles.inputRow}>
           <input
             type="number"
-            placeholder={getText('amount')}
+            placeholder={t('amount')}
             value={miqdor}
             onChange={(e) => setMiqdor(e.target.value)}
             className={styles.input}
@@ -103,7 +104,7 @@ export default function BolaPaymentModal({ bola, onClose }) {
             className={styles.input}
           />
           <button onClick={handleSave} className={styles.addBtn}>
-            {editing ? getText('update') : getText('add')}
+            {editing ? t('update') : t('add')}
           </button>
           {editing && (
             <button onClick={() => {
@@ -111,7 +112,7 @@ export default function BolaPaymentModal({ bola, onClose }) {
               setSana('');
               setEditing(null);
             }} className={styles.cancelBtn}>
-              {getText('cancel')}
+              {t('cancel')}
             </button>
           )}
         </div>
@@ -120,15 +121,15 @@ export default function BolaPaymentModal({ bola, onClose }) {
           <thead>
             <tr>
               <th>#</th>
-              <th>{getText('amount')}</th>
-              <th>{getText('date')}</th>
-              <th>{getText('actions')}</th>
+              <th>{t('amount')}</th>
+              <th>{t('date')}</th>
+              <th>{t('actions')}</th>
             </tr>
           </thead>
      <tbody>
   {payments.length === 0 ? (
     <tr>
-      <td colSpan="4" className={styles.empty}>{getText('noData')}</td>
+      <td colSpan="4" className={styles.empty}>{t('noData')}</td>
     </tr>
   ) : (
     payments.map((p, idx) => (
@@ -139,12 +140,12 @@ export default function BolaPaymentModal({ bola, onClose }) {
         <td>
           {!p.readonly && (
             <>
-              <button onClick={() => handleEdit(p)} className={styles.editBtn} title={getText('edit')}><Pencil size={16} /></button>
-              <button onClick={() => handleDelete(p.id)} className={styles.deleteBtn} title={getText('delete')}><Trash2 size={16} /></button>
+              <button onClick={() => handleEdit(p)} className={styles.editBtn} title={t('edit')}><Pencil size={16} /></button>
+              <button onClick={() => handleDelete(p.id)} className={styles.deleteBtn} title={t('delete')}><Trash2 size={16} /></button>
             </>
           )}
           {p.readonly && (
-            <span className="text-gray-400 italic">{getText('mainSalary')}</span>
+            <span className="text-gray-400 italic">{t('mainSalary')}</span>
           )}
         </td>
       </tr>

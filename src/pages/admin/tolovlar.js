@@ -9,7 +9,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import styles from '../../styles/AdminTable.module.css';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import LayoutComponent from '../../components/LayoutComponent';
 import DaromatModal from '../../components/DaromatModal';
 import DaromatDeleteModal from '../../components/DaromatDeleteModal';
@@ -17,8 +17,10 @@ import BonusShtrafModal from '../../components/BonusShtrafModal';
 import AdminTable from '../../components/AdminTableTolov';
 import ErrorModal from '../../components/ErrorModal';
 import { bugungiOy } from '../../utils/sana';
+import Loader from '../../components/Loader';
 
 export default function TolovlarPage() {
+  const { t } = useLang();
   const [rows, setRows] = useState([]);
   const [allBolalar, setAllBolalar] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,24 +69,24 @@ export default function TolovlarPage() {
   ];
 
   const columnTitles = {
-    fish: getText('colFullName'),
-    guruh: getText('colGroup'),
-    oylik_tolov: getText('colMonthlyFee'),
-    kunlik_tolov: getText('colDailyFee'),
-    jami: getText('colTotalLessons'),
-    kelgan: getText('colAttended'),
-    hisob: getText('colCalculated'),
-    naqt: getText('colCash'),
-    karta: getText('colCard'),
-    prichislena: getText('colBank'),
-    naqt_prichislena: getText('colBankCash'),
-    jami_tolangan: getText('colTotalPaid'),
-    bonus_shtraf: getText('colBonusPenalty'),
-    qarz_hadola_otgan: getText('colPastStatus'),
-    qarz_miqdori_otgan: getText('colPastAmount'),
-    balans: getText('colBalanceFull'),
-    prognoz_tola_kelsa: getText('colForecastFull'),
-    prognoz_kelmasa: getText('colForecastNone'),
+    fish: t('colFullName'),
+    guruh: t('colGroup'),
+    oylik_tolov: t('colMonthlyFee'),
+    kunlik_tolov: t('colDailyFee'),
+    jami: t('colTotalLessons'),
+    kelgan: t('colAttended'),
+    hisob: t('colCalculated'),
+    naqt: t('colCash'),
+    karta: t('colCard'),
+    prichislena: t('colBank'),
+    naqt_prichislena: t('colBankCash'),
+    jami_tolangan: t('colTotalPaid'),
+    bonus_shtraf: t('colBonusPenalty'),
+    qarz_hadola_otgan: t('colPastStatus'),
+    qarz_miqdori_otgan: t('colPastAmount'),
+    balans: t('colBalanceFull'),
+    prognoz_tola_kelsa: t('colForecastFull'),
+    prognoz_kelmasa: t('colForecastNone'),
   };
 
   const formatCurrency = (value) => {
@@ -216,7 +218,7 @@ export default function TolovlarPage() {
         }
         router.push('/login');
       } else {
-        setErrorMessage('Ma\'lumotlarni yuklashda xatolik yuz berdi!');
+        setErrorMessage(t('loadError'));
       }
     } finally {
       setLoading(false);
@@ -347,14 +349,14 @@ export default function TolovlarPage() {
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Guruh', size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Oylik to'lov", size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Kunlik to'lov", size: 14, bold: true })] })] }),
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Jami dars', size: 14, bold: true })] })] }),
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: t('colTotalLessonsShort'), size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Kelgan', size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Hisob', size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Naqt', size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Karta', size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Bank', size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Bank (naqt)', size: 14, bold: true })] })] }),
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Jami to‘langan', size: 14, bold: true })] })] }),
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: t('colTotalPaid'), size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Bonus/Shtraf', size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'O‘tgan oylardagi holat', size: 14, bold: true })] })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'O‘tgan oylardagi qarz/haqdorlik', size: 14, bold: true })] })] }),
@@ -457,7 +459,7 @@ export default function TolovlarPage() {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `Umumiy bank to‘lov: ${formatCurrency(totalSummary.prichislena)}`,
+                  text: t('totalBankPaymentLine').replace('{sum}', formatCurrency(totalSummary.prichislena)),
                   bold: true,
                   size: 12,
                 }),
@@ -530,14 +532,14 @@ export default function TolovlarPage() {
       'Guruh',
       "Oylik to'lov",
       "Kunlik to'lov",
-      'Jami dars',
+      t('colTotalLessonsShort'),
       'Kelgan',
       'Hisob',
       'Naqt',
       'Karta',
       'Bank',
       'Bank (naqt)',
-      'Jami to‘langan',
+      t('colTotalPaid'),
       'Bonus/Shtraf',
       'O‘tgan oylardagi holat',
       'O‘tgan oylardagi qarz/haqdorlik',
@@ -623,7 +625,7 @@ export default function TolovlarPage() {
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <label>Guruh:</label>
+            <label>{t('groupLabel')}</label>
             <select
               value={selectedGroup}
               onChange={(e) => {
@@ -631,7 +633,7 @@ export default function TolovlarPage() {
               }}
               style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '6px' }}
             >
-              <option value="">Barchasi</option>
+              <option value="">{t('all')}</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.name}
@@ -640,10 +642,10 @@ export default function TolovlarPage() {
             </select>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <label>Ism/Familya:</label>
+            <label>{t('nameSurnameLabel')}</label>
             <input
               type="text"
-              placeholder="Qidiruv..."
+              placeholder={t('searchPlaceholder')}
               value={searchFish}
               onChange={(e) => {
                 setSearchFish(e.target.value);
@@ -652,7 +654,7 @@ export default function TolovlarPage() {
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: '200px' }}>
-            <label>To‘lov turi:</label>
+            <label>{t('paymentTypeLabel')}</label>
             <select
               value={selectedPaymentType}
               onChange={(e) => {
@@ -660,7 +662,7 @@ export default function TolovlarPage() {
               }}
               style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '6px' }}
             >
-              <option value="">Barchasi</option>
+              <option value="">{t('all')}</option>
               <option value="naqt">Naqt to‘laganlar</option>
               <option value="karta">Karta to‘laganlar</option>
               <option value="prichislena">Bank orqali to‘laganlar</option>
@@ -672,7 +674,7 @@ export default function TolovlarPage() {
             </select>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: '200px' }}>
-            <label>Qarzdorlik holati:</label>
+            <label>{t('debtStatusLabel')}</label>
             <select
               value={selectedStatus}
               onChange={(e) => {
@@ -680,13 +682,13 @@ export default function TolovlarPage() {
               }}
               style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '6px' }}
             >
-              <option value="">Barchasi</option>
+              <option value="">{t('all')}</option>
               <option value="qarzdor">Qarzdor</option>
               <option value="qarzsiz">Qarzsiz</option>
             </select>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: '200px' }}>
-            <label>Holati:</label>
+            <label>{t('statusLabel')}</label>
             <select
               value={filter}
               onChange={(e) => {
@@ -734,9 +736,9 @@ export default function TolovlarPage() {
         </div>
 
         {loading ? (
-          <p style={{ padding: '10px' }}>Yuklanmoqda...</p>
+          <Loader />
         ) : filteredRows.length === 0 ? (
-          <p style={{ padding: '10px' }}>Hech qanday ma&apos;lumot topilmadi.</p>
+          <p style={{ padding: '10px' }}>{t('noDataFound')}</p>
         ) : (
           <>
             <p>
@@ -767,7 +769,7 @@ export default function TolovlarPage() {
               }}
             />
             <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#f9f9f9', borderRadius: '8px', maxWidth: '400px' }}>
-              <h3>Umumiy To‘lovlar</h3>
+              <h3>{t('totalPaymentsTitle')}</h3>
               <p>
                 <strong>Naqt:</strong> {formatCurrency(totalSummary.naqt)}
               </p>
@@ -794,7 +796,7 @@ export default function TolovlarPage() {
         )}
         </>
         ) : (
-          <p style={{ padding: '20px', color: 'red' }}>Sizda to‘lovlarni ko‘rish uchun ruxsat yo‘q!</p>
+          <p style={{ padding: '20px', color: 'red' }}>{t('noPaymentsPermission')}</p>
         )}
 
         {modalOpen && (permissions.create_payments || permissions.edit_payments) && (

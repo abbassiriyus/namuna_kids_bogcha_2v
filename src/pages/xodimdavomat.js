@@ -5,9 +5,12 @@ import url from '../host/host';
 import styles from '../styles/XodimCard.module.css';
 import XodimDavomat from './admin/xodim_davomat_control';
 import FaceLogin from './admin/FaceLogin';
+import Loader from '../components/Loader';
+import { useLang } from '../i18n/LanguageContext';
 import { bugungiSana, toLocalDate } from '../utils/sana';
 
 const AdminTable = ({ data, refresh, title, xodimOneDay, todayBolaKuni, xodimWorkdays }) => {
+  const { t } = useLang();
   const token = localStorage.getItem("token");
   const [loadingStates, setLoadingStates] = useState({}); // Har bir xodim uchun loading holati
 
@@ -243,6 +246,7 @@ const AdminTable = ({ data, refresh, title, xodimOneDay, todayBolaKuni, xodimWor
 };
 
 const Xodimlar = () => {
+  const { t } = useLang();
   const [xodimlar, setXodimlar] = useState([]);
   const [bolaKuni, setBolaKuni] = useState([]);
   const [xodimOneDay, setXodimOneDay] = useState([]);
@@ -269,7 +273,7 @@ const Xodimlar = () => {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('Token topilmadi!');
+      if (!token) throw new Error(t('tokenNotFound'));
 
       const currentDate = new Date();
       const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
@@ -333,7 +337,7 @@ const Xodimlar = () => {
     .filter(x => x.ish_tur === 2)
     .sort((a, b) => a.name.localeCompare(b.name, 'uz'));
 
-  if (loading || davomatMode === null) return <div>Yuklanmoqda...</div>;
+  if (loading || davomatMode === null) return <Loader />;
   if (error) return <div>{error}</div>;
 
   if (davomatMode === 'face') {
@@ -385,7 +389,7 @@ const Xodimlar = () => {
       <AdminTable
         data={oddiyXodimlar}
         refresh={fetchData}
-        title="Oddiy xodimlar"
+        title={t('normalEmployees')}
         xodimOneDay={xodimOneDay}
         todayBolaKuni={bolaKuni}
         xodimWorkdays={xodimWorkdays}
@@ -394,7 +398,7 @@ const Xodimlar = () => {
       <AdminTable
         data={maxsusXodimlar}
         refresh={fetchData}
-        title="Maxsus xodimlar"
+        title={t('specialEmployees')}
         xodimOneDay={xodimOneDay}
         todayBolaKuni={bolaKuni}
         xodimWorkdays={xodimWorkdays}

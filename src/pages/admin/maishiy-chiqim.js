@@ -10,13 +10,14 @@ import ChiqimFilter from '../../components/ChiqimFilter';
 import ErrorModal from '../../components/ErrorModal';
 import axios from 'axios';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import { saveAs } from 'file-saver';
 import { exportToExcel } from '../../utils/exportExcel';
 import { toLocalDate } from '../../utils/sana';
 import { useUserType } from '../../utils/useUserType';
 
 export default function ChiqimOmborPage() {
+  const { t } = useLang();
   // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
   const { isSuperAdmin } = useUserType();
   const router = useRouter();
@@ -265,7 +266,7 @@ export default function ChiqimOmborPage() {
       await fetchData(startDate, endDate, productId);
     } catch (err) {
       console.error('Filterlashda xatolik:', err);
-      setErrorMessage('Filterlashda xatolik yuz berdi!');
+      setErrorMessage(t('filterError'));
     }
   };
 
@@ -297,14 +298,17 @@ export default function ChiqimOmborPage() {
 
     const headers = isAggregated
       ? [
-          '#',
-          'Mahsulot',
-          'Birlik',
-          ...uniqueDates.flatMap((date) => [`Hajm (${date})`, `Narx (${date})`]),
-          'Umumiy hajm',
-          'Umumiy narx',
+          t('colNumber'),
+          t('colProduct'),
+          t('colUnit'),
+          ...uniqueDates.flatMap((date) => [
+            t('colVolumeWithDate').replace('{date}', date),
+            t('colPriceWithDate').replace('{date}', date),
+          ]),
+          t('colTotalVolume'),
+          t('colTotalPrice'),
         ]
-      : ['#', 'Mahsulot', 'Hajm', 'Birlik', 'Izoh', 'Chiqim sanasi', 'Yaratilgan sana'];
+      : [t('colNumber'), t('colProduct'), t('colVolume'), t('colUnit'), t('colComment'), t('colExpenseDate'), t('colCreatedDate')];
     const columnWidths = isAggregated
       ? [500, 2000, 1000, ...uniqueDates.flatMap(() => [1000, 1500]), 1500, 1500]
       : [500, 2000, 1000, 1000, 4000, 1800, 1800];
@@ -374,7 +378,7 @@ export default function ChiqimOmborPage() {
       ? new TableRow({
           children: [
             createCell('', columnWidths[0]),
-            createCell('Jami', columnWidths[1], AlignmentType.RIGHT, true),
+            createCell(t('colTotal'), columnWidths[1], AlignmentType.RIGHT, true),
             createCell(
               displayedData.reduce((acc, cur) => acc + (parseFloat(cur.hajm) || 0), 0).toString(),
               columnWidths[2],
@@ -394,7 +398,7 @@ export default function ChiqimOmborPage() {
         {
           children: [
             new Paragraph({
-              text: 'Chiqimlar ro‘yxati',
+              text: t('expensesList'),
               heading: 'Heading1',
               alignment: AlignmentType.CENTER,
             }),
@@ -422,14 +426,17 @@ export default function ChiqimOmborPage() {
 
     const headers = isAggregated
       ? [
-          '#',
-          'Mahsulot',
-          'Birlik',
-          ...uniqueDates.flatMap((date) => [`Hajm (${date})`, `Narx (${date})`]),
-          'Umumiy hajm',
-          'Umumiy narx',
+          t('colNumber'),
+          t('colProduct'),
+          t('colUnit'),
+          ...uniqueDates.flatMap((date) => [
+            t('colVolumeWithDate').replace('{date}', date),
+            t('colPriceWithDate').replace('{date}', date),
+          ]),
+          t('colTotalVolume'),
+          t('colTotalPrice'),
         ]
-      : ['#', 'Mahsulot', 'Hajm', 'Birlik', 'Izoh', 'Chiqim sanasi', 'Yaratilgan sana'];
+      : [t('colNumber'), t('colProduct'), t('colVolume'), t('colUnit'), t('colComment'), t('colExpenseDate'), t('colCreatedDate')];
 
     const rows = displayedData.map((item, index) =>
       isAggregated
@@ -461,11 +468,11 @@ export default function ChiqimOmborPage() {
   // 🔹 Saqlash
   const handleSave = async (form) => {
     if (!permissions.create_household_expenses && Array.isArray(form)) {
-      setErrorMessage("Sizda chiqimni yaratish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noCreateExpensePermission'));
       return;
     }
     if (!permissions.edit_household_expenses && !Array.isArray(form)) {
-      setErrorMessage("Sizda chiqimni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMessage(t('noEditExpensePermission'));
       return;
     }
     try {
@@ -479,14 +486,14 @@ export default function ChiqimOmborPage() {
       setEditingItem(null);
     } catch (err) {
       console.error("Saqlashda xatolik:", err);
-      setErrorMessage('Saqlashda xatolik yuz berdi!');
+      setErrorMessage(t('saveError'));
     }
   };
 
   // 🔹 Tahrirlash
   const handleEdit = (item) => {
     if (!permissions.edit_household_expenses) {
-      setErrorMessage("Sizda chiqimni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMessage(t('noEditExpensePermission'));
       return;
     }
     setEditingItem(item);
@@ -496,7 +503,7 @@ export default function ChiqimOmborPage() {
   // 🔹 O‘chirish
   const handleDelete = async (id) => {
     if (!permissions.delete_household_expenses) {
-      setErrorMessage("Sizda chiqimni o‘chirish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noDeleteExpensePermission'));
       return;
     }
     try {
@@ -504,7 +511,7 @@ export default function ChiqimOmborPage() {
       await fetchData(filter.startDate, filter.endDate, filter.productId);
     } catch (err) {
       console.error('O‘chirishda xatolik:', err);
-      setErrorMessage('Chiqimni o‘chirishda xatolik yuz berdi!');
+      setErrorMessage(t('expenseDeleteError'));
     }
   };
 
@@ -513,7 +520,7 @@ export default function ChiqimOmborPage() {
       {(isSuperAdmin || permissions.view_household_expenses) ? (
         <>
           <AdminHeader
-            title="Chiqim Ombori"
+            title={t('expenseStorage')}
             onCreate={
               permissions.create_household_expenses
                 ? () => {
@@ -532,11 +539,11 @@ export default function ChiqimOmborPage() {
               onChange={(e) => setIsAggregated(e.target.checked)}
               style={{ marginRight: '10px' }}
             />
-            <span>{isAggregated ? 'Umumiy (Sanalar bo‘yicha)' : 'Yakka'}</span>
+            <span>{isAggregated ? t('totalByDates') : 'Yakka'}</span>
           </div>
 
           <div style={{ padding: '10px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <label style={{ fontWeight: '500', fontSize: '16px' }}>Izoh bo‘yicha filter:</label>
+            <label style={{ fontWeight: '500', fontSize: '16px' }}>{t('filterByComment')}</label>
             <select
               value={descriptionFilter}
               onChange={(e) => setDescriptionFilter(e.target.value)}
@@ -550,7 +557,7 @@ export default function ChiqimOmborPage() {
                 cursor: 'pointer',
               }}
             >
-              <option value="">Barchasi</option>
+              <option value="">{t('all')}</option>
               {descriptionOptions.map((desc, i) => (
                 <option key={i} value={desc}>{desc}</option>
               ))}
@@ -567,7 +574,7 @@ export default function ChiqimOmborPage() {
           />
 
           <AdminTable
-            title="Chiqimlar ro'yxati"
+            title={t('expensesList')}
             columns={
               isAggregated
                 ? ['product_nomi', 'hajm_birlik', ...uniqueDates.flatMap((date) => [`hajm_${date}`, `narx_${date}`]), 'umumiy_hajm', 'umumiy_narx']
@@ -576,28 +583,28 @@ export default function ChiqimOmborPage() {
             columnTitles={
               isAggregated
                 ? {
-                    product_nomi: getText('colProduct'),
-                    hajm_birlik: getText('colUnit'),
+                    product_nomi: t('colProduct'),
+                    hajm_birlik: t('colUnit'),
                     ...uniqueDates.reduce(
                       (acc, date) => ({
                         ...acc,
-                        [`hajm_${date}`]: `${getText('colVolume')} (${date})`,
-                        [`narx_${date}`]: `${getText('colPrice')} (${date})`,
+                        [`hajm_${date}`]: `${t('colVolume')} (${date})`,
+                        [`narx_${date}`]: `${t('colPrice')} (${date})`,
                       }),
                       {}
                     ),
-                    umumiy_hajm: getText('colTotalVolume'),
-                    umumiy_narx: getText('colTotalPrice'),
+                    umumiy_hajm: t('colTotalVolume'),
+                    umumiy_narx: t('colTotalPrice'),
                   }
                 : {
-                    id: getText('colId'),
-                    product_nomi: getText('colProduct'),
-                    hajm: getText('colVolume'),
-                    hajm_birlik: getText('colUnit'),
-                    cleanedDescription: getText('colComment'),
-                    chiqim_sana: getText('colExpenseDate'),
-                    created_at: getText('colCreatedDate'),
-                    actions: getText('colActions'),
+                    id: t('colId'),
+                    product_nomi: t('colProduct'),
+                    hajm: t('colVolume'),
+                    hajm_birlik: t('colUnit'),
+                    cleanedDescription: t('colComment'),
+                    chiqim_sana: t('colExpenseDate'),
+                    created_at: t('colCreatedDate'),
+                    actions: t('colActions'),
                   }
             }
             data={displayedData}

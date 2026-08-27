@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import { Gift, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 import styles from '../styles/AdminTable.module.css';
 
 function AdminTable({
@@ -21,6 +21,7 @@ function AdminTable({
   onPageChange,
   permissions = {},
 }) {
+  const { t } = useLang();
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   // localStorage dan type ni olish
@@ -51,10 +52,11 @@ function AdminTable({
   const shouldFormatAsDateTime = (col) =>
     ['created_at', 'updated_at', 'sana', 'chiqim_sana', 'tugilgan_kun'].includes(col);
 
-  // Pul summalarini formatlash (bo'sh joy bilan, so'm sifatida)
+  // Pul summalarini formatlash (bo'sh joy bilan, joriy tildagi valyuta nomi bilan)
   const formatCurrency = (value) => {
-    if (value === null || value === undefined) return '0 so‘m';
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so‘m';
+    const som = t('currencySom');
+    if (value === null || value === undefined) return `0 ${som}`;
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ' + som;
   };
 
   // Asosiy jadvalda ko‘rsatiladigan ustunlar
@@ -88,7 +90,7 @@ function AdminTable({
 
   // O'chirish tugmasi bosilganda confirm oynasini ko'rsatish
   const handleDeleteClick = (id) => {
-    if (confirm(getText('confirmDeleteStudent'))) {
+    if (confirm(t('confirmDeleteStudent'))) {
       onDelete(id);
     }
   };
@@ -101,11 +103,11 @@ function AdminTable({
             <tr>
               {(effectivePermissions.edit_payments || effectivePermissions.delete_payments || effectivePermissions.view_payments) && (
                 <th className={`${styles['admin-table__th']} ${styles['sticky-actions']}`}>
-                  {getText('colActions')}
+                  {t('colActions')}
                 </th>
               )}
               <th className={`${styles['admin-table__th']} ${styles['sticky-index']}`}>
-                {getText('colNumber')}
+                {t('colNumber')}
               </th>
               {mainColumns.map((col, idx) => (
                 <th
@@ -126,7 +128,7 @@ function AdminTable({
                       <button
                         className={styles.editBtn}
                         onClick={() => onCustomAction(row, 'bonusShtraf')}
-                        title={getText('bonusShtrafAdd')}
+                        title={t('colBonusPenalty')}
                       >
                         <Gift size={16} />
                       </button>
@@ -135,7 +137,7 @@ function AdminTable({
                       <button
                         className={styles.deleteBtn}
                         onClick={() => handleDeleteClick(row.id)}
-                        title={getText('delete')}
+                        title={t('delete')}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -200,7 +202,7 @@ function AdminTable({
           disabled={currentPage === 1}
           className={styles['pagination__button']}
         >
-          <ChevronLeft size={16} /> {getText('pagination.prev')}
+          <ChevronLeft size={16} /> {t('pagination.prev')}
         </button>
         <span className={styles['pagination__info']}>
           {currentPage} / {totalPages}
@@ -210,7 +212,7 @@ function AdminTable({
           disabled={currentPage === totalPages}
           className={styles['pagination__button']}
         >
-          {getText('pagination.next')} <ChevronRight size={16} />
+          {t('pagination.next')} <ChevronRight size={16} />
         </button>
       </div>
     </div>

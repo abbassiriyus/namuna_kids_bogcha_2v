@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { sendDbError } from '@/lib/dbError';
 
 async function handler(req, res) {
   const { id } = req.query;
@@ -34,7 +35,7 @@ async function handler(req, res) {
       );
       return res.status(200).json(result.rows[0]);
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+      return sendDbError(res, err, 'Adminni saqlashda xatolik yuz berdi');
     }
   }
 
@@ -43,7 +44,7 @@ async function handler(req, res) {
       await pool.query(`DELETE FROM admin WHERE id = $1`, [id]);
       return res.status(204).end();
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+      return sendDbError(res, err, 'Adminni o\'chirishda xatolik yuz berdi');
     }
   }
 

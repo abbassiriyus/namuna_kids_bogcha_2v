@@ -9,10 +9,11 @@ import TaomModal from '../../components/TaomModal';
 import IngredientList from '../../components/IngredientList';
 import AdminHeader from '../../components/AdminHeader';
 import ErrorModal from '../../components/ErrorModal';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import styles from '../../styles/TaomnomaPage.module.css';
 
 export default function TaomnomaPage() {
+  const { t } = useLang();
   const [taomlar, setTaomlar] = useState([]);
   const [tarix, setTarix] = useState([]);
   const [selectedTaom, setSelectedTaom] = useState(null);
@@ -24,7 +25,7 @@ export default function TaomnomaPage() {
       const res = await axios.get(`${url}/taom`);
       setTaomlar(res.data);
     } catch {
-      setError(getText('loadError'));
+      setError(t('loadError'));
     }
   }, []);
 
@@ -33,7 +34,7 @@ export default function TaomnomaPage() {
       const res = await axios.get(`${url}/taom/ishlatish`);
       setTarix(res.data);
     } catch {
-      setError(getText('loadError'));
+      setError(t('loadError'));
     }
   }, []);
 
@@ -43,12 +44,12 @@ export default function TaomnomaPage() {
   }, [fetchTaomlar, fetchTarix]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm(getText('deleteMealConfirm'))) return;
+    if (!window.confirm(t('deleteMealConfirm'))) return;
     try {
       await axios.delete(`${url}/taom/${id}`);
       await Promise.all([fetchTaomlar(), fetchTarix()]);
     } catch {
-      setError(getText('deleteError'));
+      setError(t('deleteError'));
     }
   };
 
@@ -56,14 +57,14 @@ export default function TaomnomaPage() {
     <LayoutComponent>
       <div className="mb-6">
         <AdminHeader
-          title={getText('menuTitle')}
-          createLabel={getText('createMenu')}
+          title={t('menuTitle')}
+          createLabel={t('createMenu')}
           onCreate={() => { setSelectedTaom(null); setOpenModal(true); }}
         />
       </div>
 
       {taomlar.length === 0 ? (
-        <p className={styles.emptyState}>{getText('noMealsYet')}</p>
+        <p className={styles.emptyState}>{t('noMealsYet')}</p>
       ) : (
         <div className={styles.gridContainer}>
           {taomlar.map((taom) => (
@@ -76,11 +77,11 @@ export default function TaomnomaPage() {
                     className={styles.iconButton}
                   >
                     <Pencil size={16} />
-                    <span>{getText('edit')}</span>
+                    <span>{t('edit')}</span>
                   </button>
                   <button onClick={() => handleDelete(taom.id)} className={styles.iconButtonDelete}>
                     <Trash2 size={16} />
-                    <span>{getText('delete')}</span>
+                    <span>{t('delete')}</span>
                   </button>
                 </div>
               </div>
@@ -91,17 +92,17 @@ export default function TaomnomaPage() {
       )}
 
       <section className={styles.historySection}>
-        <h3 className={styles.historyTitle}>{getText('usageHistory')}</h3>
+        <h3 className={styles.historyTitle}>{t('usageHistory')}</h3>
         {tarix.length === 0 ? (
-          <p className={styles.emptyState}>{getText('noUsageYet')}</p>
+          <p className={styles.emptyState}>{t('noUsageYet')}</p>
         ) : (
           <div className={styles.tableWrapper}>
             <table className={styles.historyTable}>
               <thead>
                 <tr>
-                  <th>{getText('date')}</th>
-                  <th>{getText('colMeal')}</th>
-                  <th>{getText('childrenCount')}</th>
+                  <th>{t('date')}</th>
+                  <th>{t('colMeal')}</th>
+                  <th>{t('childrenCount')}</th>
                 </tr>
               </thead>
               <tbody>

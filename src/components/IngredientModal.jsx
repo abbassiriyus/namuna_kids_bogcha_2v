@@ -5,9 +5,10 @@ import axios from 'axios';
 import url from '../host/host';
 import { Check, X } from 'lucide-react';
 import styles from '../styles/BolaModal.module.css';
-import { getText } from '../i18n/translations';
+import { useLang } from '../i18n/LanguageContext';
 
 export default function IngredientModal({ open, setOpen, taomId, onSaved, ingredient }) {
+  const { t } = useLang();
   const [formData, setFormData] = useState({ sklad_product_id: '', miqdor: '', miqdor_birlik: '' });
   const [mahsulotlar, setMahsulotlar] = useState([]);
   const [error, setError] = useState('');
@@ -33,7 +34,7 @@ export default function IngredientModal({ open, setOpen, taomId, onSaved, ingred
     axios
       .get(`${url}/sklad_product`)
       .then((res) => setMahsulotlar(res.data))
-      .catch(() => setError(getText('loadError')));
+      .catch(() => setError(t('loadError')));
   }, [open]);
 
   const handleChange = (e) => {
@@ -54,7 +55,7 @@ export default function IngredientModal({ open, setOpen, taomId, onSaved, ingred
 
   const handleSubmit = async () => {
     if (!formData.sklad_product_id || Number(formData.miqdor) <= 0) {
-      setError(getText('fillAllFields'));
+      setError(t('fillAllFields'));
       return;
     }
 
@@ -73,7 +74,7 @@ export default function IngredientModal({ open, setOpen, taomId, onSaved, ingred
       setOpen(false);
       onSaved();
     } catch (err) {
-      setError(err.response?.data?.error || getText('saveError'));
+      setError(err.response?.data?.error || t('saveError'));
     } finally {
       setSaving(false);
     }
@@ -85,11 +86,11 @@ export default function IngredientModal({ open, setOpen, taomId, onSaved, ingred
     <div className={styles.modal}>
       <div className={styles.modal__content}>
         <h3 className={styles.modal__title}>
-          {isEdit ? getText('editIngredient') : getText('attachProduct')}
+          {isEdit ? t('editIngredient') : t('attachProduct')}
         </h3>
         <div className={styles.modal__form}>
           <select name="sklad_product_id" value={formData.sklad_product_id} onChange={handleChange}>
-            <option value="">{getText('selectProduct')}</option>
+            <option value="">{t('selectProduct')}</option>
             {mahsulotlar.map((m) => (
               <option key={m.id} value={m.id}>{m.nomi}</option>
             ))}
@@ -98,19 +99,19 @@ export default function IngredientModal({ open, setOpen, taomId, onSaved, ingred
             name="miqdor"
             value={formData.miqdor}
             onChange={handleChange}
-            placeholder={getText('amountPerChild')}
+            placeholder={t('amountPerChild')}
             type="number"
             min="0"
             step="any"
           />
-          <input name="miqdor_birlik" value={formData.miqdor_birlik} readOnly placeholder={getText('unitPlaceholder')} />
+          <input name="miqdor_birlik" value={formData.miqdor_birlik} readOnly placeholder={t('unitPlaceholder')} />
         </div>
         {error && <p style={{ color: '#dc2626', margin: '4px 0' }}>{error}</p>}
         <div className={styles.modal__buttons}>
           <button onClick={handleSubmit} disabled={saving}>
-            <Check size={16} /> {saving ? getText('saving') : getText('save')}
+            <Check size={16} /> {saving ? t('saving') : t('save')}
           </button>
-          <button onClick={() => setOpen(false)}><X size={16} /> {getText('cancel')}</button>
+          <button onClick={() => setOpen(false)}><X size={16} /> {t('cancel')}</button>
         </div>
       </div>
     </div>

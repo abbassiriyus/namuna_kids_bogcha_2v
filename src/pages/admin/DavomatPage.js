@@ -11,8 +11,11 @@ import DavomatModal from '../../components/DavomatModal';
 import ErrorModal from '../../components/ErrorModal';
 import styles from '../../styles/DavomatPage.module.css';
 import { bugungiOy, bugungiSana, toLocalDate } from '../../utils/sana';
+import Loader from '../../components/Loader';
+import { useLang } from '../../i18n/LanguageContext';
 
 export default function DavomatPage() {
+  const { t } = useLang();
   const router = useRouter();
   const [month, setMonth] = useState(() => bugungiOy());
   const [bolalar, setBolalar] = useState([]);
@@ -44,7 +47,7 @@ export default function DavomatPage() {
     } catch (err) {
       console.error('Guruhlar olishda xatolik:', err);
       if (err.response?.status === 403) {
-        setErrorMessage('Guruhlarni olish uchun ruxsat yo‘q');
+        setErrorMessage(t('noGroupsPermission'));
       }
     } finally {
       setLoading(false);
@@ -67,7 +70,7 @@ export default function DavomatPage() {
     } catch (err) {
       console.error('Dars kunlarini olishda xatolik:', err);
       if (err.response?.status === 403) {
-        setErrorMessage('Dars kunlarini olish uchun ruxsat yo‘q');
+        setErrorMessage(t('noLessonsPermission'));
       }
     } finally {
       setLoading(false);
@@ -82,9 +85,9 @@ export default function DavomatPage() {
     } catch (err) {
       console.error('Davomatlarni olishda xatolik:', err);
       if (err.response?.status === 403 && err.config.url.includes('bola_kun')) {
-        setErrorMessage('Davomatlarni olish uchun ruxsat yo‘q');
+        setErrorMessage(t('noAttendancePermission'));
       } else {
-        setErrorMessage('Davomatlarni olishda noma’lum xatolik yuz berdi');
+        setErrorMessage(t('attendanceUnknownError'));
       }
     } finally {
       setLoading(false);
@@ -122,7 +125,7 @@ export default function DavomatPage() {
     } catch (err) {
       console.error('Xatolik bolalarni olishda:', err);
       if (err.response?.status === 403 && err.config.url.includes('bola_kun')) {
-        setErrorMessage('Bolalarni olish uchun ruxsat yo‘q');
+        setErrorMessage(t('noChildrenPermission'));
       }
     } finally {
       setLoading(false);
@@ -150,7 +153,7 @@ export default function DavomatPage() {
     } catch (err) {
       console.error('Ruxsatlarni olishda xatolik:', err);
       if (err.response?.status === 403) {
-        setErrorMessage('Ruxsatlarni olish uchun ruxsat yo‘q');
+        setErrorMessage(t('noPermissionsFetchPermission'));
       }
     } finally {
       setLoading(false);
@@ -243,7 +246,7 @@ useEffect(() => {
       setErrorMessage(
         err.response?.data?.error ||
         err.response?.data?.message ||
-        'Davomatni saqlashda noma’lum xatolik yuz berdi'
+        t('attendanceSaveUnknownError')
       );
     } finally {
       setLoading(false);
@@ -291,7 +294,7 @@ useEffect(() => {
             />
             <input
               type="text"
-              placeholder="Ism yoki familiya..."
+              placeholder={t('nameSurnamePlaceholder')}
               className={styles.searchInput}
               value={searchQuery}
               onChange={handleSearchChange}
@@ -307,12 +310,12 @@ useEffect(() => {
               ))}
             </select>
             <button onClick={toggleUnmarkedOnly} className={styles.filterBtn}>
-              {filterUnmarkedOnly ? (<><RotateCcw size={16} /> Barchasini ko‘rsatish</>) : (<><Clock size={16} /> Bugun belgilanmaganlar</>)}
+              {filterUnmarkedOnly ? (<><RotateCcw size={16} /> {t('showAll')}</>) : (<><Clock size={16} /> Bugun belgilanmaganlar</>)}
             </button>
           </div>
 
           {loading ? (
-            <p style={{ padding: '10px' }}>Yuklanmoqda...</p>
+            <Loader />
           ) : (
             <div className={styles.tableWrapper}>
               <table className={styles.table}>

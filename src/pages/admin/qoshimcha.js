@@ -7,7 +7,7 @@ import AdminTable from '../../components/AdminTable';
 import QoshimchaModal from '../../components/QoshimchaModal';
 import axios from 'axios';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import AdminHeader from '../../components/AdminHeader';
 import ChiqimFilter from '../../components/ChiqimFilter';
 import ErrorModal from '../../components/ErrorModal';
@@ -17,6 +17,7 @@ import { FileSpreadsheet } from 'lucide-react';
 import { useUserType } from '../../utils/useUserType';
 
 export default function QoshimchaPage() {
+  const { t } = useLang();
   // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
   const { isSuperAdmin } = useUserType();
   const router = useRouter();
@@ -83,14 +84,14 @@ export default function QoshimchaPage() {
         }
         router.push('/');
       } else {
-        setErrorMessage('Ma\'lumotlarni yuklashda xatolik yuz berdi!');
+        setErrorMessage(t('loadError'));
       }
     }
   };
 
   const handleDelete = async (id) => {
     if (!permissions.delete_extras) {
-      setErrorMessage("Sizda qo‘shimcha chiqimni o‘chirish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noDeleteExtraPermission'));
       return;
     }
     try {
@@ -98,7 +99,7 @@ export default function QoshimchaPage() {
       fetchData();
     } catch (err) {
       console.error("O‘chirishda xatolik:", err);
-      setErrorMessage('Qo‘shimcha chiqimni o‘chirishda xatolik yuz berdi!');
+      setErrorMessage(t('extraDeleteError'));
     }
   };
 
@@ -106,13 +107,13 @@ export default function QoshimchaPage() {
     try {
       if (editingItem) {
         if (!permissions.edit_extras) {
-          setErrorMessage("Sizda qo‘shimcha chiqimni tahrirlash uchun ruxsat yo‘q!");
+          setErrorMessage(t('noEditExtraPermission'));
           return;
         }
         await axios.put(`${url}/chiqim_qoshimcha/${editingItem.id}`, form, authHeader);
       } else {
         if (!permissions.create_extras) {
-          setErrorMessage("Sizda qo‘shimcha chiqim yaratish uchun ruxsat yo‘q!");
+          setErrorMessage(t('noCreateExtraPermission'));
           return;
         }
         await axios.post(`${url}/chiqim_qoshimcha`, form, authHeader);
@@ -122,13 +123,13 @@ export default function QoshimchaPage() {
       setEditingItem(null);
     } catch (err) {
       console.error("Saqlashda xatolik:", err);
-      setErrorMessage('Saqlashda xatolik yuz berdi!');
+      setErrorMessage(t('saveError'));
     }
   };
 
   const handleEdit = (item) => {
     if (!permissions.edit_extras) {
-      setErrorMessage("Sizda qo‘shimcha chiqimni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMessage(t('noEditExtraPermission'));
       return;
     }
     setEditingItem(item);
@@ -150,7 +151,7 @@ export default function QoshimchaPage() {
       setData(res.data);
     } catch (err) {
       console.error("Filterlashda xatolik:", err);
-      setErrorMessage('Filterlashda xatolik yuz berdi!');
+      setErrorMessage(t('filterError'));
     }
   };
 
@@ -240,7 +241,7 @@ export default function QoshimchaPage() {
         {
           children: [
             new Paragraph({
-              text: 'Qo‘shimcha chiqimlar ro‘yxati',
+              text: t('extraExpensesList'),
               heading: 'Heading1',
               alignment: AlignmentType.CENTER,
             }),
@@ -292,7 +293,7 @@ export default function QoshimchaPage() {
       {isSuperAdmin || permissions.view_extras ? (
         <>
           <AdminHeader
-            title="Qo‘shimcha chiqimlar"
+            title={t('extraExpenses')}
             onCreate={
               permissions.create_extras
                 ? () => {
@@ -330,15 +331,15 @@ export default function QoshimchaPage() {
           </button>
 
           <AdminTable
-            title="Qo‘shimcha chiqimlar ro‘yxati"
+            title={t('extraExpensesList')}
             columns={['id', 'price', 'payment_method', 'description', 'created_at', 'actions']}
             columnTitles={{
-              id: getText('colId'),
-              price: getText('colPrice'),
-              payment_method: getText('colPaymentType'),
-              description: getText('colComment'),
-              created_at: getText('colTime'),
-              actions: getText('colActions'),
+              id: t('colId'),
+              price: t('colPrice'),
+              payment_method: t('colPaymentType'),
+              description: t('colComment'),
+              created_at: t('colTime'),
+              actions: t('colActions'),
             }}
             data={data}
             onDelete={permissions.delete_extras ? (id) => handleDelete(id) : null}

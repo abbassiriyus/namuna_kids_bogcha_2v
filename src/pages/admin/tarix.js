@@ -7,9 +7,10 @@ import AdminTable from "../../components/AdminTable";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import url from "../../host/host";
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 
 export default function Tarix() {
+  const { t } = useLang();
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
 
@@ -81,13 +82,13 @@ export default function Tarix() {
   ];
 
   const columnTitles = {
-    id: "№",
-    admin_username: getText('colAdmin'),
-    method: getText('colAction'),
-    table_name: getText('colTable'),
-    izoh: getText('colCommentJson'),
-    created_at: getText('colCreatedAt'),
-    updated_at: getText('colUpdatedAt'),
+    id: t('colNumber'),
+    admin_username: t('colAdmin'),
+    method: t('colAction'),
+    table_name: t('colTable'),
+    izoh: t('colCommentJson'),
+    created_at: t('colCreatedAt'),
+    updated_at: t('colUpdatedAt'),
   };
 
   // 🔽 unique adminlarni chiqarib olish
@@ -95,12 +96,12 @@ export default function Tarix() {
 
   return (
     <LayoutComponent>
-     <h2 className={styles.title}>Tarix</h2>
+     <h2 className={styles.title}>{t('historyTitle')}</h2>
 
 <div className={styles.filterPanel}>
   <input
     type="text"
-    placeholder="Qidirish..."
+    placeholder={t('searchPlaceholderShort')}
     className={styles.searchInput}
     value={searchText}
     onChange={(e) => setSearchText(e.target.value)}
@@ -111,7 +112,7 @@ export default function Tarix() {
     value={methodFilter}
     onChange={(e) => setMethodFilter(e.target.value)}
   >
-    <option value="">Barcha metodlar</option>
+    <option value="">{t('allMethods')}</option>
     <option value="POST">POST</option>
     <option value="PUT">PUT</option>
     <option value="DELETE">DELETE</option>
@@ -122,7 +123,7 @@ export default function Tarix() {
     value={adminFilter}
     onChange={(e) => setAdminFilter(e.target.value)}
   >
-    <option value="">Barcha adminlar</option>
+    <option value="">{t('allAdmins')}</option>
     {uniqueAdmins.map((admin, i) => (
       <option key={i} value={admin}>
         {admin}
@@ -146,12 +147,12 @@ export default function Tarix() {
       setDateFilter("");
     }}
   >
-    <X size={16} /> Tozalash
+    <X size={16} /> {t('clearFilters')}
   </button>
 </div>
 
       <AdminTable
-        title="Tarix"
+        title={t('historyTitle')}
         columns={columns}
         columnTitles={columnTitles}
         data={filteredData}

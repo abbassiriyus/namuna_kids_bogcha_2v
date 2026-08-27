@@ -1,8 +1,35 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { sendDbError } from '@/lib/dbError';
 
 async function handler(req, res) {
   const { xodim_id } = req.query;
+
+  if (req.method === 'GET') {
+    // Frontend shu yerdan "bugungi yozuv bormi" deb so'raydi (sendTime →
+    // getAttendance). Bu handler yo'q edi — GET har doim 405 qaytarardi,
+    // shuning uchun "mavjud yozuv" doim topilmagandek ko'rinib, "Ishdan
+    // ketdim" tugmasi hech qachon PUT yubormas edi.
+    const { workday } = req.query;
+    try {
+      const result = workday
+        ? await pool.query(
+            `SELECT * FROM xodim_one_day
+             WHERE xodim_id = $1 AND xodim_workdays_id = $2
+             ORDER BY created_at DESC LIMIT 1`,
+            [xodim_id, workday]
+          )
+        : await pool.query(
+            `SELECT * FROM xodim_one_day
+             WHERE xodim_id = $1 AND created_at::date = CURRENT_DATE
+             ORDER BY created_at DESC LIMIT 1`,
+            [xodim_id]
+          );
+      return res.status(200).json(result.rows);
+    } catch (err) {
+      return sendDbError(res, err, "Davomat ma'lumotlarini olishda xatolik yuz berdi");
+    }
+  }
 
   if (req.method === 'PUT') {
     const { end_time } = req.body;
@@ -24,7 +51,7 @@ async function handler(req, res) {
     }
   }
 
-  res.setHeader('Allow', ['PUT']);
+  res.setHeader('Allow', ['GET', 'PUT']);
   return res.status(405).end(`Method ${req.method} Not Allowed`);
 }
 

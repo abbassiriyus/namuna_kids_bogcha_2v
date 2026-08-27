@@ -7,11 +7,13 @@ import LayoutComponent from '../../components/LayoutComponent';
 import AdminTable from '../../components/AdminTable';
 import AdminHeader from '../../components/AdminHeader';
 import ErrorModal from '../../components/ErrorModal';
+import Loader from '../../components/Loader';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import { useUserType } from '../../utils/useUserType';
 
 export default function Lavozimlar() {
+  const { t } = useLang();
   // localStorage render paytida o'qilsa hydration xatosi beradi — hook mount'dan keyin o'qiydi.
   const { isSuperAdmin } = useUserType();
   const router = useRouter();
@@ -77,7 +79,7 @@ export default function Lavozimlar() {
         }
         router.push('/');
       } else {
-        setErrorMsg('Ma\'lumotlarni yuklashda xatolik yuz berdi!');
+        setErrorMsg(t('loadError'));
       }
     } finally {
       setLoading(false);
@@ -95,11 +97,11 @@ export default function Lavozimlar() {
 
   const handleSubmit = async () => {
     if (!permissions.create_positions && !editId) {
-      setErrorMsg("Sizda lavozimni yaratish uchun ruxsat yo‘q!");
+      setErrorMsg(t('noCreatePositionPermission'));
       return;
     }
     if (!permissions.edit_positions && editId) {
-      setErrorMsg("Sizda lavozimni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMsg(t('noEditPositionPermission'));
       return;
     }
     setBtnLoading(true);
@@ -115,7 +117,7 @@ export default function Lavozimlar() {
       await fetchData();
     } catch (err) {
       console.error('Yozishda xatolik:', err);
-      setErrorMsg('Saqlashda xatolik yuz berdi!');
+      setErrorMsg(t('saveError'));
     } finally {
       setBtnLoading(false);
     }
@@ -123,7 +125,7 @@ export default function Lavozimlar() {
 
   const handleEdit = (item) => {
     if (!permissions.edit_positions) {
-      setErrorMsg("Sizda lavozimni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMsg(t('noEditPositionPermission'));
       return;
     }
     setForm(item);
@@ -133,25 +135,25 @@ export default function Lavozimlar() {
 
   const handleDelete = async (id) => {
     if (!permissions.delete_positions) {
-      setErrorMsg("Sizda lavozimni o‘chirish uchun ruxsat yo‘q!");
+      setErrorMsg(t('noDeletePositionPermission'));
       return;
     }
-    if (confirm("Haqiqatan ham bu tarbiyalanuvchini o‘chirmoqchimisiz? Bu amaliyot yomon oqibatlarga olib kelishi mumkin!")) {
+    if (confirm(t('confirmDeleteGeneric'))) {
       try {
         await axios.delete(`${url}/lavozim/${id}`, authHeader);
         await fetchData();
       } catch (err) {
         console.error('O‘chirishda xatolik:', err);
-        setErrorMsg('Lavozimni o‘chirishda xatolik yuz berdi!');
+        setErrorMsg(t('positionDeleteError'));
       }
     }
   };
 
   const columnTitles = {
-    id: getText('colId'),
-    name: getText('colPositionName'),
-    created_at: getText('colCreatedAt'),
-    updated_at: getText('colUpdatedAt'),
+    id: t('colId'),
+    name: t('colPositionName'),
+    created_at: t('colCreatedAt'),
+    updated_at: t('colUpdatedAt'),
   };
 
   return (
@@ -159,7 +161,7 @@ export default function Lavozimlar() {
       {isSuperAdmin || permissions.view_positions ? (
         <>
           <AdminHeader
-            title="Lavozimlar"
+            title={t('positions')}
             onCreate={
               permissions.create_positions
                 ? () => {
@@ -173,10 +175,10 @@ export default function Lavozimlar() {
           />
 
           {loading ? (
-            <p style={{ padding: '10px' }}>Yuklanmoqda...</p>
+            <Loader />
           ) : (
             <AdminTable
-              title="Lavozimlar ro'yxati"
+              title={t('positionsList')}
               columns={Object.keys(columnTitles)}
               columnTitles={columnTitles}
               data={data}
@@ -193,12 +195,12 @@ export default function Lavozimlar() {
           {showModal && (permissions.create_positions || permissions.edit_positions) && (
             <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div style={{ background: 'white', padding: '20px', borderRadius: '10px', width: '300px' }}>
-                <h3>{editId ? 'Tahrirlash' : 'Yangi lavozim'}</h3>
+                <h3>{editId ? t('edit') : t('newPosition')}</h3>
                 <input
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  placeholder="Lavozim nomi"
+                  placeholder={t('positionNamePlaceholder')}
                   style={{ width: '92%', padding: '8px', marginBottom: '10px' }}
                 />
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -207,7 +209,7 @@ export default function Lavozimlar() {
                     disabled={btnLoading}
                     style={{ padding: '10px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px' }}
                   >
-                    {btnLoading ? 'Saqlanmoqda...' : 'Saqlash'}
+                    {btnLoading ? t('saving') : t('save')}
                   </button>
                   <button
                     onClick={() => setShowModal(false)}

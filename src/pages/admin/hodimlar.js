@@ -11,8 +11,9 @@ import ErrorModal from '../../components/ErrorModal';
 import FaceCaptureModal from '../../components/FaceCaptureModal';
 import styles from '../../styles/hodimlar.module.css';
 import url from '../../host/host';
-import { getText } from '../../i18n/translations';
+import { useLang } from '../../i18n/LanguageContext';
 import { toLocalDate } from '../../utils/sana';
+import Loader from '../../components/Loader';
 
 function getMonthDays(year, month) {
   const date = new Date(year, month, 1);
@@ -25,6 +26,7 @@ function getMonthDays(year, month) {
 }
 
 export default function Hodimlar() {
+  const { t } = useLang();
   const router = useRouter();
   const [data, setData] = useState([]);
   const [lavozimlar, setLavozimlar] = useState([]);
@@ -112,7 +114,7 @@ export default function Hodimlar() {
         }
         router.push('/');
       } else {
-        setErrorMsg('Ma\'lumotlarni yuklashda xatolik yuz berdi!');
+        setErrorMsg(t('loadError'));
       }
     } finally {
       setLoading(false);
@@ -139,11 +141,11 @@ export default function Hodimlar() {
 
   const handleSubmit = async () => {
     if (!permissions.create_employees && !editId) {
-      setErrorMsg("Sizda xodimni yaratish uchun ruxsat yo‘q!");
+      setErrorMsg(t('noCreateEmployeePermission'));
       return;
     }
     if (!permissions.edit_employees && editId) {
-      setErrorMsg("Sizda xodimni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMsg(t('noEditEmployeePermission'));
       return;
     }
     setSubmitting(true);
@@ -182,7 +184,7 @@ export default function Hodimlar() {
       setShowModal(false);
       setImagePreview(null);
     } catch (err) {
-      setErrorMsg(err.response?.data?.error || 'Xatolik yuz berdi');
+      setErrorMsg(err.response?.data?.error || t('errorOccurred'));
     } finally {
       setSubmitting(false);
     }
@@ -191,7 +193,7 @@ export default function Hodimlar() {
   const handleEdit = (item) => {
     console.log('handleEdit chaqirildi:', item);
     if (!permissions.edit_employees) {
-      setErrorMsg("Sizda xodimni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMsg(t('noEditEmployeePermission'));
       return;
     }
     setForm({
@@ -212,7 +214,7 @@ export default function Hodimlar() {
 
   const handleDelete = async (id) => {
     if (!permissions.delete_employees) {
-      setErrorMsg("Sizda xodimni o‘chirish uchun ruxsat yo‘q!");
+      setErrorMsg(t('noDeleteEmployeePermission'));
       return;
     }
     try {
@@ -220,7 +222,7 @@ export default function Hodimlar() {
       await fetchData();
     } catch (err) {
       console.error('O‘chirishda xatolik:', err);
-      setErrorMsg('Xodimni o‘chirishda xatolik yuz berdi!');
+      setErrorMsg(t('employeeDeleteError'));
     }
   };
 
@@ -255,18 +257,18 @@ export default function Hodimlar() {
   };
 
   const columnTitles = {
-    id: getText('colId'),
-    name: getText('colFullName'),
-    phone: getText('colPhone'),
-    lavozim_nomi: getText('colPosition'),
-    address: getText('colAddress'),
-    oylik: getText('colSalary'),
-    ish_tur: getText('colWorkType'),
-    start_time: getText('colStartTime'),
-    end_time: getText('colEndTime'),
-    image: getText('colImage'),
-    face_action: getText('colFace'),
-    created_at: getText('colCreatedAt'),
+    id: t('colId'),
+    name: t('colFullName'),
+    phone: t('colPhone'),
+    lavozim_nomi: t('colPosition'),
+    address: t('colAddress'),
+    oylik: t('colSalary'),
+    ish_tur: t('colWorkType'),
+    start_time: t('colStartTime'),
+    end_time: t('colEndTime'),
+    image: t('colImage'),
+    face_action: t('colFace'),
+    created_at: t('colCreatedAt'),
   };
 
   const customRenderers = {
@@ -280,13 +282,13 @@ export default function Hodimlar() {
         />
       ) : '—',
     ish_tur: (row) =>
-      row.ish_tur === 1 ? getText('workTypeAttendance') : (
+      row.ish_tur === 1 ? t('workTypeAttendance') : (
         <>
-          {getText('workTypeFree')}
+          {t('workTypeFree')}
           <button
             onClick={() => openSettingsModal(row)}
             style={{ marginLeft: '8px', cursor: 'pointer' }}
-            title="Setting"
+            title={t('settingsTitle')}
           >
             <Settings size={16} />
           </button>
@@ -296,7 +298,7 @@ export default function Hodimlar() {
       <button
         onClick={() => setFaceEmployee(row)}
         style={{ display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
-        title="Yuzni saqlash (Face ID)"
+        title={t('saveFaceId')}
       >
         <ScanFace size={16} /> {row.face_descriptor ? 'Qayta olish' : 'Saqlash'}
       </button>
@@ -308,7 +310,7 @@ export default function Hodimlar() {
       {permissions.view_employees ? (
         <>
           <AdminHeader
-            title="Xodimlar"
+            title={t('employees')}
             onCreate={
               permissions.create_employees
                 ? () => {
@@ -351,7 +353,7 @@ export default function Hodimlar() {
               <input
                 type="text"
                 className={styles.searchInput}
-                placeholder="Ism yoki telefon raqam..."
+                placeholder={t('searchNameOrPhone')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -361,7 +363,7 @@ export default function Hodimlar() {
           {showModal && (permissions.create_employees || permissions.edit_employees) && (
             <div className={styles.modalOverlay}>
               <div className={styles.modal}>
-                <h3>{editId ? 'Xodimni tahrirlash' : 'Yangi xodim yaratish'}</h3>
+                <h3>{editId ? t('editEmployee') : t('newEmployee')}</h3>
                 <div className={styles.formGroup}>
                   <label>F.I.Sh</label>
                   <input type="text" name="name" value={form.name} onChange={handleChange} />
@@ -373,7 +375,7 @@ export default function Hodimlar() {
                 <div className={styles.formGroup}>
                   <label>Lavozim</label>
                   <select name="lavozim_id" value={form.lavozim_id} onChange={handleChange}>
-                    <option value="">Tanlang</option>
+                    <option value="">{t('selectPlaceholder')}</option>
                     {lavozimlar.map((lavozim) => (
                       <option key={lavozim.id} value={lavozim.id}>{lavozim.name}</option>
                     ))}
@@ -424,7 +426,7 @@ export default function Hodimlar() {
                   <button onClick={handleSubmit} disabled={submitting}>
                     {submitting ? 'Saqlanmoqda...' : 'Saqlash'}
                   </button>
-                  <button onClick={() => setShowModal(false)}>Bekor qilish</button>
+                  <button onClick={() => setShowModal(false)}>{t('cancel')}</button>
                 </div>
               </div>
             </div>
@@ -490,7 +492,7 @@ export default function Hodimlar() {
                             }
                           } catch (err) {
                             console.error("Xatolik:", err);
-                            setErrorMsg("Xatolik yuz berdi");
+                            setErrorMsg(t('errorOccurred'));
                           }
                         }}
                       />
@@ -499,7 +501,7 @@ export default function Hodimlar() {
                   ))}
                 </div>
                 <div className={styles.modalButtons}>
-                  <button onClick={() => setSettingsModal(false)}>Yopish</button>
+                  <button onClick={() => setSettingsModal(false)}>{t('close')}</button>
                 </div>
               </div>
             </div>
@@ -520,10 +522,10 @@ export default function Hodimlar() {
           )}
 
           {loading ? (
-            <p style={{ padding: '10px' }}>Yuklanmoqda...</p>
+            <Loader />
           ) : (
             <AdminTable
-              title={activeTab === 'davomat' ? 'Davomat bilan xodimlar' : 'Erkin ish xodimlar'}
+              title={activeTab === 'davomat' ? t('employeesWithAttendance') : t('employeesFlexible')}
               columns={Object.keys(columnTitles)}
               columnTitles={columnTitles}
               data={data.filter(
@@ -547,7 +549,7 @@ export default function Hodimlar() {
         </>
       ) : (
         <p style={{ padding: '20px', color: 'red' }}>
-          {getText('noPermission')}
+          {t('noPermission')}
         </p>
       )}
     </LayoutComponent>
