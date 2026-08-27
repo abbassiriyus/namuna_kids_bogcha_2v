@@ -106,11 +106,11 @@ export default function XodimOneDayManager() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("End_time NULL qilindi");
+      alert(t('endTimeSetNull'));
       setLatest(res.data.data);
     } catch (e) {
       console.error(e);
-      alert("Xatolik (end_time -> NULL)");
+      alert(t('endTimeNullError'));
     } finally {
       setLoading(false);
     }
@@ -125,11 +125,11 @@ export default function XodimOneDayManager() {
       await axios.delete(`${url}/xodim_one_day/latest/${selectedXodim}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert("Oxirgi yozuv o‘chirildi");
+      alert(t('lastRecordDeleted'));
       setLatest(null);
     } catch (e) {
       console.error(e);
-      alert("Xatolik (delete)");
+      alert(t('deleteActionError'));
     } finally {
       setLoading(false);
     }

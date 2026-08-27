@@ -249,7 +249,7 @@ export default function ChiqimOmborPage() {
     } = await import('docx');
 
     if (!displayedData.length) {
-      setErrorMessage("Export qilish uchun ma'lumot yo‘q");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -347,7 +347,7 @@ export default function ChiqimOmborPage() {
 
 const handleExportToExcel = async () => {
     if (!displayedData.length) {
-      setErrorMessage("Export qilish uchun ma'lumot yo‘q");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -483,7 +483,7 @@ const handleSave = async (form) => {
               id="aggregateToggle"
             />
             <label htmlFor="aggregateToggle">
-              {isAggregated ? t('totalByDates') : 'Yakka'}
+              {isAggregated ? t('totalByDates') : t('singleView')}
             </label>
           </div>
 

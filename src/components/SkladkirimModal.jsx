@@ -163,10 +163,10 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
                   className={styles.input}
                   style={{ flex: 1 }}
                 >
-                  <option value="naqt">Naqt</option>
-                  <option value="karta">Karta</option>
-                  <option value="bank">Bank</option>
-                  <option value="boshqa">Boshqa</option>
+                  <option value="naqt">{t('payCash')}</option>
+                  <option value="karta">{t('payCard')}</option>
+                  <option value="bank">{t('payBank')}</option>
+                  <option value="boshqa">{t('payOther')}</option>
                 </select>
 
                 {rows.length > 1 && (
@@ -219,7 +219,7 @@ export default function SkladKirimModal({ isOpen, onClose, onSave, products = []
         )}
 
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> Saqlash</button>
+          <button onClick={handleSubmit}><Check size={16} /> {t('save')}</button>
           <button onClick={onClose}><X size={16} /> {t('cancel')}</button>
         </div>
       </div>

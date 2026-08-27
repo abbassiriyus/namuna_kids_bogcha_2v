@@ -197,7 +197,7 @@ useEffect(() => {
 
   const updateBolaStage = async (bolaId, newStage) => {
     if (!permissions.edit_sinovdavomat) {
-      setErrorMessage("Sizda bosqichni yangilash uchun ruxsat yo‘q!");
+      setErrorMessage(t('noStagePermission'));
       return;
     }
     try {
@@ -246,7 +246,7 @@ useEffect(() => {
       {permissions.view_sinovdavomat ? (
         <>
           <div className={styles.header}>
-            <h2 className={styles.title}>Bog‘cha Dars Kunlari Davomat</h2>
+            <h2 className={styles.title}>{t('attendanceTitle')}</h2>
             <input
               type="month"
               value={month}
@@ -265,7 +265,7 @@ useEffect(() => {
               onChange={(e) => setSelectedGuruh(e.target.value)}
               className={styles.select}
             >
-              <option value="">Barcha guruhlar</option>
+              <option value="">{t('allGroups')}</option>
               {guruhlar.map(guruh => (
                 <option key={guruh.id} value={guruh.id}>{guruh.name}</option>
               ))}
@@ -288,8 +288,8 @@ useEffect(() => {
                 <thead>
                   <tr>
                     <th style={{ textAlign: 'center', position: 'sticky', left: '0px', zIndex: 222 }}>№</th>
-                    <th style={{ position: 'sticky', left: '40px', zIndex: 22222 }}>Ism Familiya</th>
-                    <th>Bosqich</th>
+                    <th style={{ position: 'sticky', left: '40px', zIndex: 22222 }}>{t('nameSurname')}</th>
+                    <th>{t('colStage')}</th>
                     {darsKunlar.map(d => (
                       <th key={d.id}>{d.sana.slice(8, 10)}</th>
                     ))}
@@ -308,9 +308,9 @@ useEffect(() => {
                             onChange={(e) => updateBolaStage(bola.id, e.target.value)}
                           >
                             <option value="">{t('selectPlaceholder')}</option>
-                            <option value="boshlangich">Boshlang‘ich</option>
-                            <option value="qabul_qilindi">Qabul qilindi</option>
-                            <option value="kelmay_qoydi">Kelmay qo‘ydi</option>
+                            <option value="boshlangich">{t('statusInitial')}</option>
+                            <option value="qabul_qilindi">{t('statusAccepted')}</option>
+                            <option value="kelmay_qoydi">{t('statusStopped')}</option>
                           </select>
                         ) : (
                           bola.holati || '—'
@@ -349,7 +349,7 @@ useEffect(() => {
               onClose={() => setSelected(null)}
               onSelect={async (holati) => {
                 if (!permissions.create_sinovdavomat && !permissions.edit_sinovdavomat && !permissions.delete_sinovdavomat) {
-                  setErrorMessage("Sizda davomatni o‘zgartirish uchun ruxsat yo‘q!");
+                  setErrorMessage(t('noAttendanceEditPermission'));
                   return;
                 }
                 const existing = davomatlar.find(d => d.bola_id === selected.bola.id && d.darssana_id === selected.dars.id);

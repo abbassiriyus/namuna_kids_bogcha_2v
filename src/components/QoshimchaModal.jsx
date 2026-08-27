@@ -39,10 +39,10 @@ export default function QoshimchaModal({ isOpen, onClose, onSave, initialData })
             placeholder={t('price')}
           />
           <select name="payment_method" value={form.payment_method} onChange={handleChange}>
-            <option value="naqt">Naqt</option>
-            <option value="karta">Karta</option>
-            <option value="bank">Bank</option>
-            <option value="boshqa">Boshqa</option>
+            <option value="naqt">{t('payCash')}</option>
+            <option value="karta">{t('payCard')}</option>
+            <option value="bank">{t('payBank')}</option>
+            <option value="boshqa">{t('payOther')}</option>
           </select>
           <textarea
             name="description"

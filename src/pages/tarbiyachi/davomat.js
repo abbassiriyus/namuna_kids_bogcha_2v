@@ -135,7 +135,7 @@ useEffect(() => {
       )}
 
       {!dars && (
-        <p style={{ color: 'red' }}>Bugungi dars belgilanmagan. Iltimos, avval mavzu yarating.</p>
+        <p style={{ color: 'red' }}>{t('todayLessonNotSet')}</p>
       )}
 
       {dars && bolalar.length > 0 && (
@@ -201,7 +201,7 @@ useEffect(() => {
             borderTop: '1px solid #ccc',
             fontSize: '16px'
           }}>
-            <strong>Statistika:</strong><br />
+            <strong>{t('statisticsLabel')}</strong><br />
             Jami bola: <strong>{jami}</strong><br />
             Kelgan: <strong style={{ color: 'green' }}>{kelgan}</strong><br />
             Kelmagan: <strong style={{ color: 'red' }}>{kelmagan}</strong>

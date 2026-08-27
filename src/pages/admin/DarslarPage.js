@@ -97,7 +97,7 @@ export default function DarslarPage() {
 
   const handleCheckboxChange = async (dateStr) => {
     if (!permissions.edit_lessons && !permissions.delete_lessons) {
-      setErrorMessage("Sizda dars kunlarini tahrirlash yoki o'chirish uchun ruxsat yo'q!");
+      setErrorMessage(t('noEditLessonPermission'));
       return;
     }
 
@@ -107,14 +107,14 @@ export default function DarslarPage() {
     try {
       if (isChecked) {
         if (!permissions.delete_lessons) {
-          setErrorMessage("Sizda dars kunini o'chirish uchun ruxsat yo'q!");
+          setErrorMessage(t('noDeleteLessonPermission'));
           return;
         }
         await axios.delete(`${url}/bola_kun_all`, { data: { sana: dateStr }, ...authHeader });
         setSelectedDates((prev) => prev.filter((d) => d !== dateStr));
       } else {
         if (!permissions.create_lessons) {
-          setErrorMessage("Sizda dars kuni yaratish uchun ruxsat yo'q!");
+          setErrorMessage(t('noCreateLessonPermission'));
           return;
         }
         await axios.post(
@@ -129,7 +129,7 @@ export default function DarslarPage() {
       }
     } catch (err) {
       console.error('Xatolik:', err);
-      setErrorMessage('Dars kuni o`zgartirishda xatolik yuz berdi!');
+      setErrorMessage(t('lessonChangeError'));
     } finally {
       setLoading(false);
     }
@@ -137,7 +137,7 @@ export default function DarslarPage() {
 
   const handleAutoFill = async () => {
     if (!permissions.create_lessons) {
-      setErrorMessage("Sizda dars kunlarini avtomatik to'ldirish uchun ruxsat yo'q!");
+      setErrorMessage(t('noAutofillPermission'));
       return;
     }
 
@@ -162,7 +162,7 @@ export default function DarslarPage() {
       setSelectedDates((prev) => [...prev, ...newDates]);
     } catch (err) {
       console.error('Xatolik:', err);
-      setErrorMessage('Avtomatik to`ldirishda xatolik yuz berdi!');
+      setErrorMessage(t('autofillError'));
     } finally {
       setLoading(false);
     }
@@ -177,7 +177,7 @@ export default function DarslarPage() {
           <div className={styles.calendar}>
             <div className={styles.calendar__top}>
               <label htmlFor="month-select" className={styles.calendar__label}>
-                Oy tanlang:
+                {t('selectMonthLabel')}:
               </label>
               <input
                 id="month-select"

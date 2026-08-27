@@ -211,7 +211,7 @@ export default function TolovlarPage() {
     } catch (error) {
       console.error('Xatolik:', error);
       if (error.response?.status === 400) {
-        setErrorMessage('Noto‘g‘ri oy parametri kiritildi!');
+        setErrorMessage(t('invalidMonthParam'));
       } else if (error.response?.status === 401 || error.response?.status === 403) {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('token');
@@ -324,11 +324,11 @@ export default function TolovlarPage() {
     const { Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun } = await import('docx');
 
     if (!permissions.view_payments) {
-      setErrorMessage("Sizda ma'lumotlarni eksport qilish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noExportPermission'));
       return;
     }
     if (!filteredRows.length) {
-      setErrorMessage("Eksport qilish uchun ma'lumot yo‘q!");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -518,11 +518,11 @@ export default function TolovlarPage() {
 
   const handleExportToExcel = async () => {
     if (!permissions.view_payments) {
-      setErrorMessage("Sizda ma'lumotlarni eksport qilish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noExportPermission'));
       return;
     }
     if (!filteredRows.length) {
-      setErrorMessage("Eksport qilish uchun ma'lumot yo‘q!");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -571,11 +571,11 @@ export default function TolovlarPage() {
 
   const handleCustomAction = (row, actionType) => {
     if (!permissions.edit_payments && actionType !== 'delete') {
-      setErrorMessage("Sizda to'lovlarni tahrirlash uchun ruxsat yo‘q!");
+      setErrorMessage(t('noEditPaymentPermission'));
       return;
     }
     if (!permissions.delete_payments && actionType === 'delete') {
-      setErrorMessage("Sizda to'lovlarni o‘chirish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noDeletePaymentPermission'));
       return;
     }
     if (actionType === 'bonusShtraf') {
@@ -663,14 +663,14 @@ export default function TolovlarPage() {
               style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '6px' }}
             >
               <option value="">{t('all')}</option>
-              <option value="naqt">Naqt to‘laganlar</option>
-              <option value="karta">Karta to‘laganlar</option>
-              <option value="prichislena">Bank orqali to‘laganlar</option>
-              <option value="naqt_prichislena">Bank (naqt) orqali to‘laganlar</option>
-              <option value="naqt_yoq">Naqt to‘lamaganlar</option>
-              <option value="karta_yoq">Karta to‘lamaganlar</option>
-              <option value="prichislena_yoq">Bank orqali to‘lamaganlar</option>
-              <option value="naqt_prichislena_yoq">Bank (naqt) orqali to‘lamaganlar</option>
+              <option value="naqt">{t('paidCash')}</option>
+              <option value="karta">{t('paidCard')}</option>
+              <option value="prichislena">{t('paidBank')}</option>
+              <option value="naqt_prichislena">{t('paidBankCash')}</option>
+              <option value="naqt_yoq">{t('unpaidCash')}</option>
+              <option value="karta_yoq">{t('unpaidCard')}</option>
+              <option value="prichislena_yoq">{t('unpaidBank')}</option>
+              <option value="naqt_prichislena_yoq">{t('unpaidBankCash')}</option>
             </select>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: '200px' }}>
@@ -683,8 +683,8 @@ export default function TolovlarPage() {
               style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '6px' }}
             >
               <option value="">{t('all')}</option>
-              <option value="qarzdor">Qarzdor</option>
-              <option value="qarzsiz">Qarzsiz</option>
+              <option value="qarzdor">{t('inDebt')}</option>
+              <option value="qarzsiz">{t('noDebt')}</option>
             </select>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: '200px' }}>
@@ -697,10 +697,10 @@ export default function TolovlarPage() {
               }}
               style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '6px' }}
             >
-              <option value="all">Barchasi</option>
-              <option value="active">Faol</option>
-              <option value="inactive">Nofaol</option>
-              <option value="qarzdor">Qarzdor</option>
+              <option value="all">{t('all')}</option>
+              <option value="active">{t('activeLabel')}</option>
+              <option value="inactive">{t('inactiveBadge')}</option>
+              <option value="qarzdor">{t('inDebt')}</option>
             </select>
           </div>
           <button
@@ -742,7 +742,7 @@ export default function TolovlarPage() {
         ) : (
           <>
             <p>
-              <strong>Natija:</strong> {filteredRows.length} ta bola
+              <strong>{t('resultLabel')}</strong> {filteredRows.length} ta bola
             </p>
             <AdminTable
               title=""
@@ -771,25 +771,25 @@ export default function TolovlarPage() {
             <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#f9f9f9', borderRadius: '8px', maxWidth: '400px' }}>
               <h3>{t('totalPaymentsTitle')}</h3>
               <p>
-                <strong>Naqt:</strong> {formatCurrency(totalSummary.naqt)}
+                <strong>{t('cashLabel')}</strong> {formatCurrency(totalSummary.naqt)}
               </p>
               <p>
-                <strong>Karta:</strong> {formatCurrency(totalSummary.karta)}
+                <strong>{t('cardLabel')}</strong> {formatCurrency(totalSummary.karta)}
               </p>
               <p>
-                <strong>Bank to‘lov:</strong> {formatCurrency(totalSummary.prichislena)}
+                <strong>{t('bankPaymentLabel')}</strong> {formatCurrency(totalSummary.prichislena)}
               </p>
               <p>
-                <strong>Bank (naqt):</strong> {formatCurrency(totalSummary.naqt_prichislena)}
+                <strong>{t('bankCashLabel')}</strong> {formatCurrency(totalSummary.naqt_prichislena)}
               </p>
               <p>
-                <strong>Jami to‘langan:</strong> {formatCurrency(totalSummary.jami_tolangan)}
+                <strong>{t('totalPaidLabel')}</strong> {formatCurrency(totalSummary.jami_tolangan)}
               </p>
               <p>
-                <strong>Bonus/Shtraf:</strong> {formatCurrency(totalSummary.bonus_shtraf)}
+                <strong>{t('bonusPenaltyLabel')}</strong> {formatCurrency(totalSummary.bonus_shtraf)}
               </p>
               <p>
-                <strong>O‘tgan oylardagi qarz/haqdorlik:</strong> {formatCurrency(totalSummary.qarz_miqdori_otgan)}
+                <strong>{t('pastDebtLabel')}</strong> {formatCurrency(totalSummary.qarz_miqdori_otgan)}
               </p>
             </div>
           </>

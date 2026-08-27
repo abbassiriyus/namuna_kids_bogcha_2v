@@ -43,10 +43,10 @@ export default function ChiqimFilter({ filter, onChange, onSubmit, onExport, onE
         onChange={onSearch}  // Search inputga o'zgartirishni yuborish
       />
 
-      <button onClick={onSubmit} className={styles.button}><Search size={16} /> Filterlash</button>
-      <button onClick={onExport} className={styles.button} style={{ backgroundColor: '#2ecc71' }}><Archive size={16} /> Filega aylantirish</button>
+      <button onClick={onSubmit} className={styles.button}><Search size={16} /> {t('doFilter')}</button>
+      <button onClick={onExport} className={styles.button} style={{ backgroundColor: '#2ecc71' }}><Archive size={16} /> {t('toWordFile')}</button>
       {onExportExcel && (
-        <button onClick={onExportExcel} className={styles.button} style={{ backgroundColor: '#217346' }}><FileSpreadsheet size={16} /> Excelga aylantirish</button>
+        <button onClick={onExportExcel} className={styles.button} style={{ backgroundColor: '#217346' }}><FileSpreadsheet size={16} /> {t('toExcelFile')}</button>
       )}
     </div>
   );

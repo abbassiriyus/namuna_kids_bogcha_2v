@@ -260,7 +260,7 @@ export default function OyliklarPage() {
         <>
           <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Oy tanlang:
+              {t('selectMonthLabel')}:
             </label>
             <input
               type="month"

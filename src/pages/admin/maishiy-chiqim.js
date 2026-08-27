@@ -292,7 +292,7 @@ export default function ChiqimOmborPage() {
     } = await import('docx');
 
     if (!displayedData.length) {
-      setErrorMessage("Export qilish uchun ma'lumot yo‘q");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -420,7 +420,7 @@ export default function ChiqimOmborPage() {
   // 🔹 Excelga eksport
   const handleExportToExcel = async () => {
     if (!displayedData.length) {
-      setErrorMessage("Export qilish uchun ma'lumot yo‘q");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -539,7 +539,7 @@ export default function ChiqimOmborPage() {
               onChange={(e) => setIsAggregated(e.target.checked)}
               style={{ marginRight: '10px' }}
             />
-            <span>{isAggregated ? t('totalByDates') : 'Yakka'}</span>
+            <span>{isAggregated ? t('totalByDates') : t('singleView')}</span>
           </div>
 
           <div style={{ padding: '10px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>

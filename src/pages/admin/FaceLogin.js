@@ -183,7 +183,7 @@ export default function FaceLogin() {
 
   return (
     <div className={styles.wrapper}>
-      <h2 className={styles.title}>Yuz orqali davomat</h2>
+      <h2 className={styles.title}>{t('faceAttendance')}</h2>
 
       {!active ? (
         <button className={styles.startBtn} onClick={() => setActive(true)}>
@@ -203,14 +203,14 @@ export default function FaceLogin() {
                   <span className={styles.cornerBR} />
                 </div>
                 {scanState === 'notmatched' && (
-                  <div className={styles.notMatchedOverlay}>Mos kelmadi</div>
+                  <div className={styles.notMatchedOverlay}>{t('noMatch')}</div>
                 )}
               </>
             )}
           </div>
 
           {!modelsLoaded && (
-            <p className={styles.status}><Loader2 size={14} className={styles.spin} /> Tizim yuklanmoqda...</p>
+            <p className={styles.status}><Loader2 size={14} className={styles.spin} /> {t('systemLoading')}</p>
           )}
 
           {modelsLoaded && !recognized && <p className={styles.status}>{status}</p>}
@@ -238,11 +238,11 @@ export default function FaceLogin() {
             <div className={styles.actionRow}>
               {todayState === 'open' ? (
                 <button className={styles.ketBtn} onClick={() => handleAction('ketish')} disabled={actionLoading}>
-                  <LogOut size={18} /> Ishdan ketdim
+                  <LogOut size={18} /> {t('checkOut')}
                 </button>
               ) : (
                 <button className={styles.kelBtn} onClick={() => handleAction('kelish')} disabled={actionLoading}>
-                  <Check size={18} /> Ishga keldim
+                  <Check size={18} /> {t('checkIn')}
                 </button>
               )}
             </div>
@@ -287,7 +287,7 @@ export default function FaceLogin() {
 
         {showRoster && (
           rosterLoading && roster.length === 0 ? (
-            <p className={styles.status}><Loader2 size={14} className={styles.spin} /> Yuklanmoqda...</p>
+            <p className={styles.status}><Loader2 size={14} className={styles.spin} /> {t('loadingShort')}</p>
           ) : roster.length === 0 ? (
             <p className={styles.status}>{t('employeesNotFound')}</p>
           ) : (
@@ -298,10 +298,10 @@ export default function FaceLogin() {
                     <th>{t('colEmployee')}</th>
                     <th>{t('colPlan')}</th>
                     <th>{t('colAttended')}</th>
-                    <th>Ketgan</th>
-                    <th>Kechikkan</th>
-                    <th>Kayfiyat</th>
-                    <th>Face ID</th>
+                    <th>{t('colLeft')}</th>
+                    <th>{t('colLate')}</th>
+                    <th>{t('colMood')}</th>
+                    <th>{t('colFaceId')}</th>
                   </tr>
                 </thead>
                 <tbody>

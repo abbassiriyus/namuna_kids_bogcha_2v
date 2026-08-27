@@ -167,7 +167,7 @@ export default function KirimlarPage() {
       console.error('Ma\'lumotlarni olishda xatolik:', err.message);
       if (err.response?.status === 401 || err.response?.status === 403) {
         localStorage.removeItem('token');
-        setErrorMessage('Sessiya tugadi. Iltimos, qayta kiring.');
+        setErrorMessage(t('sessionExpired'));
         router.push('/login');
       } else {
         setErrorMessage('Ma\'lumotlarni yuklashda xatolik yuz berdi: ' + err.message);
@@ -289,11 +289,11 @@ export default function KirimlarPage() {
       setLoading(true);
       const { startDate, endDate, productId } = filter;
       if (startDate && isNaN(new Date(startDate).getTime())) {
-        setErrorMessage('Boshlang‘ich sana noto‘g‘ri!');
+        setErrorMessage(t('startDateInvalid'));
         return;
       }
       if (endDate && isNaN(new Date(endDate).getTime())) {
-        setErrorMessage('Tugash sanasi noto‘g‘ri!');
+        setErrorMessage(t('endDateInvalid'));
         return;
       }
       await fetchData(startDate, endDate, productId);
@@ -324,7 +324,7 @@ export default function KirimlarPage() {
     } = await import('docx');
 
     if (!displayedData.length) {
-      setErrorMessage("Eksport qilish uchun ma'lumot yo‘q!");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -419,7 +419,7 @@ export default function KirimlarPage() {
 
   const handleExportToExcel = async () => {
     if (!displayedData.length) {
-      setErrorMessage("Eksport qilish uchun ma'lumot yo‘q!");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -486,7 +486,7 @@ export default function KirimlarPage() {
               onChange={(e) => setIsAggregated(e.target.checked)}
               id="aggregateToggle"
             />
-            <label htmlFor="aggregateToggle">{isAggregated ? t('totalByDates') : 'Yakka'}</label>
+            <label htmlFor="aggregateToggle">{isAggregated ? t('totalByDates') : t('singleView')}</label>
           </div>
           {loading ? (
             <Loader />

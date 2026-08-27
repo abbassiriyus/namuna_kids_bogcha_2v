@@ -100,7 +100,7 @@ export default function Sinov() {
         }
         router.push('/');
       } else if (error.response?.status === 403 && error.config.url.includes('bola_kun_prp')) {
-        setErrorMessage('Bunday amalni bajarib bo‘lmaydi');
+        setErrorMessage(t('cannotDoAction'));
       }
     } finally {
       setLoading(false);
@@ -109,7 +109,7 @@ export default function Sinov() {
 
   const handleSendToBola = async (bolaData) => {
     if (!permissions.edit_prp) {
-      setErrorMessage("Sizda tarbiyalanuvchi ma'lumotlarini yuborish uchun ruxsat yo'q!");
+      setErrorMessage(t('noSendDataPermission'));
       return;
     }
     try {
@@ -171,9 +171,9 @@ export default function Sinov() {
     } catch (error) {
       console.error('Bola APIga yuborishda xatolik:', error);
       if (error.response?.status === 403 && error.config?.url.includes('bola_kun_prp')) {
-        setErrorMessage('Bunday amalni bajarib bo‘lmaydi');
+        setErrorMessage(t('cannotDoAction'));
       } else {
-        setErrorMessage("Xatolik yuz berdi: Ma'lumotni yuborishda muammo!");
+        setErrorMessage(t('dataSubmitError'));
       }
     }
   };
@@ -198,7 +198,7 @@ export default function Sinov() {
     } catch (error) {
       console.error('is_active yangilashda xatolik:', error);
       if (error.response?.status === 403 && error.config?.url.includes('bola_kun_prp')) {
-        setErrorMessage('Bunday amalni bajarib bo‘lmaydi');
+        setErrorMessage(t('cannotDoAction'));
       } else {
         setErrorMessage(t('statusUpdateError'));
       }
@@ -253,9 +253,9 @@ export default function Sinov() {
       } catch (err) {
         console.error('O‘chirishda xatolik:', err);
         if (err.response?.status === 403 && err.config?.url.includes('bola_kun_prp')) {
-          setErrorMessage('Bunday amalni bajarib bo‘lmaydi');
+          setErrorMessage(t('cannotDoAction'));
         } else {
-          setErrorMessage("O‘chirishda xatolik yuz berdi!");
+          setErrorMessage(t('deleteErrorGeneric'));
         }
       }
     }
@@ -409,9 +409,9 @@ export default function Sinov() {
                   }}
                 >
                   <option value="">{t('all')}</option>
-                  <option value="boshlangich">Boshlang‘ich</option>
-                  <option value="qabul_qilindi">Qabul qilindi</option>
-                  <option value="kelmay_qoydi">Kelmay qo‘ydi</option>
+                  <option value="boshlangich">{t('statusInitial')}</option>
+                  <option value="qabul_qilindi">{t('statusAccepted')}</option>
+                  <option value="kelmay_qoydi">{t('statusStopped')}</option>
                 </select>
               </div>
 
@@ -463,7 +463,7 @@ export default function Sinov() {
           {/* STATISTIKA */}
           {permissions.view_prp && (
             <div style={{ marginBottom: '15px', fontWeight: '600' }}>
-              Statistika:
+              {t('statisticsLabel')}
               <span style={{ marginLeft: '15px' }}>Boshlang‘ich: {holatStats.boshlangich}</span>
               <span style={{ marginLeft: '15px' }}>Qabul qilindi: {holatStats.qabul_qilindi}</span>
               <span style={{ marginLeft: '15px' }}>Kelmay qo‘ydi: {holatStats.kelmay_qoydi}</span>

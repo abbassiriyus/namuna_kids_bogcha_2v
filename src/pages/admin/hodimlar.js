@@ -244,7 +244,7 @@ export default function Hodimlar() {
       setSettingsModal(true);
     } catch (err) {
       console.error("Ish kunlarini olishda xatolik:", err);
-      setErrorMsg("Ish kunlarini olishda xatolik yuz berdi");
+      setErrorMsg(t('workdaysLoadError'));
     }
   };
 
@@ -369,11 +369,11 @@ export default function Hodimlar() {
                   <input type="text" name="name" value={form.name} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Telefon</label>
+                  <label>{t('colPhone')}</label>
                   <input type="text" name="phone" value={form.phone} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Lavozim</label>
+                  <label>{t('colPosition')}</label>
                   <select name="lavozim_id" value={form.lavozim_id} onChange={handleChange}>
                     <option value="">{t('selectPlaceholder')}</option>
                     {lavozimlar.map((lavozim) => (
@@ -382,22 +382,22 @@ export default function Hodimlar() {
                   </select>
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Manzil</label>
+                  <label>{t('colAddress')}</label>
                   <input type="text" name="address" value={form.address} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Oylik</label>
+                  <label>{t('colSalary')}</label>
                   <input type="number" name="oylik" value={form.oylik} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Ish turi</label>
+                  <label>{t('colWorkTypeLabel')}</label>
                   <select name="ish_tur" value={form.ish_tur} onChange={handleChange}>
-                    <option value="1">Davomat bilan</option>
-                    <option value="2">Erkin ish</option>
+                    <option value="1">{t('workWithAttendance')}</option>
+                    <option value="2">{t('workFree')}</option>
                   </select>
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Ish boshlanishi (start_time)</label>
+                  <label>{t('workStartLabel')}</label>
                   <input
                     type="time"
                     name="start_time"
@@ -406,7 +406,7 @@ export default function Hodimlar() {
                   />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Ish tugashi (end_time)</label>
+                  <label>{t('workEndLabel')}</label>
                   <input
                     type="time"
                     name="end_time"
@@ -415,9 +415,9 @@ export default function Hodimlar() {
                   />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Rasm</label>
+                  <label>{t('photoLabel')}</label>
                   <input type="file" name="image" accept="image/*" onChange={handleChange} />
-                  {imagePreview && <img src={imagePreview} alt="Preview" className={styles.previewImg} />}
+                  {imagePreview && <img src={imagePreview} alt={t('previewLabel')} className={styles.previewImg} />}
                 </div>
 
                 {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}

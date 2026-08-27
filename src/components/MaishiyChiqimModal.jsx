@@ -210,11 +210,11 @@ useEffect(() => {
   {groupOptions.map((group) => (
     <option key={group.id} value={group.name}>{group.name}</option>
   ))}
-  <option value="Ko`cha">Ko`cha</option>
-  <option value="Oshxona">Oshxona</option>
-  <option value="Karidor">Karidor</option>
+  <option value="Ko`cha">{t('placeStreet')}</option>
+  <option value="Oshxona">{t('placeKitchen')}</option>
+  <option value="Karidor">{t('placeCorridor')}</option>
 
-  <option value="other">Boshqa...</option>
+  <option value="other">{t('otherDots')}</option>
 </select>
 
 {/* Agar "➕ Boshqa..." tanlansa, input ochiladi */}
@@ -235,7 +235,7 @@ useEffect(() => {
 
               {mavjud !== undefined && (
                 <p style={{ marginTop: '4px', color: 'gray' }}>
-                  <strong>Mavjud hajm:</strong> {mavjud} {product?.hajm_birlik || ''}
+                  <strong>{t('availableVolumeLabel')}</strong> {mavjud} {product?.hajm_birlik || ''}
                 </p>
               )}
             </div>
@@ -260,7 +260,7 @@ useEffect(() => {
         </button>
 
         <div className={styles.modal__buttons}>
-          <button onClick={handleSubmit}><Check size={16} /> Saqlash</button>
+          <button onClick={handleSubmit}><Check size={16} /> {t('save')}</button>
           <button onClick={onClose}><X size={16} /> {t('cancel')}</button>
         </div>
       </div>

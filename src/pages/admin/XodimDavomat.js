@@ -402,7 +402,7 @@ export default function XodimDavomat() {
 
   const sendTime = async (xodimId, type) => {
     if (!permissions.edit_employees) {
-      setErrorMessage("Sizda davomatni tahrirlash uchun ruxsat yo'q!");
+      setErrorMessage(t('noAttendanceEditPermission'));
       return;
     }
 
@@ -588,7 +588,7 @@ export default function XodimDavomat() {
       return;
     }
     if (!xodimlar.length) {
-      setErrorMessage("Eksport qilish uchun ma'lumot yo'q!");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -639,7 +639,7 @@ export default function XodimDavomat() {
       return;
     }
     if (!xodimlar.length) {
-      setErrorMessage("Eksport qilish uchun ma'lumot yo'q!");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -785,7 +785,7 @@ export default function XodimDavomat() {
       });
     } catch (err) {
       console.error('Ertangi kun ma\'lumotlarini eksport qilishda xato:', err);
-      setErrorMessage('Ertangi kun ma\'lumotlarini eksport qilishda xatolik yuz berdi!');
+      setErrorMessage(t('tomorrowExportError'));
     } finally {
       setLoading(false);
     }
@@ -797,7 +797,7 @@ export default function XodimDavomat() {
       return;
     }
     if (!xodimlar.length) {
-      setErrorMessage("Eksport qilish uchun ma'lumot yo'q!");
+      setErrorMessage(t('noDataToExport'));
       return;
     }
 
@@ -817,7 +817,7 @@ export default function XodimDavomat() {
           .filter(k => k.sana === tomorrow);
       } catch (err) {
         console.error('bola_kun_all so‘rovida xato:', err);
-        setErrorMessage("Ish kunlari ma'lumotlarini olishda xatolik!");
+        setErrorMessage(t('workdayDataError'));
         throw err;
       }
 
@@ -868,7 +868,7 @@ export default function XodimDavomat() {
       }
 
       if (!tomorrowBolaKuni.length && !tomorrowMaxsusKunlar.length) {
-        setErrorMessage("Ertangi kun uchun ish kuni ma'lumotlari yo'q!");
+        setErrorMessage(t('tomorrowNoWorkdayData'));
         setLoading(false);
         return;
       }
@@ -891,7 +891,7 @@ export default function XodimDavomat() {
       await exportToExcel({ headers, rows, filename: `davomat_${tomorrow}` });
     } catch (err) {
       console.error('Ertangi kun ma\'lumotlarini eksport qilishda xato:', err);
-      setErrorMessage('Ertangi kun ma\'lumotlarini eksport qilishda xatolik yuz berdi!');
+      setErrorMessage(t('tomorrowExportError'));
     } finally {
       setLoading(false);
     }
@@ -1197,7 +1197,7 @@ export default function XodimDavomat() {
                                           onClick={(e) => { e.stopPropagation(); sendTime(xodim.id, 'kelgan'); }}
                                           disabled={loading || !permissions.edit_employees || loadingStates[`kelgan_${xodim.id}`]}
                                         >
-                                          {loadingStates[`kelgan_${xodim.id}`] ? t('saving') : <><Check size={14} /> Ishga keldim</>}
+                                          {loadingStates[`kelgan_${xodim.id}`] ? t('saving') : <><Check size={14} /> {t('checkIn')}</>}
                                         </button>
                                       )}
                                     </div>
@@ -1210,7 +1210,7 @@ export default function XodimDavomat() {
                                           onClick={(e) => { e.stopPropagation(); sendTime(xodim.id, 'ketgan'); }}
                                           disabled={loading || !permissions.edit_employees || !vaqtInfo.start_time || loadingStates[`ketgan_${xodim.id}`]}
                                         >
-                                          {loadingStates[`ketgan_${xodim.id}`] ? t('saving') : <><LogOut size={14} /> Ishdan ketdim</>}
+                                          {loadingStates[`ketgan_${xodim.id}`] ? t('saving') : <><LogOut size={14} /> {t('checkOut')}</>}
                                         </button>
                                       )}
                                     </div>

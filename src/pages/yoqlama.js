@@ -65,7 +65,7 @@ export default function Login() {
       const type = admin.type;
 
       if (!token) {
-        setError("Login yoki parol noto‘g‘ri");
+        setError(t('loginErrorWrong'));
         setIsLoading(false);
         return;
       }
@@ -105,10 +105,10 @@ export default function Login() {
         return;
       }
 
-      setError("Sizda hech qanday sahifaga kirish ruxsati yo‘q");
+      setError(t('loginErrorNoAccess'));
       setIsLoading(false);
     } catch (err) {
-      setError("Server bilan bog‘lanishda xatolik: " + (err.response?.data?.message || err.message));
+      setError(t('loginErrorServer') + ': ' + (err.response?.data?.message || err.message));
       setIsLoading(false);
     }
   };
@@ -118,7 +118,7 @@ export default function Login() {
       <div className={styles.ornament} aria-hidden="true"></div>
       <div className={styles.overlay}></div>
       <form onSubmit={handleLogin} className={styles.loginBox}>
-        <h2>Admin Login</h2>
+        <h2>{t('loginTitle')}</h2>
         {error && <p className={styles.error}>{error}</p>}
         <input
           type="text"
@@ -138,10 +138,10 @@ export default function Login() {
           {isLoading ? (
             <span className={styles.btnLoading}>
               <Loader2 size={16} className={styles.spin} />
-              {redirecting ? 'Tizimga kirilmoqda, kuting...' : 'Kirilmoqda...'}
+              {redirecting ? t('loginRedirecting') : t('loggingIn')}
             </span>
           ) : (
-            'Kirish'
+            t('loginButton')
           )}
         </button>
       </form>

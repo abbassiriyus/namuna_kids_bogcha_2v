@@ -181,13 +181,13 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Oy bo‘yicha Davomat Statistikasi</h2>
+      <h2 className={styles.title}>{t('monthlyAttendanceStats')}</h2>
 
       {/* Oy Dashboard'ning yuqorisidagi tanlagichdan boshqarilsa, bu yerda
           takroriy input ko'rsatilmaydi. */}
       {!isControlled && (
         <div className={styles.controls}>
-          <label>Oy tanlang: </label>
+          <label>{t('selectMonthLabel')}: </label>
           <input
             type="month"
             value={month}
@@ -198,7 +198,7 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
       )}
 
       <div style={{ marginBottom: '2rem' }}>
-        <h2>Kunlik davomat</h2>
+        <h2>{t('dailyAttendanceChart')}</h2>
         {dailyDavomatData.length > 0 && (
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={dailyDavomatData}>
@@ -216,7 +216,7 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
 
       {/* {topDays.length > 0 && (
         <div style={{ marginBottom: '2rem' }}>
-          <h3>Eng yaxshi 3 kun</h3>
+          <h3>{t('top3Days')}</h3>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             {topDays.map((day, index) => (
               <div key={index} style={{
@@ -228,7 +228,7 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
               }}>
                 <h4>{formatDate(day.sana)}</h4>
-                <p><strong>KPI:</strong> <span style={{ color: '#16a34a' }}>{day.kpi}%</span></p>
+                <p><strong>{t('kpiLabel')}</strong> <span style={{ color: '#16a34a' }}>{day.kpi}%</span></p>
               </div>
             ))}
           </div>
@@ -236,7 +236,7 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
       )} */}
 
       {/* <div style={{ gridColumn: '1 / -1' }}>
-        <h2>Guruhlar KPI statistikasi</h2>
+        <h2>{t('groupsKpiStats')}</h2>
 
         {groupKPIData.length > 0 && (
           <ResponsiveContainer width="100%" height={300}>
@@ -255,7 +255,7 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
 
         {topGroups.length > 0 && (
           <div style={{ marginTop: '2rem' }}>
-            <h3>Eng yaxshi 3 guruh</h3>
+            <h3>{t('top3Groups')}</h3>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               {topGroups.map((group, index) => (
                 <div key={index} style={{
@@ -267,7 +267,7 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
                   boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
                 }}>
                   <h4 style={{ marginBottom: '4px' }}>{group.guruh}</h4>
-                  <p><strong>KPI:</strong> <span style={{ color: '#2563eb' }}>{group.kpi}%</span></p>
+                  <p><strong>{t('kpiLabel')}</strong> <span style={{ color: '#2563eb' }}>{group.kpi}%</span></p>
                 </div>
               ))}
             </div>

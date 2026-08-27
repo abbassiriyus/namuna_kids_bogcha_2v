@@ -212,7 +212,7 @@ useEffect(() => {
 
   const openModal = (bola, dars) => {
     if (!permissions.edit_attendance && !permissions.create_attendance && !permissions.delete_attendance) {
-      setErrorMessage("Sizda davomatni o‘zgartirish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noAttendanceEditPermission'));
       return;
     }
     setErrorMessage('');
@@ -223,7 +223,7 @@ useEffect(() => {
     if (!selected) return;
 
     if (!permissions.create_attendance && !permissions.edit_attendance && !permissions.delete_attendance) {
-      setErrorMessage("Sizda davomatni o‘zgartirish uchun ruxsat yo‘q!");
+      setErrorMessage(t('noAttendanceEditPermission'));
       return;
     }
 
@@ -281,7 +281,7 @@ useEffect(() => {
       {permissions.view_attendance ? (
         <>
           <div className={styles.header}>
-            <h2 className={styles.title}>Bog‘cha Dars Kunlari Davomat</h2>
+            <h2 className={styles.title}>{t('attendanceTitle')}</h2>
             <input
               type="month"
               value={month}
@@ -304,13 +304,13 @@ useEffect(() => {
               onChange={handleGuruhChange}
               className={styles.select}
             >
-              <option value="">Barcha guruhlar</option>
+              <option value="">{t('allGroups')}</option>
               {guruhlar.map(guruh => (
                 <option key={guruh.id} value={guruh.id}>{guruh.name}</option>
               ))}
             </select>
             <button onClick={toggleUnmarkedOnly} className={styles.filterBtn}>
-              {filterUnmarkedOnly ? (<><RotateCcw size={16} /> {t('showAll')}</>) : (<><Clock size={16} /> Bugun belgilanmaganlar</>)}
+              {filterUnmarkedOnly ? (<><RotateCcw size={16} /> {t('showAll')}</>) : (<><Clock size={16} /> {t('unmarkedToday')}</>)}
             </button>
           </div>
 
@@ -322,11 +322,11 @@ useEffect(() => {
                 <thead>
                   <tr>
                     <th style={{ textAlign: 'center', position: 'sticky', left: '0px', zIndex: 22, top: '0px' }}>№</th>
-                    <th style={{ position: 'sticky', left: '45px', zIndex: 22 }}>Ism Familiya</th>
+                    <th style={{ position: 'sticky', left: '45px', zIndex: 22 }}>{t('nameSurname')}</th>
                     {darsKunlar.map(d => (
                       <th key={d.id}>{d.sana.slice(8, 10)}</th>
                     ))}
-                    <th><Check size={14} color="var(--color-success)" /> Bor</th>
+                    <th><Check size={14} color="var(--color-success)" /> {t('presentShort')}</th>
                     <th><X size={14} color="var(--color-danger)" /> Yo‘q</th>
                   </tr>
                 </thead>
@@ -372,7 +372,7 @@ useEffect(() => {
                 <tfoot>
                   <tr>
                     <td className={styles.stickyCol} style={{ fontWeight: 'bold', zIndex: 333, left: '0px' }}></td>
-                    <td className={styles.stickyCol} style={{ fontWeight: 'bold', zIndex: 333, left: '40px' }}>Kun bo‘yicha:</td>
+                    <td className={styles.stickyCol} style={{ fontWeight: 'bold', zIndex: 333, left: '40px' }}>{t('byDayLabel')}</td>
                     {darsKunlar.map(d => {
                       const kunDavomat = davomatlar.filter(
                         v => v.darssana_id === d.id &&

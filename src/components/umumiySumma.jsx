@@ -62,7 +62,7 @@ export default function UmumiySumma() {
     // Yil validatsiyasi
     const yearRegex = /^\d{4}$/;
     if (!yearRegex.test(year)) {
-      setError('Yil YYYY formatida bo‘lishi kerak');
+      setError(t('yearFormatError'));
       setLoading(false);
       return;
     }
@@ -244,7 +244,7 @@ export default function UmumiySumma() {
   // Word eksporti uchun funksiya
   const handleExportToWord = async () => {
     if (!data || !data.daromat || !data.maishiy || !data.taktic || !data.qoshimcha || !data.oylik || !data.totalChiqim) {
-      setError('Eksport qilish uchun ma’lumotlar hali to‘liq yuklanmadi');
+      setError(t('dataNotLoadedYet'));
       return;
     }
 
@@ -395,7 +395,7 @@ export default function UmumiySumma() {
   // Excel eksporti uchun funksiya
   const handleExportToExcel = async () => {
     if (!data || !data.daromat || !data.maishiy || !data.taktic || !data.qoshimcha || !data.oylik || !data.totalChiqim) {
-      setError('Eksport qilish uchun ma’lumotlar hali to‘liq yuklanmadi');
+      setError(t('dataNotLoadedYet'));
       return;
     }
 
@@ -492,7 +492,7 @@ export default function UmumiySumma() {
       <h1 className={styles.title}>{t('totalIncomeExpense')}</h1>
       <div className={styles.form}>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Yil:</label>
+          <label className={styles.label}>{t('yearLabelColon')}</label>
           <input
             type="text"
             value={year}
@@ -508,7 +508,7 @@ export default function UmumiySumma() {
             onChange={(e) => setMonth(e.target.value)}
             className={styles.select}
           >
-            <option value="" disabled>Tanlang</option>
+            <option value="" disabled>{t('selectPlaceholder')}</option>
             {months.map((m) => (
               <option key={m.value} value={m.value}>
                 {m.label}
@@ -550,17 +550,17 @@ export default function UmumiySumma() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th className={styles.th}>Kategoriya</th>
-                <th className={styles.th}>Naqt (so‘m)</th>
-                <th className={styles.th}>Karta (so‘m)</th>
-                <th className={styles.th}>Bank (so‘m)</th>
-                <th className={styles.th}>Naqt bank (so‘m)</th>
-                <th className={styles.th}>Jami (so‘m)</th>
+                <th className={styles.th}>{t('colCategory')}</th>
+                <th className={styles.th}>{t('colCashSom')}</th>
+                <th className={styles.th}>{t('colCardSom')}</th>
+                <th className={styles.th}>{t('colBankSom')}</th>
+                <th className={styles.th}>{t('colBankCashSom')}</th>
+                <th className={styles.th}>{t('colTotalSom')}</th>
               </tr>
             </thead>
             <tbody>
               <tr className={styles.tr}>
-                <td className={styles.td}>Daromad</td>
+                <td className={styles.td}>{t('rowIncome')}</td>
                 <td className={styles.td}>{formatNumber(data.daromat?.total_naqt)}</td>
                 <td className={styles.td}>{formatNumber(data.daromat?.total_karta)}</td>
                 <td className={styles.td}>{formatNumber(data.daromat?.total_prichislena)}</td>
@@ -568,7 +568,7 @@ export default function UmumiySumma() {
                 <td className={styles.td}>{formatNumber(data.daromat?.total_daromat)}</td>
               </tr>
               <tr className={styles.tr}>
-                <td className={styles.td}>Maishiy chiqimlar</td>
+                <td className={styles.td}>{t('rowHouseholdExpenses')}</td>
                 <td className={styles.td}>{formatNumber(data.maishiy?.total_naqt)}</td>
                 <td className={styles.td}>{formatNumber(data.maishiy?.total_karta)}</td>
                 <td className={styles.td}>{formatNumber(data.maishiy?.total_prichislena)}</td>
@@ -576,7 +576,7 @@ export default function UmumiySumma() {
                 <td className={styles.td}>{formatNumber(data.maishiy?.total_kirim)}</td>
               </tr>
               <tr className={styles.tr}>
-                <td className={styles.td}>Oshxona chiqimlari</td>
+                <td className={styles.td}>{t('rowKitchenExpenses')}</td>
                 <td className={styles.td}>{formatNumber(data.taktic?.total_naqt)}</td>
                 <td className={styles.td}>{formatNumber(data.taktic?.total_karta)}</td>
                 <td className={styles.td}>{formatNumber(data.taktic?.total_prichislena)}</td>
@@ -584,7 +584,7 @@ export default function UmumiySumma() {
                 <td className={styles.td}>{formatNumber(data.taktic?.total_kirim)}</td>
               </tr>
               <tr className={styles.tr}>
-                <td className={styles.td}>Qo‘shimcha xarajatlar</td>
+                <td className={styles.td}>{t('extraExpenses')}</td>
                 <td className={styles.td}>{formatNumber(data.qoshimcha?.total_naqt)}</td>
                 <td className={styles.td}>{formatNumber(data.qoshimcha?.total_karta)}</td>
                 <td className={styles.td}>{formatNumber(data.qoshimcha?.total_prichislena)}</td>
@@ -592,7 +592,7 @@ export default function UmumiySumma() {
                 <td className={styles.td}>{formatNumber(data.qoshimcha?.total_kirim)}</td>
               </tr>
               <tr className={styles.tr}>
-                <td className={styles.td}>Xodimlar oyligi</td>
+                <td className={styles.td}>{t('employeeSalaries')}</td>
                 <td className={styles.td}>{formatNumber(data.oylik?.total_naqt)}</td>
                 <td className={styles.td}>{formatNumber(data.oylik?.total_karta)}</td>
                 <td className={styles.td}>{formatNumber(data.oylik?.total_prichislena)}</td>
@@ -600,7 +600,7 @@ export default function UmumiySumma() {
                 <td className={styles.td}>{formatNumber(data.oylik?.total_kirim)}</td>
               </tr>
               <tr className={`${styles.tr} ${styles.bold}`}>
-                <td className={styles.td}>Umumiy chiqim</td>
+                <td className={styles.td}>{t('rowTotalExpense')}</td>
                 <td className={styles.td}>{formatNumber(data.totalChiqim?.total_naqt)}</td>
                 <td className={styles.td}>{formatNumber(data.totalChiqim?.total_karta)}</td>
                 <td className={styles.td}>{formatNumber(data.totalChiqim?.total_prichislena)}</td>
@@ -608,7 +608,7 @@ export default function UmumiySumma() {
                 <td className={styles.td}>{formatNumber(data.totalChiqim?.total_kirim)}</td>
               </tr>
               <tr className={`${styles.tr} ${styles.bold}`}>
-                <td className={styles.td}>Sof foyda</td>
+                <td className={styles.td}>{t('rowNetProfit')}</td>
                 <td className={styles.td}>
                   {formatNumber((data.daromat?.total_naqt || 0) - (data.totalChiqim?.total_naqt || 0))}
                 </td>
@@ -629,7 +629,7 @@ export default function UmumiySumma() {
           </table>
         </div>
       ) : data && !error ? (
-        <p className={styles.error}>Ma’lumotlar hali to‘liq yuklanmadi</p>
+        <p className={styles.error}>{t('dataNotReady')}</p>
       ) : null}
     </div>
   );

@@ -98,19 +98,19 @@ export default function DaromatDeleteModal({ open, onClose, bolaId, month, onDel
                 {editItem?.id === item.id ? (
                   <>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <span>Sana: {item.sana}</span>
-                      <input type="number" placeholder="Naqt" value={editForm.naqt}
+                      <span>{t('date')}: {item.sana}</span>
+                      <input type="number" placeholder={t('payCash')} value={editForm.naqt}
                         onChange={e => setEditForm({ ...editForm, naqt: e.target.value })} />
-                      <input type="number" placeholder="Karta" value={editForm.karta}
+                      <input type="number" placeholder={t('payCard')} value={editForm.karta}
                         onChange={e => setEditForm({ ...editForm, karta: e.target.value })} />
-                      <input type="number" placeholder="Bank" value={editForm.prichislena}
+                      <input type="number" placeholder={t('payBank')} value={editForm.prichislena}
                         onChange={e => setEditForm({ ...editForm, prichislena: e.target.value })} />
-                      <input type="number" placeholder="Bank(Naqt)" value={editForm.naqt_prichislena}
+                      <input type="number" placeholder={t('payBankCash')} value={editForm.naqt_prichislena}
                         onChange={e => setEditForm({ ...editForm, naqt_prichislena: e.target.value })} />
 
                       <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
                         <button onClick={handleSaveEdit} style={{ backgroundColor: '#15803d', color: 'white' }}>
-                          <Save size={16} /> Saqlash
+                          <Save size={16} /> {t('save')}
                         </button>
                         <button onClick={() => setEditItem(null)}><X size={16} /> {t('cancel')}</button>
                       </div>
@@ -119,11 +119,11 @@ export default function DaromatDeleteModal({ open, onClose, bolaId, month, onDel
                 ) : (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>
-                      Sana: {item.sana} | Naqt: {item.naqt} | Karta: {item.karta} | Bank: {item.prichislena} | Naqt(B): {item.naqt_prichislena}
+                      {t('date')}: {item.sana} | {t('payCash')}: {item.naqt} | {t('payCard')}: {item.karta} | {t('payBank')}: {item.prichislena} | {t('payBankCash')}: {item.naqt_prichislena}
                     </span>
                     <div style={{ display: 'flex', gap: 8, marginLeft: 10 }}>
-                      <button onClick={() => startEdit(item)} style={{ color: '#0c4a6e' }} title="Tahrirlash"><Pencil size={16} /></button>
-                      <button onClick={() => handleDelete(item.id)} style={{ color: 'red' }} title="O'chirish"><Trash2 size={16} /></button>
+                      <button onClick={() => startEdit(item)} style={{ color: '#0c4a6e' }} title={t('edit')}><Pencil size={16} /></button>
+                      <button onClick={() => handleDelete(item.id)} style={{ color: 'red' }} title={t('delete')}><Trash2 size={16} /></button>
                     </div>
                   </div>
                 )}

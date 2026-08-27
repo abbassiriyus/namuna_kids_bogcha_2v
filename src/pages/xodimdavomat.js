@@ -16,7 +16,7 @@ const AdminTable = ({ data, refresh, title, xodimOneDay, todayBolaKuni, xodimWor
 
   const handleStart = async (xodim_id, xodim_workdays_id) => {
     if (!xodim_workdays_id) {
-      alert("Ish kuni ID si topilmadi!");
+      alert(t('workdayIdNotFound'));
       return;
     }
     setLoadingStates(prev => ({ ...prev, [`start_${xodim_id}`]: true }));
@@ -32,7 +32,7 @@ const AdminTable = ({ data, refresh, title, xodimOneDay, todayBolaKuni, xodimWor
       refresh(); 
     } catch (err) {
       console.error("Kelish xatosi:", err);
-      alert("Kelish xatosi!");
+      alert(t('arrivalError'));
     } finally {
       setLoadingStates(prev => ({ ...prev, [`start_${xodim_id}`]: false }));
     }
@@ -52,7 +52,7 @@ const AdminTable = ({ data, refresh, title, xodimOneDay, todayBolaKuni, xodimWor
       refresh(); 
     } catch (err) {
       console.error("Ketish xatosi:", err);
-      alert("Ketish xatosi!");
+      alert(t('departureError'));
     } finally {
       setLoadingStates(prev => ({ ...prev, [`end_${xodim_id}`]: false }));
     }
@@ -163,12 +163,12 @@ const AdminTable = ({ data, refresh, title, xodimOneDay, todayBolaKuni, xodimWor
           <thead>
             <tr>
               <th>№</th>
-              <th>Ism va Familiya</th>
-              <th>Ish vaqti</th>
-              <th>Ish bajardi</th>
-              <th>Kechikish</th>
-              <th>Kayfiyat</th>
-              <th>Amallar</th>
+              <th>{t('colNameSurname')}</th>
+              <th>{t('colWorkTime')}</th>
+              <th>{t('colWorkDone')}</th>
+              <th>{t('colDelay')}</th>
+              <th>{t('colMood')}</th>
+              <th>{t('colActions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -204,32 +204,32 @@ const AdminTable = ({ data, refresh, title, xodimOneDay, todayBolaKuni, xodimWor
               return (
                 <tr key={xodim.id}>
                   <td data-label="№">{index + 1}</td>
-                  <td data-label="Ism va Familiya">{xodim.name}</td>
-                  <td data-label="Ish vaqti">
+                  <td data-label={t('colNameSurname')}>{xodim.name}</td>
+                  <td data-label={t('colWorkTime')}>
                     {xodim?.start_time ? xodim.start_time.slice(0, 5) : '-'} - 
                     {xodim?.end_time ? xodim.end_time.slice(0, 5) : '-'}
                   </td>
-                  <td data-label="Ish bajardi">
+                  <td data-label={t('colWorkDone')}>
                     {todayOneDay?.start_time ? todayOneDay.start_time.slice(0, 5) : '-'} - 
                     {todayOneDay?.end_time ? todayOneDay.end_time.slice(0, 5) : '-'}
                   </td>
-                  <td data-label="Kechikish">{lateness}</td>
-                  <td data-label="Kayfiyat" style={{ backgroundColor: color }}>{sticker}</td>
-                  <td data-label="Amallar">
+                  <td data-label={t('colDelay')}>{lateness}</td>
+                  <td data-label={t('colMood')} style={{ backgroundColor: color }}>{sticker}</td>
+                  <td data-label={t('colActions')}>
                     <div className={styles.actions}>
                       <button
                         className={`${styles.btn} ${styles.btnGreen}`}
                         onClick={() => handleStart(xodim.id, xodimWorkdaysId)}
                         disabled={todayOneDay && todayOneDay.start_time || loadingStates[`start_${xodim.id}`]}
                       >
-                        {loadingStates[`start_${xodim.id}`] ? 'Saqlanmoqda...' : (<><Check size={16} /> Ishga keldim</>)}
+                        {loadingStates[`start_${xodim.id}`] ? t('saving') : (<><Check size={16} /> {t('checkIn')}</>)}
                       </button>
                       <button
                         className={`${styles.btn} ${styles.btnRed}`}
                         onClick={() => handleEnd(xodim.id)}
                         disabled={!todayOneDay || !todayOneDay.start_time || (todayOneDay && todayOneDay.end_time) || loadingStates[`end_${xodim.id}`]}
                       >
-                        {loadingStates[`end_${xodim.id}`] ? 'Saqlanmoqda...' : (<><LogOut size={16} /> Ishdan ketdim</>)}
+                        {loadingStates[`end_${xodim.id}`] ? t('saving') : (<><LogOut size={16} /> {t('checkOut')}</>)}
                       </button>
                     </div>
                   </td>
@@ -356,18 +356,18 @@ const Xodimlar = () => {
     <div className={styles.container}>
       <h2>Bugungi sana: {today}</h2>
       <XodimDavomat/>
-      <h1>Bugungi ishga kelgan xodimlar</h1>
+      <h1>{t('todayPresentEmployees')}</h1>
 
       <div>
-        <h3>Bugungi bola kuni</h3>
+        <h3>{t('todayChildDay')}</h3>
         {bolaKuni.length > 0 ? (
           <table className={styles.table}>
             <thead>
               <tr>
                 <th>№</th>
                 <th>Id</th>
-                <th>Mavzu</th>
-                <th>Sana</th>
+                <th>{t('topic')}</th>
+                <th>{t('date')}</th>
               </tr>
             </thead>
             <tbody>
@@ -375,14 +375,14 @@ const Xodimlar = () => {
                 <tr key={item.id}>
                   <td data-label="№">{index + 1}</td>
                   <td data-label="Id">{item.id}</td>
-                  <td data-label="Mavzu">{item.mavzu}</td>
-                  <td data-label="Sana">{new Date(item.sana).toLocaleDateString('uz-UZ', { timeZone: 'Asia/Tashkent' })}</td>
+                  <td data-label={t('topic')}>{item.mavzu}</td>
+                  <td data-label={t('date')}>{new Date(item.sana).toLocaleDateString('uz-UZ', { timeZone: 'Asia/Tashkent' })}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
-          <p>Bugun uchun bola kuni rejalari topilmadi</p>
+          <p>{t('noChildDayPlans')}</p>
         )}
       </div>
 
