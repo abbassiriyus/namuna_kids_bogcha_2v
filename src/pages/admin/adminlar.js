@@ -5,14 +5,15 @@ import axios from 'axios';
 import { Pencil, Trash2, Settings, Plus, Save, X, Check } from 'lucide-react';
 import LayoutComponent from '../../components/LayoutComponent';
 import PermissionTable from '../../components/PermissionModal';
+import { getText } from '../../i18n/translations';
 import styles from '../../styles/Adminlar.module.css';
 import { useRouter } from 'next/navigation';
 import url from '../../host/host';
 
 const TABS = [
-  { label: 'Super Adminlar', type: 1 },
-  { label: 'Tarbiyachilar', type: 2 },
-  { label: 'Qo‘shimcha Adminlar', type: 3 }
+  { labelKey: 'role.superAdmin', type: 1 },
+  { labelKey: 'role.teacher', type: 2 },
+  { labelKey: 'role.extraAdmin', type: 3 }
 ];
 
 export default function AdminTabs() {
@@ -74,13 +75,13 @@ export default function AdminTabs() {
       );
       setAdmins(sortedAdmins);
     } catch {
-      alert('Adminlarni yuklashda xatolik.');
+      alert(getText('loadError'));
     }
   };
 
   const fetchPermissions = async (adminId) => {
     if (!hasPermission('edit_admins')) {
-      return alert('Sizda ruxsat yo‘q');
+      return alert(getText('noActionPermission'));
     }
     try {
       const res = await axios.get(`${url}/permissions/${adminId}`);
@@ -88,25 +89,25 @@ export default function AdminTabs() {
       setSelectedAdminId(adminId);
       setShowPermissionModal(true);
     } catch {
-      alert('Ruxsatlarni yuklashda xatolik');
+      alert(getText('loadError'));
     }
   };
 
   const handleSavePermissions = async () => {
     try {
       await axios.post(`${url}/permissions/${selectedAdminId}`, { permissions });
-      alert('Ruxsatlar saqlandi');
+      alert(getText('save'));
       setShowPermissionModal(false);
     } catch {
-      alert('Saqlashda xatolik');
+      alert(getText('saveError'));
     }
   };
 
   const handleDelete = async (id) => {
     if (!hasPermission('delete_admins')) {
-      return alert('Sizda ruxsat yo‘q');
+      return alert(getText('noActionPermission'));
     }
-    if (confirm('Aniq o‘chirmoqchimisiz?')) {
+    if (confirm(getText('confirmDelete'))) {
       await axios.delete(`${url}/admin/${id}`);
       fetchAdmins();
     }
@@ -141,7 +142,7 @@ export default function AdminTabs() {
       setGroupModalAdmin(admin);
       setShowGroupModal(true);
     } catch {
-      alert('Guruhlarni yuklashda xatolik');
+      alert(getText('loadError'));
     }
   };
 
@@ -159,7 +160,7 @@ export default function AdminTabs() {
         setAssignedGroups((prev) => [...prev, res.data]);
       }
     } catch {
-      alert('Guruh biriktirishda xatolik');
+      alert(getText('saveError'));
     }
   };
 
@@ -167,12 +168,12 @@ export default function AdminTabs() {
     e.preventDefault();
     if (selectedAdmin) {
       if (!hasPermission('edit_admins')) {
-        return alert('Sizda ruxsat yo‘q');
+        return alert(getText('noActionPermission'));
       }
       await axios.put(`${url}/admin/${selectedAdmin.id}`, form);
     } else {
       if (!hasPermission('create_admins')) {
-        return alert('Sizda ruxsat yo‘q');
+        return alert(getText('noActionPermission'));
       }
       await axios.post(`${url}/admin`, form);
     }
@@ -183,7 +184,7 @@ export default function AdminTabs() {
   return (
     <LayoutComponent>
       <div className={styles.wrapper}>
-        <h2>Adminlar</h2>
+        <h2>{getText('admins')}</h2>
 
         <div className={styles.tabs}>
           {TABS.map((tab) => (
@@ -192,7 +193,7 @@ export default function AdminTabs() {
               onClick={() => setActiveType(tab.type)}
               className={`${styles.tab} ${activeType === tab.type ? styles.tabActive : ''}`}
             >
-              {tab.label}
+              {getText(tab.labelKey)}
             </button>
           ))}
         </div>
@@ -200,11 +201,11 @@ export default function AdminTabs() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Foydalanuvchi</th>
-              <th>Telefon</th>
-              <th>Faolmi?</th>
-              <th>Amallar</th>
+              <th>{getText('colId')}</th>
+              <th>{getText('colFullName')}</th>
+              <th>{getText('colPhone')}</th>
+              <th>{getText('colActiveStatus')}</th>
+              <th>{getText('actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -222,23 +223,23 @@ export default function AdminTabs() {
                 </td>
                 <td className={styles.actions}>
                   {hasPermission('edit_admins') && (
-                    <button onClick={() => handleOpenEdit(a)} title="Tahrirlash">
+                    <button onClick={() => handleOpenEdit(a)} title={getText('edit')}>
                       <Pencil size={16} />
                     </button>
                   )}
                   {hasPermission('delete_admins') && (
-                    <button onClick={() => handleDelete(a.id)} title="O‘chirish">
+                    <button onClick={() => handleDelete(a.id)} title={getText('delete')}>
                       <Trash2 size={16} color="var(--color-danger)" />
                     </button>
                   )}
                   {activeType === 3 && hasPermission('edit_admins') && (
-                    <button onClick={() => fetchPermissions(a.id)} title="Ruxsat">
-                      <Settings size={16} /> Ruxsat
+                    <button onClick={() => fetchPermissions(a.id)} title={getText('permissionsManageTitle')}>
+                      <Settings size={16} /> {getText('permissionsManageTitle')}
                     </button>
                   )}
                   {activeType === 2 && hasPermission('edit_admins') && (
-                    <button onClick={() => openGroupModal(a)} title="Guruhlar">
-                      <Settings size={16} /> Guruhlar
+                    <button onClick={() => openGroupModal(a)} title={getText('groups')}>
+                      <Settings size={16} /> {getText('groups')}
                     </button>
                   )}
                 </td>
@@ -250,10 +251,10 @@ export default function AdminTabs() {
         {showGroupModal && (
           <div className={styles.modalOverlay}>
             <div className={styles.modal}>
-              <h3>{groupModalAdmin?.username} — biriktirilgan guruhlar</h3>
+              <h3>{groupModalAdmin?.username} — {getText('assignedGroupsTitle')}</h3>
               <div className={styles.form}>
                 {allGuruhlar.length === 0 ? (
-                  <p>Guruhlar topilmadi</p>
+                  <p>{getText('groupsNotFound')}</p>
                 ) : (
                   allGuruhlar.map((g) => (
                     <label key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -268,7 +269,7 @@ export default function AdminTabs() {
                 )}
               </div>
               <div className={styles.modalActions}>
-                <button type="button" onClick={() => setShowGroupModal(false)}><X size={16} /> Yopish</button>
+                <button type="button" onClick={() => setShowGroupModal(false)}><X size={16} /> {getText('close')}</button>
               </div>
             </div>
           </div>
@@ -277,7 +278,7 @@ export default function AdminTabs() {
         {showPermissionModal && (
           <div className={styles.modalOverlay}>
             <div className={styles.modal}>
-              <h3>Ruxsatlarni boshqarish (ID: {selectedAdminId})</h3>
+              <h3>{getText('permissionsManageTitle')} (ID: {selectedAdminId})</h3>
               <PermissionTable
                 permissions={permissions}
                 setPermissions={setPermissions}
@@ -290,30 +291,30 @@ export default function AdminTabs() {
 
         {hasPermission('create_admins') && (
           <button className={styles.addBtn} onClick={handleOpenCreate}>
-            <Plus size={16} /> Yangi admin qo‘shish
+            <Plus size={16} /> {getText('add')} {getText('admins')}
           </button>
         )}
 
         {showAdminModal && (
           <div className={styles.modalOverlay}>
             <div className={styles.modal}>
-              <h3>{selectedAdmin ? 'Adminni tahrirlash' : 'Yangi admin qo‘shish'}</h3>
+              <h3>{selectedAdmin ? getText('edit') + ' ' + getText('admins') : getText('add') + ' ' + getText('admins')}</h3>
               <form onSubmit={handleSaveAdmin} className={styles.form}>
                 <input
-                  placeholder="Foydalanuvchi nomi"
+                  placeholder={getText('usernamePlaceholder')}
                   value={form.username}
                   onChange={(e) => setForm({ ...form, username: e.target.value })}
                   required
                 />
                 <input
-                  placeholder="Telefon raqam"
+                  placeholder={getText('colPhone')}
                   value={form.phone_number}
                   onChange={(e) => setForm({ ...form, phone_number: e.target.value })}
                   required
                 />
                 <input
                   type="password"
-                  placeholder="Parol"
+                  placeholder={getText('password')}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   required={!selectedAdmin}
@@ -322,9 +323,9 @@ export default function AdminTabs() {
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: parseInt(e.target.value) })}
                 >
-                  <option value={1}>Super Admin</option>
-                  <option value={2}>Tarbiyachi</option>
-                  <option value={3}>Qo‘shimcha Admin</option>
+                  <option value={1}>{getText('role.superAdmin')}</option>
+                  <option value={2}>{getText('role.teacher')}</option>
+                  <option value={3}>{getText('role.extraAdmin')}</option>
                 </select>
                 <label>
                   <input
@@ -332,11 +333,11 @@ export default function AdminTabs() {
                     checked={form.is_active}
                     onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
                   />
-                  Faolmi?
+                  {getText('colActiveStatus')}
                 </label>
                 <div className={styles.modalActions}>
-                  <button type="submit"><Save size={16} /> Saqlash</button>
-                  <button type="button" onClick={() => setShowAdminModal(false)}><X size={16} /> Bekor qilish</button>
+                  <button type="submit"><Save size={16} /> {getText('save')}</button>
+                  <button type="button" onClick={() => setShowAdminModal(false)}><X size={16} /> {getText('cancel')}</button>
                 </div>
               </form>
             </div>

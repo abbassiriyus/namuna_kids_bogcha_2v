@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import { Gift, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getText } from '../i18n/translations';
 import styles from '../styles/AdminTable.module.css';
 
 function AdminTable({
@@ -87,11 +88,7 @@ function AdminTable({
 
   // O'chirish tugmasi bosilganda confirm oynasini ko'rsatish
   const handleDeleteClick = (id) => {
-    if (
-      confirm(
-        "Haqiqatan ham bu tarbiyalanuvchini o‘chirmoqchimisiz? Bu amaliyot yomon oqibatlarga olib kelishi mumkin!"
-      )
-    ) {
+    if (confirm(getText('confirmDeleteStudent'))) {
       onDelete(id);
     }
   };
@@ -104,11 +101,11 @@ function AdminTable({
             <tr>
               {(effectivePermissions.edit_payments || effectivePermissions.delete_payments || effectivePermissions.view_payments) && (
                 <th className={`${styles['admin-table__th']} ${styles['sticky-actions']}`}>
-                  Amallar
+                  {getText('colActions')}
                 </th>
               )}
               <th className={`${styles['admin-table__th']} ${styles['sticky-index']}`}>
-                №
+                {getText('colNumber')}
               </th>
               {mainColumns.map((col, idx) => (
                 <th
@@ -129,7 +126,7 @@ function AdminTable({
                       <button
                         className={styles.editBtn}
                         onClick={() => onCustomAction(row, 'bonusShtraf')}
-                        title="Bonus/Shtraf qo‘shish"
+                        title={getText('bonusShtrafAdd')}
                       >
                         <Gift size={16} />
                       </button>
@@ -138,7 +135,7 @@ function AdminTable({
                       <button
                         className={styles.deleteBtn}
                         onClick={() => handleDeleteClick(row.id)}
-                        title="O‘chirish"
+                        title={getText('delete')}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -203,7 +200,7 @@ function AdminTable({
           disabled={currentPage === 1}
           className={styles['pagination__button']}
         >
-          <ChevronLeft size={16} /> Oldingi
+          <ChevronLeft size={16} /> {getText('pagination.prev')}
         </button>
         <span className={styles['pagination__info']}>
           {currentPage} / {totalPages}
@@ -213,7 +210,7 @@ function AdminTable({
           disabled={currentPage === totalPages}
           className={styles['pagination__button']}
         >
-          Keyingi <ChevronRight size={16} />
+          {getText('pagination.next')} <ChevronRight size={16} />
         </button>
       </div>
     </div>

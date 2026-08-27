@@ -5,6 +5,7 @@ import Webcam from 'react-webcam';
 import axios from 'axios';
 import url from '../host/host';
 import styles from '../styles/FaceCaptureModal.module.css';
+import { getText } from '../i18n/translations';
 
 // Har qanday xodim uchun yuz tanish (Face ID) ma'lumotini yozib olish yoki
 // yangilash uchun umumiy modal. Hodimlar sahifasida ham, Davomat sahifasida
@@ -68,11 +69,11 @@ export default function FaceCaptureModal({ employee, onClose, authHeader }) {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
-        <h3>{employee.name} — yuzni saqlash</h3>
+        <h3>{employee.name} — {getText('face.saveTitle')}</h3>
         <div className={styles.videoBox}>
           <Webcam ref={webcamRef} screenshotFormat="image/jpeg" />
         </div>
-        {!modelsLoaded && <p className={styles.hint}>Tizim yuklanmoqda...</p>}
+        {!modelsLoaded && <p className={styles.hint}>{getText('face.loading')}</p>}
         {message && (
           <p className={`${styles.message} ${message.type === 'success' ? styles.messageSuccess : styles.messageError}`}>
             {message.text}
@@ -80,9 +81,9 @@ export default function FaceCaptureModal({ employee, onClose, authHeader }) {
         )}
         <div className={styles.modalButtons}>
           <button onClick={handleCapture} disabled={!modelsLoaded || capturing}>
-            {capturing ? 'Saqlanmoqda...' : 'Suratga olish va saqlash'}
+            {capturing ? getText('face.saving') : getText('face.saveButton')}
           </button>
-          <button onClick={onClose}>Yopish</button>
+          <button onClick={onClose}>{getText('close')}</button>
         </div>
       </div>
     </div>

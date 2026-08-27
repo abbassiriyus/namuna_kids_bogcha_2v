@@ -1,30 +1,15 @@
 'use client';
 
 import styles from '../styles/Adminlar.module.css';
+import { getText } from '../i18n/translations';
 
-const MODULES = {
-  admins: 'Adminlar',
-  students: 'Tarbiyalanuvchi',
-  groups: 'Guruhlar',
-  attendance: 'Davomat',
-  lessons: 'Bola Kuni',
-  payments: 'Tolovlar',
-  employees: 'Hodimlar',
-  salaries: 'Oyliklar',
-  positions: 'Lavozim',
-  meals: 'Taomnoma',
-  extras: 'Qo‘shimcha',
-};
+const MODULES = [
+  'admins','students','groups','attendance','childDay','payments','employees','salaries','positions','menuMeals','extras'
+];
 
-const VIEW_ONLY_MODULES = {
-  dashboard: 'Dashboard',
-  kitchen_incomes: 'Oshxona Kirim',
-  kitchen_expenses: 'Oshxona Chiqim',
-  kitchen_storage: 'Oshxona Ombor',
-  household_incomes: 'Maishiy Kirim',
-  household_expenses: 'Maishiy Chiqim',
-  household_storage: 'Maishiy Ombor',
-};
+const VIEW_ONLY_MODULES = [
+  'dashboard','kitchen_incomes','kitchen_expenses','kitchen_storage','household_incomes','household_expenses','household_storage'
+];
 
 const ACTIONS = ['view', 'create', 'edit', 'delete'];
 
@@ -40,20 +25,20 @@ export default function PermissionTable({ permissions, setPermissions }) {
     <table className={styles.table}>
       <thead>
         <tr>
-          <th>Modul</th>
-          <th>Ko‘rish</th>
-          <th>Qo‘shish</th>
-          <th>Tahrirlash</th>
-          <th>O‘chirish</th>
+          <th>{getText('table.module')}</th>
+          <th>{getText('table.view')}</th>
+          <th>{getText('table.create')}</th>
+          <th>{getText('table.edit')}</th>
+          <th>{getText('table.delete')}</th>
         </tr>
       </thead>
       <tbody>
         {/* 4-action modullar */}
-        {Object.entries(MODULES).map(([key, label]) => (
+        {MODULES.map((key) => (
           <tr key={key}>
-            <td>{label}</td>
+            <td>{getText(`module.${key}`) || key}</td>
             {ACTIONS.map((action) => {
-              const fullKey = `${action}_${key}`;
+              const fullKey = `${action}_${key.replace(/menuMeals/, 'meals')}`;
               return (
                 <td key={fullKey}>
                   <input
@@ -68,9 +53,9 @@ export default function PermissionTable({ permissions, setPermissions }) {
         ))}
 
         {/* faqat view modullar */}
-        {Object.entries(VIEW_ONLY_MODULES).map(([key, label]) => (
+        {VIEW_ONLY_MODULES.map((key) => (
           <tr key={key}>
-            <td>{label}</td>
+            <td>{getText(`module.${key}`) || key}</td>
             <td>
               <input
                 type="checkbox"

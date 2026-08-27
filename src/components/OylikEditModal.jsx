@@ -4,6 +4,7 @@ import { Check, X } from "lucide-react";
 import styles from "../styles/BolaModal.module.css";
 import axios from "axios";
 import url from "../host/host";
+import { getText } from '../i18n/translations';
 
 export default function OylikEditModal({ open, onClose, xodim, onSaved }) {
   const [bonus, setBonus] = useState('');
@@ -22,10 +23,10 @@ export default function OylikEditModal({ open, onClose, xodim, onSaved }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       onSaved();
-      alert("Saqlandi");
+      alert(getText('oylik.saved'));
     } catch (err) {
       console.error(err);
-      alert("Xatolik yuz berdi");
+      alert(getText('oylik.error'));
     }
   };
 
@@ -34,12 +35,12 @@ const handleOylikTolash = async () => {
     const summa = parseFloat(oylikNarx);
 
     if (!oylikNarx || isNaN(summa)) {
-      alert("To‘langan summa noto‘g‘ri");
+      alert(getText('oylik.invalidPaidAmount'));
       return;
     }
 
     if (summa > xodim.total) {
-      alert(`To‘langan summa umumiy hisobdan (${xodim.total} so‘m) oshmasligi kerak!`);
+      alert(getText('oylik.exceedsTotal').replace('{total}', xodim.total));
       return;
     }
 
@@ -51,10 +52,10 @@ const handleOylikTolash = async () => {
     });
 
     onSaved();
-    alert("To‘langan summa saqlandi");
+    alert(getText('oylik.paidSaved'));
   } catch (err) {
     console.error(err);
-    alert("Xatolik yuz berdi");
+    alert(getText('oylik.error'));
   }
 };
 
@@ -64,44 +65,44 @@ const handleOylikTolash = async () => {
   return (
     <div className={styles.modal}>
       <div className={styles.modal__content}>
-        <h3 className={styles.modal__title}>Oylik amallari: {xodim.name}</h3>
+        <h3 className={styles.modal__title}>{getText('oylik.actionsTitle')} {xodim.name}</h3>
 
         <div className={styles.modal__form}>
-          <label>Bonus qo‘shish:</label>
+          <label>{getText('oylik.addBonusLabel')}</label>
           <input type="number" value={bonus} onChange={e => setBonus(e.target.value)} />
-          <button onClick={() => handlePost('bonus', bonus)}>Qo‘shish</button>
+          <button onClick={() => handlePost('bonus', bonus)}>{getText('add')}</button>
         </div>
 
         <div className={styles.modal__form}>
-          <label>N/B yozish:</label>
+          <label>{getText('oylik.addPenaltyLabel')}</label>
           <input type="number" value={jarima} onChange={e => setJarima(e.target.value)} />
-          <button onClick={() => handlePost('jarima', jarima)}>Qo‘shish</button>
+          <button onClick={() => handlePost('jarima', jarima)}>{getText('add')}</button>
         </div>
 
         <div className={styles.modal__form}>
-          <label>Kunlik qo‘shish:</label>
+          <label>{getText('oylik.addDailyLabel')}</label>
           <input type="number" value={kunlik} onChange={e => setKunlik(e.target.value)} />
-          <button onClick={() => handlePost('kunlik', kunlik)}>Qo‘shish</button>
+          <button onClick={() => handlePost('kunlik', kunlik)}>{getText('add')}</button>
         </div>
 
         <div className={styles.modal__form}>
-          <label>To‘langan summa:</label>
+          <label>{getText('oylik.paidAmountLabel')}</label>
           <input
             type="number"
             value={oylikNarx}
             onChange={e => setOylikNarx(e.target.value)}
-            placeholder="Masalan: 1500000"
+            placeholder={getText('oylik.paidAmountPlaceholder')}
           />
           <button
             onClick={handleOylikTolash}
             style={{ background: '#4caf50', color: '#fff', padding: '8px', marginTop: '0.5rem' }}
           >
-            <Check size={16} /> Oylik to‘landi (summani yozib saqlash)
+            <Check size={16} /> {getText('oylik.payButton')}
           </button>
         </div>
 
         <div className={styles.modal__buttons}>
-          <button onClick={onClose}><X size={16} /> Yopish</button>
+          <button onClick={onClose}><X size={16} /> {getText('close')}</button>
         </div>
       </div>
     </div>
