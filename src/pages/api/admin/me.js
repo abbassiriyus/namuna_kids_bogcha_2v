@@ -1,6 +1,7 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { sendDbError } from '@/lib/dbError';
+import { hashPassword } from '@/lib/password';
 
 async function handler(req, res) {
   if (req.method === 'GET') {
@@ -25,8 +26,9 @@ async function handler(req, res) {
       let query = `UPDATE admin SET username = $1, phone_number = $2, description = $3, updated_at = CURRENT_TIMESTAMP`;
       const params = [username, phone_number, description ?? null];
 
+      // Yangi parol kelgan bo‘lsa hashlab yozamiz; bo‘sh bo‘lsa eskisi o‘zgarmaydi.
       if (password) {
-        params.push(password);
+        params.push(await hashPassword(password));
         query += `, password = $${params.length}`;
       }
 

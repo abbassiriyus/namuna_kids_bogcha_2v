@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import pool from '@/lib/db';
 import { SECRET_KEY } from '@/lib/auth';
+import { verifyPassword, upgradeLegacyPassword } from '@/lib/password';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -23,9 +24,13 @@ export default async function handler(req, res) {
       return res.status(403).json({ code: 'inactive', message: 'Admin faollashtirilmagan' });
     }
 
-    if (admin.password !== password) {
+    // Parol bazada bcrypt hash sifatida saqlanadi; eski ochiq matnli yozuvlar
+    // ham qabul qilinadi va shu yerda avtomatik hashga o'tkaziladi.
+    const ok = await verifyPassword(password, admin.password);
+    if (!ok) {
       return res.status(401).json({ code: 'wrongPassword', message: "Parol noto'g'ri" });
     }
+    await upgradeLegacyPassword(admin.id, admin.password, password);
 
     const token = jwt.sign(
       { id: admin.id, username: admin.username, type: admin.type },

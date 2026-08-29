@@ -8,10 +8,12 @@
     "build:standalone": "next build && node scripts/prepare-standalone.js",
     "start": "next start",
     "lint": "next lint",
-    "check": "node scripts/check-i18n.js && node scripts/check-api-routes.js"
+    "check": "node scripts/check-i18n.js && node scripts/check-api-routes.js",
+    "admin:reset": "node scripts/reset-admin-password.js"
   },
   "dependencies": {
     "axios": "^1.8.4",
+    "bcryptjs": "^3.0.3",
     "dayjs": "^1.11.13",
     "docx": "^9.5.1",
     "face-api.js": "^0.22.2",

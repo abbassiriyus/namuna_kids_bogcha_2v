@@ -9,11 +9,12 @@
 //      yaratadi). schema.sql ichidagi GRANT'lar qattiq "abbasuz3_user" nomiga
 //      bog'langan edi — buni haqiqiy DB_USER'ga almashtiramiz, shunda boshqa
 //      muhitda boshqa DB_USER bilan ham xatosiz ishlaydi.
-//   2) "admin" nomli foydalanuvchi bo'lmasa — standart admin (login: admin,
+//   2) admin jadvali bo‘m-bo‘sh bo‘lsa (0 ta admin) — standart admin (login: admin,
 //      parol: 12345) yaratadi, aks holda tizimga kiradigan hech kim qolmaydi.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import pool from './lib/db.js';
+import pool, { checkConnection } from './lib/db.js';
+import { hashPassword } from './lib/password.js';
 
 async function ensureSchema() {
   const schemaPath = join(process.cwd(), 'db', 'schema.sql');
@@ -38,7 +39,10 @@ async function ensureSchema() {
 
   const dbUser = process.env.DB_USER;
   if (dbUser) {
-    sql = sql.split('abbasuz3_user').join(dbUser);
+    // Identifikatorni qo'shtirnoqqa olamiz: DB_USER "default" kabi SQL'da
+    // zahiralangan so'z bo'lsa, tirnoqsiz GRANT sintaksis xatosi beradi.
+    const quoted = '"' + dbUser.replace(/"/g, '""') + '"';
+    sql = sql.split('abbasuz3_user').join(quoted);
   }
 
   await pool.query(sql);
@@ -47,28 +51,57 @@ async function ensureSchema() {
   );
 }
 
-async function ensureDefaultAdmin() {
-  const { rows } = await pool.query('SELECT id FROM admin WHERE username = $1 LIMIT 1', ['admin']);
-  if (rows.length > 0) return;
+// Standart admin ma'lumotlari — kerak bo'lsa .env orqali o'zgartiriladi.
+const DEFAULT_ADMIN_USERNAME = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
+const DEFAULT_ADMIN_PASSWORD = process.env.DEFAULT_ADMIN_PASSWORD || '12345';
+const DEFAULT_ADMIN_PHONE = process.env.DEFAULT_ADMIN_PHONE || '+998000000000';
 
+async function ensureDefaultAdmin() {
+  const { rows } = await pool.query('SELECT COUNT(*)::int AS c FROM admin');
+  if (rows[0].c > 0) return; // adminlar bor — tegmaymiz
+
+  // Parol ochiq matnda emas, bcrypt hash ko'rinishida yoziladi.
   await pool.query(
     `INSERT INTO admin (username, phone_number, type, description, is_active, password)
      VALUES ($1, $2, $3, $4, $5, $6)`,
-    ['admin', '+998000000000', 1, "Standart admin (tizim tomonidan avtomatik yaratildi)", true, '12345']
+    [
+      DEFAULT_ADMIN_USERNAME,
+      DEFAULT_ADMIN_PHONE,
+      1,
+      'Standart admin (tizim tomonidan avtomatik yaratildi)',
+      true,
+      await hashPassword(DEFAULT_ADMIN_PASSWORD),
+    ]
   );
   console.log(
-    "[instrumentation] Admin topilmadi — standart admin yaratildi (login: admin, parol: 12345). Xavfsizlik uchun birinchi kirishdan so'ng parolni albatta almashtiring."
+    `[instrumentation] Admin jadvali bo'sh edi — standart admin yaratildi (login: ${DEFAULT_ADMIN_USERNAME}, parol: ${DEFAULT_ADMIN_PASSWORD}). Xavfsizlik uchun birinchi kirishdan so'ng parolni albatta almashtiring.`
   );
 }
 
-try {
-  await ensureSchema();
-} catch (err) {
-  console.error('[instrumentation] Baza sxemasini yaratishda xato:', err.message);
+console.log('[server] 🚀 Backend ishga tushdi (Next.js API routes: /api)');
+
+// 0) Avval bazaga ulanamiz va natijani terminalga yozamiz. Ulanmasa — keyingi
+//    qadamlarni bajarishning ma’nosi yo’q, xatolar to‘planib ketmasin.
+const { ok } = await checkConnection();
+
+if (ok) {
+  try {
+    await ensureSchema();
+  } catch (err) {
+    console.error('[instrumentation] Baza sxemasini yaratishda xato:', err.message);
+  }
+
+  try {
+    await ensureDefaultAdmin();
+  } catch (err) {
+    console.error('[instrumentation] Admin mavjudligini tekshirishda xato:', err.message);
+  }
+} else {
+  console.error('[instrumentation] Bazaga ulanib bo’lmagani uchun sxema va admin tekshiruvi o’tkazilmadi.');
 }
 
-try {
-  await ensureDefaultAdmin();
-} catch (err) {
-  console.error('[instrumentation] Admin mavjudligini tekshirishda xato:', err.message);
+if (ok) {
+  console.log("[server] ✅ Backend tayyor — API so'rovlarini qabul qilishga shay.");
+} else {
+  console.error("[server] ⚠️  Backend ishlayapti, lekin BAZASIZ — API so'rovlari xato qaytaradi.");
 }
