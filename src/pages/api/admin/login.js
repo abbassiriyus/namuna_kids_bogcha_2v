@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import pool from '@/lib/db';
+import pool, { describeDbError } from '@/lib/db';
 import { SECRET_KEY } from '@/lib/auth';
 import { verifyPassword, upgradeLegacyPassword } from '@/lib/password';
 
@@ -42,7 +42,8 @@ export default async function handler(req, res) {
     const { password: _, ...adminData } = admin;
     return res.status(200).json({ token, admin: adminData });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: err.message });
+    const detail = describeDbError(err);
+    console.error('[login] Xato:', detail, err);
+    return res.status(500).json({ code: 'serverError', message: 'Serverda xatolik', error: detail });
   }
 }

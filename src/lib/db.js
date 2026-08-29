@@ -57,7 +57,7 @@ async function checkConnection() {
     return { ok: true };
   } catch (err) {
     console.error(`[DB] ❌ PostgreSQL'ga ULANIB BO'LMADI -> ${where}`);
-    console.error(`[DB]    Sabab: ${err.code ? err.code + ' — ' : ''}${err.message}`);
+    console.error(`[DB]    Sabab: ${describeDbError(err)}`);
     if (err.code === '28000' && !ssl) {
       console.error('[DB]    Maslahat: .env.local ga DB_SSL=true qo\'shing.');
     }
@@ -65,5 +65,18 @@ async function checkConnection() {
   }
 }
 
+// Node ECONNREFUSED'ni AggregateError sifatida qaytaradi va uning message'i
+// bo'm-bo'sh bo'ladi ({"error":""}). Shuning uchun xatoni o'zimiz yozamiz.
+function describeDbError(err) {
+  if (!err) return 'Noma’lum xato';
+  if (err.message) return err.code ? `${err.code}: ${err.message}` : err.message;
+  if (Array.isArray(err.errors) && err.errors.length) {
+    const inner = err.errors.map((e) => e.code || e.message).filter(Boolean).join(', ');
+    return `Bazaga ulanib bo'lmadi (${host}:${port}) — ${inner || err.name}`;
+  }
+  return `${err.name || 'Error'} (${host}:${port})`;
+}
+
 module.exports = pool;
 module.exports.checkConnection = checkConnection;
+module.exports.describeDbError = describeDbError;
