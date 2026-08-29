@@ -629,7 +629,7 @@ export default function ChiqimOmborPage() {
           />
 
           <div style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '16px' }}>
-            Jami summa: {parseFloat(displayedData.reduce((acc, cur) => acc + (parseFloat(cur.summa) || parseFloat(cur.umumiy_narx) || 0), 0)).toFixed(2).toLocaleString()} so‘m
+            {t('totalSumLabel')}: {parseFloat(displayedData.reduce((acc, cur) => acc + (parseFloat(cur.summa) || parseFloat(cur.umumiy_narx) || 0), 0)).toFixed(2).toLocaleString()} {t('currencySom')}
           </div>
 
           {modalOpen && (permissions.create_household_expenses || permissions.edit_household_expenses) && (

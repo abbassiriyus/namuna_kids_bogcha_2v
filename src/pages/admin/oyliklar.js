@@ -236,15 +236,15 @@ export default function OyliklarPage() {
                 textAlign: 'left',
               }}
             >
-              {tolovlar.map((t, i) => (
+              {tolovlar.map((tolov, i) => (
                 <div
-                  key={t.id}
+                  key={tolov.id}
                   style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '2px 0' }}
                 >
                   <span>
-                    {i + 1}. {new Date(t.created_at).toLocaleDateString('uz-UZ')}
+                    {i + 1}. {new Date(tolov.created_at).toLocaleDateString('uz-UZ')}
                   </span>
-                  <strong>{formatSum(t.narx)} so‘m</strong>
+                  <strong>{formatSum(tolov.narx)} {t('currencySom')}</strong>
                 </div>
               ))}
             </div>

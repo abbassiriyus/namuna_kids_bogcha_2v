@@ -6,6 +6,7 @@ import axios from 'axios';
 import url from '../../host/host';
 import styles from '../../styles/Dashboard.module.css';
 import { bugungiOy } from '../../utils/sana';
+import { useLang } from '../../i18n/LanguageContext';
 import {
   ResponsiveContainer,
   BarChart,
@@ -25,6 +26,7 @@ import {
  * tanlagichi bilan joriy oyni ishlatadi.
  */
 export default function Dashboard({ month: monthProp, onMonthChange }) {
+  const { t } = useLang();
   const [innerMonth, setInnerMonth] = useState(() => bugungiOy());
   const isControlled = Boolean(monthProp);
   const month = isControlled ? monthProp : innerMonth;
