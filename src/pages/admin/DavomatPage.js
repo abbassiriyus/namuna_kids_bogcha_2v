@@ -4,10 +4,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import { RotateCcw, Clock, Check, X } from 'lucide-react';
+import { RotateCcw, Clock, Check, X, Save, Loader2 } from 'lucide-react';
 import url from '../../host/host';
 import LayoutComponent from '../../components/LayoutComponent';
-import DavomatModal from '../../components/DavomatModal';
 import ErrorModal from '../../components/ErrorModal';
 import styles from '../../styles/DavomatPage.module.css';
 import { bugungiOy, bugungiSana, toLocalDate } from '../../utils/sana';
@@ -24,11 +23,13 @@ export default function DavomatPage() {
   const [davomatlar, setDavomatlar] = useState([]);
   const [guruhlar, setGuruhlar] = useState([]);
   const [selectedGuruh, setSelectedGuruh] = useState('');
-  const [selected, setSelected] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterUnmarkedOnly, setFilterUnmarkedOnly] = useState(false);
   const [loading, setLoading] = useState(true); // Added loading state
+  // Saqlanmagan belgilashlar: `${bola_id}_${darssana_id}` -> 1 (keldi) | 2 (kelmadi) | 0 (o'chirish)
+  const [pending, setPending] = useState({});
+  const [saving, setSaving] = useState(false);
   const [permissions, setPermissions] = useState({
     view_attendance: false,
     create_attendance: false,
@@ -210,46 +211,110 @@ useEffect(() => {
     setFilterUnmarkedOnly((prev) => !prev);
   };
 
-  const openModal = (bola, dars) => {
-    if (!permissions.edit_attendance && !permissions.create_attendance && !permissions.delete_attendance) {
-      setErrorMessage(t('noAttendanceEditPermission'));
-      return;
-    }
-    setErrorMessage('');
-    setSelected({ bola, dars });
+  // ---------------------------------------------------------------------
+  // Davomat belgilash. Avval har bir bosishda darhol serverga so'rov ketardi:
+  // sekin edi va butun ro'yxat qayta yuklanardi. Endi belgilashlar avval
+  // shu yerda (`pending`) to'planadi, foydalanuvchi hammasini belgilab
+  // bo'lgach bitta "Saqlash" tugmasi bilan yuboriladi.
+  // ---------------------------------------------------------------------
+
+  const kalit = (bolaId, darsId) => `${bolaId}_${darsId}`;
+  const pendingCount = Object.keys(pending).length;
+
+  // Katakning ko'rsatiladigan holati: saqlanmagan o'zgarish bo'lsa u ustun,
+  // aks holda bazadagi qiymat. 0 — belgilanmagan.
+  const katakHolati = (bolaId, darsId) => {
+    const k = kalit(bolaId, darsId);
+    if (k in pending) return pending[k];
+    const entry = davomatlar.find(v => v.bola_id === bolaId && v.darssana_id === darsId);
+    return entry?.holati ?? 0;
   };
 
-  const handleDavomatSelect = async (holati) => {
-    if (!selected) return;
+  // Bosilganda aylanadi: bo'sh -> keldi -> kelmadi -> bo'sh
+  const toggleKatak = (bola, dars) => {
+    const joriy = katakHolati(bola.id, dars.id);
+    const keyingi = joriy === 0 ? 1 : joriy === 1 ? 2 : 0;
 
-    if (!permissions.create_attendance && !permissions.edit_attendance && !permissions.delete_attendance) {
+    const bazada = davomatlar.find(v => v.bola_id === bola.id && v.darssana_id === dars.id);
+    const asl = bazada?.holati ?? 0;
+
+    // Ruxsatlar: yangi yozuv — create, mavjudini o'zgartirish — edit,
+    // butunlay olib tashlash — delete.
+    const kerak = keyingi === 0 ? permissions.delete_attendance
+      : asl === 0 ? permissions.create_attendance
+      : permissions.edit_attendance;
+    if (!kerak) {
       setErrorMessage(t('noAttendanceEditPermission'));
       return;
     }
 
-    const { bola, dars } = selected;
-    const existing = davomatlar.find(d => d.bola_id === bola.id && d.darssana_id === dars.id);
+    setErrorMessage('');
+    setPending((prev) => {
+      const yangi = { ...prev };
+      const k = kalit(bola.id, dars.id);
+      // Asl holatga qaytgan bo'lsa — o'zgarish sifatida saqlamaymiz.
+      if (keyingi === asl) delete yangi[k];
+      else yangi[k] = keyingi;
+      return yangi;
+    });
+  };
 
-    const payload = { bola_id: bola.id, darssana_id: dars.id, holati };
-    const endpoint = existing ? `${url}/bola_kun/${existing.id}` : `${url}/bola_kun`;
-    const method = existing ? 'put' : 'post';
+  const handleBekorQilish = () => {
+    setPending({});
+    setErrorMessage('');
+  };
 
+  const handleSaqlash = async () => {
+    const ozgarishlar = Object.entries(pending);
+    if (ozgarishlar.length === 0 || saving) return;
+
+    setSaving(true);
     try {
-      // setLoading(true);
-      await axios[method](endpoint, payload, authHeader);
-      await fetchDavomatlar();
-      setSelected(null);
-    } catch (err) {
-      // Serverdan kelgan aniq sababni ko'rsatamiz (masalan "Faqat bugungi dars
-      // uchun davomat kiritish mumkin"), aks holda sabab yashirin qolardi.
-      console.error('Xatolik:', err);
-      setErrorMessage(
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        t('attendanceSaveUnknownError')
+      // Hammasi bir vaqtda yuboriladi. allSettled: bittasi rad etilsa ham
+      // (masalan "faqat bugungi dars uchun") qolganlari saqlanib qoladi.
+      const natijalar = await Promise.allSettled(
+        ozgarishlar.map(([k, holati]) => {
+          const [bolaId, darsId] = k.split('_').map(Number);
+          const bazada = davomatlar.find(v => v.bola_id === bolaId && v.darssana_id === darsId);
+
+          if (holati === 0) {
+            return axios.delete(`${url}/bola_kun/${bazada.id}`, authHeader);
+          }
+          const payload = { bola_id: bolaId, darssana_id: darsId, holati };
+          return bazada
+            ? axios.put(`${url}/bola_kun/${bazada.id}`, payload, authHeader)
+            : axios.post(`${url}/bola_kun`, payload, authHeader);
+        })
       );
+
+      // Saqlanmaganlari `pending` da qoladi — foydalanuvchi qayta urinishi mumkin.
+      const qolgan = {};
+      let birinchiXato = '';
+      natijalar.forEach((r, i) => {
+        if (r.status === 'rejected') {
+          const [k, holati] = ozgarishlar[i];
+          qolgan[k] = holati;
+          if (!birinchiXato) {
+            birinchiXato =
+              r.reason?.response?.data?.error ||
+              r.reason?.response?.data?.message ||
+              t('attendanceSaveUnknownError');
+          }
+        }
+      });
+
+      await fetchDavomatlar();
+      setPending(qolgan);
+
+      const xatoSoni = Object.keys(qolgan).length;
+      if (xatoSoni > 0) {
+        setErrorMessage(`${t('saveFailedCount').replace('{n}', xatoSoni)} — ${birinchiXato}`);
+      }
+    } catch (err) {
+      console.error('Davomatni saqlashda xatolik:', err);
+      setErrorMessage(t('attendanceSaveUnknownError'));
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -271,10 +336,6 @@ useEffect(() => {
   useEffect(() => {
     filterBolalar(bolalar, selectedGuruh, searchQuery, filterUnmarkedOnly);
   }, [selectedGuruh, searchQuery, filterUnmarkedOnly, bolalar, davomatlar, darsKunlar]);
-
-  useEffect(() => {
-    if (errorMessage) setSelected(null);
-  }, [errorMessage]);
 
   return (
     <LayoutComponent>
@@ -317,7 +378,7 @@ useEffect(() => {
           {loading ? (
             <Loader />
           ) : (
-            <div className={styles.tableWrapper}>
+            <div className={`${styles.tableWrapper} ${pendingCount > 0 ? styles.tableWrapperWithBar : ''}`}>
               <table className={styles.table}>
                 <thead>
                   <tr>
@@ -332,32 +393,31 @@ useEffect(() => {
                 </thead>
                 <tbody>
                   {filteredBolalar.map((bola, index) => {
-                    const bolaDavomat = davomatlar.filter(
-                      v => v.bola_id === bola.id &&
-                           darsKunlar.some(d => d.id === v.darssana_id)
-                    );
-
-                    const bor = bolaDavomat.filter(v => v.holati === 1).length;
-                    const yoq = bolaDavomat.filter(v => v.holati === 2).length;
+                    // Yig'indilar saqlanmagan belgilashlarni ham hisobga oladi —
+                    // shunda son darhol o'zgaradi, saqlashni kutmaydi.
+                    const bor = darsKunlar.filter(d => katakHolati(bola.id, d.id) === 1).length;
+                    const yoq = darsKunlar.filter(d => katakHolati(bola.id, d.id) === 2).length;
 
                     return (
                       <tr key={bola.id}>
                         <td className={styles.stickyCol} style={{ textAlign: 'center', left: '0px', zIndex: 22 }}>{index + 1}</td>
                         <td className={styles.stickyCol} style={{ left: '45px', zIndex: 22 }}>{bola.username}</td>
                         {darsKunlar.map(d => {
-                          const entry = davomatlar.find(
-                            v => v.bola_id === bola.id && v.darssana_id === d.id
-                          );
-                          const mark = entry?.holati === 1 ? (
+                          const holati = katakHolati(bola.id, d.id);
+                          // Saqlanmagan katak boshqa fonda ko'rinadi; saqlangach
+                          // `pending` bo'shaydi va fon odatdagi holatga qaytadi.
+                          const saqlanmagan = kalit(bola.id, d.id) in pending;
+                          const mark = holati === 1 ? (
                             <Check size={14} color="var(--color-success)" />
-                          ) : entry?.holati === 2 ? (
+                          ) : holati === 2 ? (
                             <X size={14} color="var(--color-danger)" />
                           ) : '';
                           return (
                             <td
                               key={d.id}
+                              className={saqlanmagan ? styles.pendingCell : undefined}
                               style={{ cursor: permissions.edit_attendance || permissions.create_attendance || permissions.delete_attendance ? 'pointer' : 'default', textAlign: 'center' }}
-                              onClick={() => openModal(bola, d)}
+                              onClick={() => toggleKatak(bola, d)}
                             >
                               {mark}
                             </td>
@@ -374,12 +434,8 @@ useEffect(() => {
                     <td className={styles.stickyCol} style={{ fontWeight: 'bold', zIndex: 333, left: '0px' }}></td>
                     <td className={styles.stickyCol} style={{ fontWeight: 'bold', zIndex: 333, left: '40px' }}>{t('byDayLabel')}</td>
                     {darsKunlar.map(d => {
-                      const kunDavomat = davomatlar.filter(
-                        v => v.darssana_id === d.id &&
-                             filteredBolalar.some(b => b.id === v.bola_id)
-                      );
-                      const bor = kunDavomat.filter(v => v.holati === 1).length;
-                      const yoq = kunDavomat.filter(v => v.holati === 2).length;
+                      const bor = filteredBolalar.filter(b => katakHolati(b.id, d.id) === 1).length;
+                      const yoq = filteredBolalar.filter(b => katakHolati(b.id, d.id) === 2).length;
 
                       return (
                         <td key={d.id} style={{ fontSize: '12px', lineHeight: '14px', textAlign: 'center' }}>
@@ -388,22 +444,16 @@ useEffect(() => {
                       );
                     })}
                     <td style={{ fontWeight: 'bold', color: '#166534' }}>
-                      {
-                        davomatlar.filter(
-                          v => v.holati === 1 &&
-                               filteredBolalar.some(b => b.id === v.bola_id) &&
-                               darsKunlar.some(d => d.id === v.darssana_id)
-                        ).length
-                      }
+                      {filteredBolalar.reduce(
+                        (jami, b) => jami + darsKunlar.filter(d => katakHolati(b.id, d.id) === 1).length,
+                        0
+                      )}
                     </td>
                     <td style={{ fontWeight: 'bold', color: '#991b1b' }}>
-                      {
-                        davomatlar.filter(
-                          v => v.holati === 2 &&
-                               filteredBolalar.some(b => b.id === v.bola_id) &&
-                               darsKunlar.some(d => d.id === v.darssana_id)
-                        ).length
-                      }
+                      {filteredBolalar.reduce(
+                        (jami, b) => jami + darsKunlar.filter(d => katakHolati(b.id, d.id) === 2).length,
+                        0
+                      )}
                     </td>
                   </tr>
                 </tfoot>
@@ -411,16 +461,41 @@ useEffect(() => {
             </div>
           )}
 
-          {selected && (permissions.create_attendance || permissions.edit_attendance || permissions.delete_attendance) && (
-            <DavomatModal
-              bola={selected.bola}
-              sana={selected.dars.sana}
-              onClose={() => setSelected(null)}
-              onSelect={handleDavomatSelect}
-              canEdit={permissions.edit_attendance}
-              canCreate={permissions.create_attendance}
-              canDelete={permissions.delete_attendance}
-            />
+          {/* Saqlanmagan belgilashlar bo'lgandagina pastda paydo bo'ladigan panel.
+              Sahifa uzun bo'lgani uchun u ekranga qadalgan (fixed) — jadvalning
+              qayeriga tushib qolgan bo'lsangiz ham tugma qo'l ostida turadi. */}
+          {pendingCount > 0 && (
+            <div className={styles.saveBar} role="region" aria-live="polite">
+              <div className={styles.saveBarInfo}>
+                <span className={styles.saveBarBadge}>{pendingCount}</span>
+                <div>
+                  <strong>{t('unsavedMarks').replace('{n}', pendingCount)}</strong>
+                  <p className={styles.saveBarHint}>{t('attendanceCellHint')}</p>
+                </div>
+              </div>
+              <div className={styles.saveBarActions}>
+                <button
+                  type="button"
+                  className={styles.discardBtn}
+                  onClick={handleBekorQilish}
+                  disabled={saving}
+                >
+                  <RotateCcw size={16} /> {t('discardChanges')}
+                </button>
+                <button
+                  type="button"
+                  className={styles.saveBtn}
+                  onClick={handleSaqlash}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <><Loader2 size={16} className={styles.spinner} /> {t('saving')}</>
+                  ) : (
+                    <><Save size={16} /> {t('save')}</>
+                  )}
+                </button>
+              </div>
+            </div>
           )}
 
           <ErrorModal

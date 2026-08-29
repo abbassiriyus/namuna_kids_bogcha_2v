@@ -320,6 +320,15 @@ export default function Dashboard() {
 
   const kpiColor = (kpi) => (kpi >= 8 ? PALETTE.good : kpi >= 6 ? PALETTE.naqt_prichislena : PALETTE.critical);
 
+  // KPI diagrammasi gorizontal: guruh nomlari chapdagi tik o'qda turadi.
+  // O'q kengligini eng uzun nomga qarab hisoblaymiz — nomlar qisqa bo'lsa
+  // ustunlarga ko'proq joy qoladi, uzun bo'lsa kesilmay sig'adi.
+  const kpiNameMax = 22;
+  const kpiUzunlik = groupRanked.length
+    ? Math.min(kpiNameMax, Math.max(...groupRanked.map((g) => String(g.guruh || '').length)))
+    : 10;
+  const kpiAxisWidth = Math.min(180, Math.max(80, kpiUzunlik * 7 + 12));
+
   const bugungiBolaJami = todayAttendanceStats.kelgan + todayAttendanceStats.kelmagan;
   const bugungiBolaFoiz = bugungiBolaJami > 0
     ? Math.round((todayAttendanceStats.kelgan / bugungiBolaJami) * 100) : 0;
@@ -629,34 +638,43 @@ export default function Dashboard() {
             {groupRanked.length === 0 ? (
               <p className={styles.emptyNote}>{t('noDataFound')}</p>
             ) : (
-              /* Vertikal ustunlar: har bir guruh KPI'si 0–10 shkalada,
-                 ustun ustida baho, tagida kelgan/kelmagan sonlari. */
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={groupRanked} margin={{ top: 24, right: 8, left: 0, bottom: 0 }}>
+              /* Gorizontal ustunlar: guruh nomlari uzun bo'lgani uchun ular
+                 tik o'qda, chap tomonda to'liq yoziladi. Tik ustunlarda nomlar
+                 bir-birining ustiga tushib ketardi, kesib ko'rsatish esa
+                 "Kichik guruh ..." bilan boshlanadigan ikki guruhni bir xil
+                 qilib qo'yardi. Balandlik guruhlar soniga qarab o'sadi. */
+              <ResponsiveContainer width="100%" height={Math.max(200, groupRanked.length * 48 + 40)}>
+                <BarChart
+                  data={groupRanked}
+                  layout="vertical"
+                  margin={{ top: 8, right: 56, left: 0, bottom: 8 }}
+                >
                   <defs>
                     {groupRanked.map((g) => (
-                      <linearGradient key={g.guruh} id={`kpiGrad-${g.guruh}`} x1="0" y1="0" x2="0" y2="1">
+                      <linearGradient key={g.guruh} id={`kpiGrad-${g.guruh}`} x1="0" y1="0" x2="1" y2="0">
                         <stop offset="0%" stopColor={kpiColor(g.kpi)} stopOpacity={0.95} />
                         <stop offset="100%" stopColor={kpiColor(g.kpi)} stopOpacity={0.5} />
                       </linearGradient>
                     ))}
                   </defs>
-                  <CartesianGrid vertical={false} stroke="#e5e9f0" />
+                  <CartesianGrid horizontal={false} stroke="#e5e9f0" />
                   <XAxis
-                    dataKey="guruh"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={axisTick}
-                    interval={0}
-                    tickFormatter={shortLabel}
-                  />
-                  <YAxis
+                    type="number"
                     domain={[0, 10]}
                     ticks={[0, 2, 4, 6, 8, 10]}
                     tickLine={false}
                     axisLine={false}
                     tick={axisTick}
-                    width={30}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="guruh"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={axisTick}
+                    interval={0}
+                    width={kpiAxisWidth}
+                    tickFormatter={(v) => shortLabel(v, kpiNameMax)}
                   />
                   <Tooltip
                     cursor={{ fill: 'rgba(37,99,235,0.05)' }}
@@ -672,27 +690,28 @@ export default function Dashboard() {
                       ];
                     }}
                   />
-                  <Bar dataKey="kpi" radius={[6, 6, 0, 0]} barSize={38}>
+                  <Bar dataKey="kpi" radius={[0, 6, 6, 0]} barSize={24}>
                     {groupRanked.map((g) => (
                       <Cell key={g.guruh} fill={`url(#kpiGrad-${g.guruh})`} />
                     ))}
                     <LabelList
                       dataKey="kpi"
-                      position="top"
+                      position="right"
                       formatter={(v) => Number(v).toFixed(1)}
                       style={{ fill: '#0f172a', fontSize: 12, fontWeight: 800 }}
                     />
-                    {/* Ustun ichida kelgan/kelmagan sonlari */}
+                    {/* Ustun ichida kelgan/kelmagan sonlari — ustun yetarlicha
+                        uzun bo'lgandagina, aks holda raqam tashqariga chiqadi. */}
                     <LabelList
-                      position="insideBottom"
                       content={({ x, y, width, height, index }) => {
                         const g = groupRanked[index];
-                        if (!g || height < 26) return null;
+                        if (!g || width < 52) return null;
                         return (
                           <text
-                            x={x + width / 2}
-                            y={y + height - 8}
-                            textAnchor="middle"
+                            x={x + 10}
+                            y={y + height / 2}
+                            dominantBaseline="middle"
+                            textAnchor="start"
                             style={{ fontSize: 11, fontWeight: 700, fill: '#fff' }}
                           >
                             {g.holati1}/{g.holati2}
