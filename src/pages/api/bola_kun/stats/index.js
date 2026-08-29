@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { yearRangeDate } from '@/lib/sqlDate';
 
 const KUN = `a.sana`;
 
@@ -21,10 +22,10 @@ async function handler(req, res) {
               COUNT(*) FILTER (WHERE bk.holati = 2)::int AS holati2
        FROM bola_kun bk
        JOIN bola_kuni_all a ON a.id = bk.darssana_id
-       WHERE EXTRACT(YEAR FROM ${KUN}) = $1
+       WHERE ${yearRangeDate(KUN, 1)}
        GROUP BY EXTRACT(MONTH FROM ${KUN})
        ORDER BY oy_raqami`,
-      [Number(year)]
+      [String(year)]
     );
 
     const months = [

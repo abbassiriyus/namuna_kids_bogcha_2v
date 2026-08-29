@@ -675,50 +675,75 @@ export default function XodimDavomat() {
         throw err;
       }
 
+      // Har bir "maxsus" xodim uchun ish kunlari alohida so'rov bilan olinadi.
+      // Avval ular birin-ketin (ketma-ket) so'ralardi: 20 ta xodim = 20 marta
+      // serverga borib-kelish. Endi hammasi bir vaqtda ketadi — kutish vaqti
+      // eng sekin bitta so'rov qadar qoladi.
       const tomorrowKunMap = {};
       let tomorrowMaxsusWorkdays = [];
-      for (const xodim of xodimlar) {
-        if (xodim.ish_tur === 2) {
+      const maxsusXodimlar = xodimlar.filter((x) => x.ish_tur === 2);
+
+      const maxsusNatijalar = await Promise.all(
+        maxsusXodimlar.map(async (xodim) => {
           try {
             const res = await axios.get(`${url}/xodim_workdays/xodim/${xodim.id}`, getAuthHeaders());
-            tomorrowKunMap[xodim.id] = res.data
-              .map(k => ({
-                ...k,
-                work_day: dayjs(k.work_day).tz('Asia/Tashkent').format('YYYY-MM-DD'),
-              }))
-              .filter(k => k.work_day === tomorrow);
-            tomorrowMaxsusWorkdays = [...tomorrowMaxsusWorkdays, ...tomorrowKunMap[xodim.id]];
+            return {
+              id: xodim.id,
+              kunlar: res.data
+                .map(k => ({
+                  ...k,
+                  work_day: dayjs(k.work_day).tz('Asia/Tashkent').format('YYYY-MM-DD'),
+                }))
+                .filter(k => k.work_day === tomorrow),
+            };
           } catch (err) {
             console.error(`Xodim ${xodim.id} uchun workdays so‘rovida xato:`, err);
-            tomorrowKunMap[xodim.id] = [];
+            return { id: xodim.id, kunlar: [] };
           }
-        } else {
-          tomorrowKunMap[xodim.id] = tomorrowBolaKuni;
-        }
+        })
+      );
+
+      // Tartib xodimlar ro'yxatidagidek saqlanadi (Promise.all natijani
+      // kirish tartibida qaytaradi).
+      for (const { id, kunlar } of maxsusNatijalar) {
+        tomorrowKunMap[id] = kunlar;
+        tomorrowMaxsusWorkdays = [...tomorrowMaxsusWorkdays, ...kunlar];
+      }
+      for (const xodim of xodimlar) {
+        if (xodim.ish_tur !== 2) tomorrowKunMap[xodim.id] = tomorrowBolaKuni;
       }
 
       const tomorrowMaxsusKunlar = [...new Set(tomorrowMaxsusWorkdays.map(k => k.work_day))]
         .sort((a, b) => new Date(a) - new Date(b))
         .map(sana => ({ id: tomorrowMaxsusWorkdays.find(k => k.work_day === sana).id, sana }));
 
+      // Davomat ham har bir xodim uchun alohida so'raladi — bularni ham
+      // parallel yuboramiz (avval har biri oldingisini kutib turardi).
       const tomorrowAttendance = {};
-      for (const xodim of xodimlar) {
-        let workday;
-        if (xodim.ish_tur === 1 && tomorrowBolaKuni.length > 0) {
-          workday = tomorrowBolaKuni[0];
-        } else if (xodim.ish_tur === 2) {
-          workday = tomorrowKunMap[xodim.id]?.find(w => w.work_day === tomorrow);
-        }
-        if (workday) {
+      const davomatSoraladiganlar = xodimlar
+        .map((xodim) => {
+          let workday;
+          if (xodim.ish_tur === 1 && tomorrowBolaKuni.length > 0) {
+            workday = tomorrowBolaKuni[0];
+          } else if (xodim.ish_tur === 2) {
+            workday = tomorrowKunMap[xodim.id]?.find(w => w.work_day === tomorrow);
+          }
+          return workday ? { xodim, workday } : null;
+        })
+        .filter(Boolean);
+
+      const davomatNatijalar = await Promise.all(
+        davomatSoraladiganlar.map(async ({ xodim, workday }) => {
           try {
-            const data = await getAttendance(xodim.id, workday.id);
-            if (data) {
-              tomorrowAttendance[xodim.id] = data;
-            }
+            return { id: xodim.id, data: await getAttendance(xodim.id, workday.id) };
           } catch (err) {
             console.error(`Xodim ${xodim.id} uchun davomat so‘rovida xato:`, err);
+            return { id: xodim.id, data: null };
           }
-        }
+        })
+      );
+      for (const { id, data } of davomatNatijalar) {
+        if (data) tomorrowAttendance[id] = data;
       }
 
       if (!tomorrowBolaKuni.length && !tomorrowMaxsusKunlar.length) {
@@ -821,50 +846,75 @@ export default function XodimDavomat() {
         throw err;
       }
 
+      // Har bir "maxsus" xodim uchun ish kunlari alohida so'rov bilan olinadi.
+      // Avval ular birin-ketin (ketma-ket) so'ralardi: 20 ta xodim = 20 marta
+      // serverga borib-kelish. Endi hammasi bir vaqtda ketadi — kutish vaqti
+      // eng sekin bitta so'rov qadar qoladi.
       const tomorrowKunMap = {};
       let tomorrowMaxsusWorkdays = [];
-      for (const xodim of xodimlar) {
-        if (xodim.ish_tur === 2) {
+      const maxsusXodimlar = xodimlar.filter((x) => x.ish_tur === 2);
+
+      const maxsusNatijalar = await Promise.all(
+        maxsusXodimlar.map(async (xodim) => {
           try {
             const res = await axios.get(`${url}/xodim_workdays/xodim/${xodim.id}`, getAuthHeaders());
-            tomorrowKunMap[xodim.id] = res.data
-              .map(k => ({
-                ...k,
-                work_day: dayjs(k.work_day).tz('Asia/Tashkent').format('YYYY-MM-DD'),
-              }))
-              .filter(k => k.work_day === tomorrow);
-            tomorrowMaxsusWorkdays = [...tomorrowMaxsusWorkdays, ...tomorrowKunMap[xodim.id]];
+            return {
+              id: xodim.id,
+              kunlar: res.data
+                .map(k => ({
+                  ...k,
+                  work_day: dayjs(k.work_day).tz('Asia/Tashkent').format('YYYY-MM-DD'),
+                }))
+                .filter(k => k.work_day === tomorrow),
+            };
           } catch (err) {
             console.error(`Xodim ${xodim.id} uchun workdays so‘rovida xato:`, err);
-            tomorrowKunMap[xodim.id] = [];
+            return { id: xodim.id, kunlar: [] };
           }
-        } else {
-          tomorrowKunMap[xodim.id] = tomorrowBolaKuni;
-        }
+        })
+      );
+
+      // Tartib xodimlar ro'yxatidagidek saqlanadi (Promise.all natijani
+      // kirish tartibida qaytaradi).
+      for (const { id, kunlar } of maxsusNatijalar) {
+        tomorrowKunMap[id] = kunlar;
+        tomorrowMaxsusWorkdays = [...tomorrowMaxsusWorkdays, ...kunlar];
+      }
+      for (const xodim of xodimlar) {
+        if (xodim.ish_tur !== 2) tomorrowKunMap[xodim.id] = tomorrowBolaKuni;
       }
 
       const tomorrowMaxsusKunlar = [...new Set(tomorrowMaxsusWorkdays.map(k => k.work_day))]
         .sort((a, b) => new Date(a) - new Date(b))
         .map(sana => ({ id: tomorrowMaxsusWorkdays.find(k => k.work_day === sana).id, sana }));
 
+      // Davomat ham har bir xodim uchun alohida so'raladi — bularni ham
+      // parallel yuboramiz (avval har biri oldingisini kutib turardi).
       const tomorrowAttendance = {};
-      for (const xodim of xodimlar) {
-        let workday;
-        if (xodim.ish_tur === 1 && tomorrowBolaKuni.length > 0) {
-          workday = tomorrowBolaKuni[0];
-        } else if (xodim.ish_tur === 2) {
-          workday = tomorrowKunMap[xodim.id]?.find(w => w.work_day === tomorrow);
-        }
-        if (workday) {
+      const davomatSoraladiganlar = xodimlar
+        .map((xodim) => {
+          let workday;
+          if (xodim.ish_tur === 1 && tomorrowBolaKuni.length > 0) {
+            workday = tomorrowBolaKuni[0];
+          } else if (xodim.ish_tur === 2) {
+            workday = tomorrowKunMap[xodim.id]?.find(w => w.work_day === tomorrow);
+          }
+          return workday ? { xodim, workday } : null;
+        })
+        .filter(Boolean);
+
+      const davomatNatijalar = await Promise.all(
+        davomatSoraladiganlar.map(async ({ xodim, workday }) => {
           try {
-            const data = await getAttendance(xodim.id, workday.id);
-            if (data) {
-              tomorrowAttendance[xodim.id] = data;
-            }
+            return { id: xodim.id, data: await getAttendance(xodim.id, workday.id) };
           } catch (err) {
             console.error(`Xodim ${xodim.id} uchun davomat so‘rovida xato:`, err);
+            return { id: xodim.id, data: null };
           }
-        }
+        })
+      );
+      for (const { id, data } of davomatNatijalar) {
+        if (data) tomorrowAttendance[id] = data;
       }
 
       if (!tomorrowBolaKuni.length && !tomorrowMaxsusKunlar.length) {

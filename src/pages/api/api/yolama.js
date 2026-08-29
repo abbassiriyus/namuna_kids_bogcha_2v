@@ -1,6 +1,7 @@
 import pool from '@/lib/db';
+import { requireAuth } from '@/lib/auth';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -65,3 +66,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: err.message });
   }
 }
+
+export default requireAuth(handler);

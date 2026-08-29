@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { monthRangeDate } from '@/lib/sqlDate';
 
 const KUN = `a.sana`;
 
@@ -23,7 +24,7 @@ async function handler(req, res) {
        LEFT JOIN bola b ON b.guruh_id = g.id
        LEFT JOIN bola_kun bk ON bk.bola_id = b.id
        LEFT JOIN bola_kuni_all a
-              ON a.id = bk.darssana_id AND TO_CHAR(${KUN}, 'YYYY-MM') = $1
+              ON a.id = bk.darssana_id AND ${monthRangeDate(KUN, 1)}
        WHERE bk.id IS NULL OR a.id IS NOT NULL
        GROUP BY g.id, g.name
        ORDER BY g.name`,

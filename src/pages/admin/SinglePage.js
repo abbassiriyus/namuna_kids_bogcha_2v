@@ -205,7 +205,7 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={dailyDavomatData}>
               <CartesianGrid vertical={false} stroke="#e5e9f0" />
-              <XAxis dataKey="kun" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+              <XAxis dataKey="kun" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} minTickGap={14} />
               <YAxis tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
               <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e5e9f0', borderRadius: 12 }} formatter={(value, name) => [value, name === 'holati1' ? 'Kelgan' : 'Kelmagan']} />
               <Legend iconType="circle" iconSize={8} formatter={(value) => (value === 'holati1' ? 'Kelgan' : 'Kelmagan')} />
@@ -244,7 +244,14 @@ export default function Dashboard({ month: monthProp, onMonthChange }) {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={groupKPIData}>
               <CartesianGrid vertical={false} stroke="#e5e9f0" />
-              <XAxis dataKey="guruh" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+              <XAxis
+                dataKey="guruh"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: '#64748b', fontSize: 12 }}
+                interval={0}
+                tickFormatter={(v) => (String(v).length > 12 ? `${String(v).slice(0, 11)}…` : v)}
+              />
               <YAxis tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
               <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e5e9f0', borderRadius: 12 }} formatter={(value, name) => [value, name === 'holati1' ? 'Kelgan' : name === 'holati2' ? 'Kelmagan' : 'KPI (%)']} />
               <Legend iconType="circle" iconSize={8} formatter={(value) => (value === 'holati1' ? 'Kelgan' : value === 'holati2' ? 'Kelmagan' : 'KPI (%)')} />

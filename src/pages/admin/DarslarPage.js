@@ -145,21 +145,36 @@ export default function DarslarPage() {
     const newDates = [];
     setLoading(true);
     try {
-      for (const day of days) {
-        const dateStr = day.toLocaleDateString('sv-SE');
-        if (!selectedDates.includes(dateStr)) {
-          await axios.post(
+      // Kunlar bir-biriga bog'liq emas — avval har biri oldingisini kutib
+      // turardi (oyiga ~22 marta serverga borib-kelish). Endi hammasi bir
+      // vaqtda ketadi. allSettled: bittasi xato bersa ham qolganlari saqlanadi
+      // va ro'yxatga faqat haqiqatan yaratilganlari qo'shiladi.
+      const qoshiladigan = days
+        .map((day) => day.toLocaleDateString('sv-SE'))
+        .filter((dateStr) => !selectedDates.includes(dateStr));
+
+      const natijalar = await Promise.allSettled(
+        qoshiladigan.map((dateStr) =>
+          axios.post(
             `${url}/bola_kun_all`,
             {
               sana: dateStr,
               mavzu: 'Avtomatik mavzu',
             },
             authHeader
-          );
-          newDates.push(dateStr);
-        }
-      }
+          )
+        )
+      );
+
+      natijalar.forEach((r, i) => {
+        if (r.status === 'fulfilled') newDates.push(qoshiladigan[i]);
+        else console.error('Dars kunini qo‘shishda xato:', qoshiladigan[i], r.reason);
+      });
+
       setSelectedDates((prev) => [...prev, ...newDates]);
+      if (newDates.length < qoshiladigan.length) {
+        setErrorMessage(t('lessonChangeError'));
+      }
     } catch (err) {
       console.error('Xatolik:', err);
       setErrorMessage(t('autofillError'));

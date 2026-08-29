@@ -10,6 +10,14 @@ import { getDavomatMood, formatMinutes } from '../../utils/davomatMood';
 import FaceCaptureModal from '../../components/FaceCaptureModal';
 import { useLang } from '../../i18n/LanguageContext';
 
+// Bu sahifadagi API'lar himoyalangan (requireAuth). Token har chaqiruvda
+// localStorage'dan o'qiladi — obyekt modul darajasida yaratilsa, useCallback
+// bog'liqliklari o'zgarmaydi.
+function authConfig(extra) {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : '';
+  return { ...extra, headers: { Authorization: `Bearer ${token}` } };
+}
+
 const SCAN_INTERVAL_MS = 600;
 const RESET_DELAY_MS = 3500;
 
@@ -33,17 +41,13 @@ export default function FaceLogin() {
   const [faceEditEmployee, setFaceEditEmployee] = useState(null); // yuzi qayta yozilayotgan xodim
 
   // Yuzni saqlash uchun token kerak (POST /api/xodim/:id/face himoyalangan).
-  const authHeader = {
-    headers: {
-      Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('token') : ''}`,
-    },
-  };
+  const authHeader = authConfig();
 
   // Barcha xodimlarning bugungi holatini bitta so'rovda olamiz.
   const loadRoster = useCallback(async () => {
     setRosterLoading(true);
     try {
-      const res = await axios.get(`${url}/api/today-roster`);
+      const res = await axios.get(`${url}/api/today-roster`, authConfig());
       setRoster(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Xodimlar ro‘yxatini olishda xatolik:', err);
@@ -92,7 +96,7 @@ export default function FaceLogin() {
       setScanState('checking');
       setStatus('Aniqlanmoqda...');
       const descriptor = Array.from(detection.descriptor);
-      const res = await axios.post(`${url}/api/check-face`, { descriptor });
+      const res = await axios.post(`${url}/api/check-face`, { descriptor }, authConfig());
 
       if (!res.data?.match) {
         cooldownRef.current = true;
@@ -143,7 +147,7 @@ export default function FaceLogin() {
     if (!recognized) return;
     setActionLoading(true);
     try {
-      const res = await axios.post(`${url}/api/yolama`, { xodim_id: recognized.id, action });
+      const res = await axios.post(`${url}/api/yolama`, { xodim_id: recognized.id, action }, authConfig());
       const time = action === 'kelish' ? res.data?.record?.start_time : res.data?.record?.end_time;
       const timeText = time ? time.slice(0, 5) : '';
       setActionResult({
@@ -166,7 +170,7 @@ export default function FaceLogin() {
     if (!recognized) return;
     setUndoLoading(true);
     try {
-      await axios.delete(`${url}/api/xodim/${recognized.id}/today-undo`, { params: { scope } });
+      await axios.delete(`${url}/api/xodim/${recognized.id}/today-undo`, authConfig({ params: { scope } }));
       setActionResult({
         type: 'success',
         text: scope === 'end' ? 'Ketish vaqti bekor qilindi' : 'Bugungi belgi bekor qilindi',

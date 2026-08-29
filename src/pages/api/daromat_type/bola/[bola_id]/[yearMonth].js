@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { monthRangeDate } from '@/lib/sqlDate';
 
 async function handler(req, res) {
   const { bola_id, yearMonth } = req.query;
@@ -8,7 +9,7 @@ async function handler(req, res) {
     try {
       const result = await pool.query(
         `SELECT * FROM daromat_type
-         WHERE bola_id = $1 AND TO_CHAR(sana, 'YYYY-MM') = $2`,
+         WHERE bola_id = $1 AND ${monthRangeDate('sana', 2)}`,
         [bola_id, yearMonth]
       );
       return res.json(result.rows);

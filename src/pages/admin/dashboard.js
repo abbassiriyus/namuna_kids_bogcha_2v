@@ -248,6 +248,30 @@ export default function Dashboard() {
   const formatNumber = (value) =>
     new Intl.NumberFormat('uz-UZ').format(Number(value) || 0);
 
+  // Diagrammalarda 12 oy yonma-yon turadi. Ustun tepasidagi raqam to'liq
+  // yozilsa ("1 500 000") qo'shni ustunning raqami bilan ustma-ust tushadi,
+  // shuning uchun diagramma ichida qisqartirilgan ko'rinish ishlatiladi.
+  // To'liq qiymat tooltip'da baribir ko'rinadi.
+  const formatCompact = (value) => {
+    const n = Number(value) || 0;
+    const abs = Math.abs(n);
+    if (abs >= 1000000) {
+      const m = n / 1000000;
+      return `${(Math.abs(m) >= 10 ? Math.round(m) : Number(m.toFixed(1))).toLocaleString('uz-UZ')} ${t('unitMillionShort')}`;
+    }
+    if (abs >= 10000) return `${Math.round(n / 1000).toLocaleString('uz-UZ')} ${t('unitThousandShort')}`;
+    return formatNumber(n);
+  };
+
+  // Oy nomi to'liq yozilganda ("Sentyabr") 12 tasi o'qqa sig'maydi.
+  const shortMonth = (name) => (typeof name === 'string' ? name.slice(0, 3) : name);
+
+  // Guruh nomlari uzun bo'lishi mumkin ("Katta guruh «Bilimdon»") — o'qda kesamiz.
+  const shortLabel = (name, max = 12) => {
+    const s = String(name ?? '');
+    return s.length > max ? `${s.slice(0, max - 1)}…` : s;
+  };
+
   const chartTooltipStyle = {
     background: '#ffffff',
     border: '1px solid #e5e9f0',
@@ -397,7 +421,7 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={daromadData} margin={{ top: 24, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="#e5e9f0" />
-                <XAxis dataKey="oy" tickLine={false} axisLine={false} tick={axisTick} />
+                <XAxis dataKey="oy" tickLine={false} axisLine={false} tick={axisTick} tickFormatter={shortMonth} interval={0} />
                 <YAxis tickLine={false} axisLine={false} tick={axisTick} tickFormatter={formatNumber} width={56} />
                 <Tooltip
                   cursor={{ fill: 'rgba(37,99,235,0.05)' }}
@@ -434,7 +458,7 @@ export default function Dashboard() {
                   <LabelList
                     dataKey="jami"
                     position="top"
-                    formatter={(value) => (value ? formatNumber(value) : '')}
+                    formatter={(value) => (value ? formatCompact(value) : '')}
                     style={{ fill: '#0f172a', fontSize: 11, fontWeight: 600 }}
                   />
                 </Bar>
@@ -449,7 +473,7 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={darslarData} margin={{ top: 24, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="#e5e9f0" />
-                <XAxis dataKey="oy" tickLine={false} axisLine={false} tick={axisTick} />
+                <XAxis dataKey="oy" tickLine={false} axisLine={false} tick={axisTick} tickFormatter={shortMonth} interval={0} />
                 <YAxis tickLine={false} axisLine={false} tick={axisTick} width={40} />
                 <Tooltip
                   cursor={{ fill: 'rgba(37,99,235,0.05)' }}
@@ -507,7 +531,7 @@ export default function Dashboard() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} stroke="#e5e9f0" />
-                <XAxis dataKey="oy" tickLine={false} axisLine={false} tick={axisTick} />
+                <XAxis dataKey="oy" tickLine={false} axisLine={false} tick={axisTick} tickFormatter={shortMonth} interval={0} />
                 <YAxis yAxisId="left" tickLine={false} axisLine={false} tick={axisTick} width={40} />
                 {/* O'ng o'q — foiz uchun alohida shkala, aks holda ustunlar yonida
                     foiz chizig'i ko'rinmay ketardi. */}
@@ -541,7 +565,7 @@ export default function Dashboard() {
                   <LabelList
                     dataKey="holati1"
                     position="top"
-                    formatter={(value) => (value ? formatNumber(value) : '')}
+                    formatter={(value) => (value ? formatCompact(value) : '')}
                     style={{ fill: '#0f172a', fontSize: 10, fontWeight: 700 }}
                   />
                 </Bar>
@@ -549,7 +573,7 @@ export default function Dashboard() {
                   <LabelList
                     dataKey="holati2"
                     position="top"
-                    formatter={(value) => (value ? formatNumber(value) : '')}
+                    formatter={(value) => (value ? formatCompact(value) : '')}
                     style={{ fill: '#0f172a', fontSize: 10, fontWeight: 700 }}
                   />
                 </Bar>
@@ -582,7 +606,7 @@ export default function Dashboard() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} stroke="#e5e9f0" />
-                <XAxis dataKey="kun" tickLine={false} axisLine={false} tick={axisTick} interval="preserveStartEnd" />
+                <XAxis dataKey="kun" tickLine={false} axisLine={false} tick={axisTick} interval="preserveStartEnd" minTickGap={14} />
                 <YAxis tickLine={false} axisLine={false} tick={axisTick} width={36} allowDecimals={false} />
                 <Tooltip
                   contentStyle={chartTooltipStyle}
@@ -624,6 +648,7 @@ export default function Dashboard() {
                     axisLine={false}
                     tick={axisTick}
                     interval={0}
+                    tickFormatter={shortLabel}
                   />
                   <YAxis
                     domain={[0, 10]}
@@ -697,7 +722,7 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height={230}>
               <BarChart data={xodimDavomatData} margin={{ top: 24, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="#e5e9f0" />
-                <XAxis dataKey="oy" tickLine={false} axisLine={false} tick={axisTick} />
+                <XAxis dataKey="oy" tickLine={false} axisLine={false} tick={axisTick} tickFormatter={shortMonth} interval={0} />
                 <YAxis tickLine={false} axisLine={false} tick={axisTick} width={40} allowDecimals={false} />
                 <Tooltip
                   cursor={{ fill: 'rgba(124,58,237,0.06)' }}

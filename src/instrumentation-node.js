@@ -35,7 +35,24 @@ async function ensureSchema() {
   const existing = new Set(rows.map((r) => r.table_name));
   const missing = requiredTables.filter((t) => !existing.has(t));
 
-  if (missing.length === 0) return; // hammasi joyida — tegmaymiz
+  if (missing.length === 0) {
+    // Jadvallar joyida, lekin schema.sql'ga keyinchalik yangi indeks qo'shilgan
+    // bo'lishi mumkin. CREATE INDEX IF NOT EXISTS idempotent — mavjudini
+    // qayta yaratmaydi. Hammasini BITTA so'rovda yuboramiz: har birini alohida
+    // yuborish uzoq bazada (masalan Neon) o'nlab marta borib-kelishni bildiradi.
+    const indexStatements = sql
+      .split(/\r?\n/)
+      .filter((line) => /^\s*CREATE\s+(UNIQUE\s+)?INDEX/i.test(line))
+      .join('\n');
+    if (indexStatements) {
+      try {
+        await pool.query(indexStatements);
+      } catch (err) {
+        console.error('[instrumentation] Indekslarni tekshirishda xato:', err.message);
+      }
+    }
+    return;
+  }
 
   const dbUser = process.env.DB_USER;
   if (dbUser) {

@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { monthRangeDate } from '@/lib/sqlDate';
 
 async function handler(req, res) {
   if (req.method === 'GET') {
@@ -9,7 +10,7 @@ async function handler(req, res) {
       const values = [];
 
       if (year && month) {
-        query += ' WHERE TO_CHAR(sana, \'YYYY-MM\') = $1';
+        query += ` WHERE ${monthRangeDate('sana', 1)}`;
         const yearMonth = `${year}-${month.padStart(2, '0')}`;
         values.push(yearMonth);
       }

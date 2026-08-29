@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { monthRangeDate } from '@/lib/sqlDate';
 
 async function handler(req, res) {
   if (req.method === 'GET') {
@@ -16,7 +17,7 @@ async function handler(req, res) {
         return res.status(400).json({ error: 'month noto‘g‘ri (YYYY-MM kutiladi)' });
       }
       params.push(month);
-      conditions.push(`TO_CHAR(work_day, 'YYYY-MM') = $${params.length}`);
+      conditions.push(monthRangeDate('work_day', params.length));
     }
 
     const where = conditions.length ? ` WHERE ${conditions.join(' AND ')}` : '';

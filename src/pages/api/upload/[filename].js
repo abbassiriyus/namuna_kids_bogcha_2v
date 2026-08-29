@@ -31,6 +31,25 @@ export default async function handler(req, res) {
   const ext = path.extname(safeName).toLowerCase();
   res.setHeader('Content-Type', MIME_TYPES[ext] || 'application/octet-stream');
 
+  // Brauzer fayl turini o'zi "taxmin qilib" HTML deb ochib yubormasin.
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+
+  // SVG ichida JavaScript bo'lishi mumkin. <img> tegida u baribir ishlamaydi,
+  // lekin faylni to'g'ridan-to'g'ri manzil orqali ochganda ishlab ketardi —
+  // CSP shuni to'sadi (rasm ko'rinishiga ta'sir qilmaydi).
+  if (ext === '.svg') {
+    res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+  }
+
+  // Fayl nomi `<vaqt>_<asl nom>` — bir marta yozilgach o'zgarmaydi, shuning
+  // uchun uzoq keshlash xavfsiz va rasmlar qayta yuklanmaydi.
+  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+
   const stream = fs.createReadStream(filePath);
+  stream.on('error', (err) => {
+    console.error('[upload] Faylni o\u2018qishda xato:', err.message);
+    if (!res.headersSent) res.status(500).end();
+    else res.end();
+  });
   stream.pipe(res);
 }

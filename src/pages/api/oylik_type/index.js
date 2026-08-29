@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { monthRangeTimestamptz } from '@/lib/sqlDate';
 
 async function handler(req, res) {
   if (req.method === 'GET') {
@@ -7,7 +8,7 @@ async function handler(req, res) {
     try {
       const result = month
         ? await pool.query(
-            `SELECT * FROM oylik_type WHERE TO_CHAR(created_at, 'YYYY-MM') = $1 ORDER BY id DESC`,
+            `SELECT * FROM oylik_type WHERE ${monthRangeTimestamptz('created_at', 1)} ORDER BY id DESC`,
             [month]
           )
         : await pool.query(`SELECT * FROM oylik_type ORDER BY id DESC`);

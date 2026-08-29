@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { monthRangeDate, isMonth } from '@/lib/sqlDate';
 
 async function handler(req, res) {
   if (req.method === 'POST') {
@@ -16,11 +17,20 @@ async function handler(req, res) {
 
   if (req.method === 'GET') {
     const { month, year } = req.query;
+
+    // Oldin oy/yil alohida `EXTRACT(...)` bilan solishtirilardi — bunda
+    // indeksdan foydalanib bo'lmaydi. Endi bitta "YYYY-MM" oralig'iga
+    // aylantiramiz; natija bir xil, lekin indeks ishlaydi.
+    const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
+    if (!isMonth(yearMonth)) {
+      return res.status(400).json({ error: 'month/year noto‘g‘ri (masalan month=8, year=2026)' });
+    }
+
     try {
-      const result = await pool.query(`
-        SELECT * FROM bola_kuni_all
-        WHERE EXTRACT(MONTH FROM sana) = $1 AND EXTRACT(YEAR FROM sana) = $2
-      `, [month, year]);
+      const result = await pool.query(
+        `SELECT * FROM bola_kuni_all WHERE ${monthRangeDate('sana', 1)}`,
+        [yearMonth]
+      );
       return res.json(result.rows);
     } catch (err) {
       return res.status(500).json({ error: err.message });

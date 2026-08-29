@@ -443,3 +443,32 @@ CREATE INDEX IF NOT EXISTS idx_bola_prp_is_active ON bola_prp(is_active);
 CREATE INDEX IF NOT EXISTS idx_bola_is_active ON bola(is_active);
 CREATE INDEX IF NOT EXISTS idx_bola_kun_created_at ON bola_kun(created_at);
 CREATE INDEX IF NOT EXISTS idx_bola_kun_bola_id ON bola_kun(bola_id);
+-- --------------------------------------------------------------------------
+-- Qo'shimcha indekslar: JOIN qilinadigan tashqi kalitlar va sana bo'yicha
+-- filtrlanadigan ustunlar. PostgreSQL tashqi kalitga avtomatik indeks
+-- yaratmaydi — indekssiz har JOIN butun jadvalni o'qiydi.
+-- --------------------------------------------------------------------------
+
+-- Tashqi kalitlar
+CREATE INDEX IF NOT EXISTS idx_xodim_lavozim_id ON xodim(lavozim_id);
+CREATE INDEX IF NOT EXISTS idx_bonus_xodim_id ON bonus(xodim_id);
+CREATE INDEX IF NOT EXISTS idx_jarima_xodim_id ON jarima(xodim_id);
+CREATE INDEX IF NOT EXISTS idx_kunlik_xodim_id ON kunlik(xodim_id);
+CREATE INDEX IF NOT EXISTS idx_oylik_type_xodim_id ON oylik_type(xodim_id);
+CREATE INDEX IF NOT EXISTS idx_guruh_xodim_id ON guruh(xodim_id);
+CREATE INDEX IF NOT EXISTS idx_bola_guruh_id ON bola(guruh_id);
+CREATE INDEX IF NOT EXISTS idx_bola_prp_guruh_id ON bola_prp(guruh_id);
+CREATE INDEX IF NOT EXISTS idx_bola_kun_darssana_id ON bola_kun(darssana_id);
+CREATE INDEX IF NOT EXISTS idx_bola_kun_prp_bola_id ON bola_kun_prp(bola_id);
+CREATE INDEX IF NOT EXISTS idx_bola_kun_prp_darssana_id ON bola_kun_prp(darssana_id);
+CREATE INDEX IF NOT EXISTS idx_taom_ishlatish_taom_id ON taom_ishlatish(taom_id);
+CREATE INDEX IF NOT EXISTS idx_xodim_one_day_workdays_id ON xodim_one_day(xodim_workdays_id);
+CREATE INDEX IF NOT EXISTS idx_group_admin_group_id ON group_admin(group_id);
+
+-- Sana ustunlari (oy bo'yicha filtrlash va ORDER BY uchun)
+CREATE INDEX IF NOT EXISTS idx_darssana_sana ON darssana(sana);
+CREATE INDEX IF NOT EXISTS idx_bola_kuni_all_sana ON bola_kuni_all(sana);
+CREATE INDEX IF NOT EXISTS idx_daromat_type_sana ON daromat_type(sana);
+CREATE INDEX IF NOT EXISTS idx_taom_ishlatish_sana ON taom_ishlatish(sana);
+CREATE INDEX IF NOT EXISTS idx_bola_pay_control_sana ON bola_pay_control(sana);
+CREATE INDEX IF NOT EXISTS idx_bola_pay_new_sana ON bola_pay_new(sana);

@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { monthRangeDate, isMonth } from '@/lib/sqlDate';
 
 async function handler(req, res) {
   const { id } = req.query;
@@ -10,8 +11,14 @@ async function handler(req, res) {
       let query = 'SELECT work_day FROM xodim_workdays WHERE xodim_id = $1';
       const params = [id];
       if (year && month) {
-        query += ` AND EXTRACT(YEAR FROM work_day) = $2 AND EXTRACT(MONTH FROM work_day) = $3`;
-        params.push(year, month);
+        // EXTRACT(...) ustun ustidan funksiya — indeks ishlamaydi. Oy oralig'i
+        // bir xil natija beradi va (xodim_id, work_day) indeksidan foydalanadi.
+        const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
+        if (!isMonth(yearMonth)) {
+          return res.status(400).json({ error: 'year/month noto‘g‘ri' });
+        }
+        params.push(yearMonth);
+        query += ` AND ${monthRangeDate('work_day', params.length)}`;
       }
       const result = await pool.query(query, params);
       return res.status(200).json(result.rows.map(r => r.work_day.toISOString().slice(0, 10)));

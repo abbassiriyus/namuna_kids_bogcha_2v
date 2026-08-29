@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { monthOrEarlierDate } from '@/lib/sqlDate';
 
 function monthRange(startYearMonth, endYearMonth) {
   const months = [];
@@ -32,7 +33,7 @@ async function handler(req, res) {
     const darsKunlariRes = await pool.query(
       `SELECT TO_CHAR(sana, 'YYYY-MM') AS oy, COUNT(*)::int AS soni
        FROM bola_kuni_all
-       WHERE TO_CHAR(sana, 'YYYY-MM') <= $1
+       WHERE ${monthOrEarlierDate('sana', 1)}
        GROUP BY TO_CHAR(sana, 'YYYY-MM')`,
       [oy]
     );
@@ -43,7 +44,7 @@ async function handler(req, res) {
       `SELECT bk.bola_id, TO_CHAR(a.sana, 'YYYY-MM') AS oy, COUNT(*)::int AS soni
        FROM bola_kun bk
        JOIN bola_kuni_all a ON a.id = bk.darssana_id
-       WHERE bk.holati = 1 AND TO_CHAR(a.sana, 'YYYY-MM') <= $1
+       WHERE bk.holati = 1 AND ${monthOrEarlierDate('a.sana', 1)}
        GROUP BY bk.bola_id, TO_CHAR(a.sana, 'YYYY-MM')`,
       [oy]
     );
@@ -57,7 +58,7 @@ async function handler(req, res) {
               COALESCE(SUM(prichislena), 0)::numeric AS prichislena,
               COALESCE(SUM(naqt_prichislena), 0)::numeric AS naqt_prichislena
        FROM daromat_type
-       WHERE TO_CHAR(sana, 'YYYY-MM') <= $1
+       WHERE ${monthOrEarlierDate('sana', 1)}
        GROUP BY bola_id, TO_CHAR(sana, 'YYYY-MM')`,
       [oy]
     );
@@ -74,7 +75,7 @@ async function handler(req, res) {
     const bonusRes = await pool.query(
       `SELECT id, bola_id, miqdor, sana, izoh, TO_CHAR(sana, 'YYYY-MM') AS oy
        FROM bola_pay_control
-       WHERE TO_CHAR(sana, 'YYYY-MM') <= $1
+       WHERE ${monthOrEarlierDate('sana', 1)}
        ORDER BY sana DESC`,
       [oy]
     );
@@ -92,7 +93,7 @@ async function handler(req, res) {
     const tolovOzgarishRes = await pool.query(
       `SELECT bola_id, miqdor, TO_CHAR(sana, 'YYYY-MM') AS oy
        FROM bola_pay_new
-       WHERE TO_CHAR(sana, 'YYYY-MM') <= $1
+       WHERE ${monthOrEarlierDate('sana', 1)}
        ORDER BY sana ASC`,
       [oy]
     );

@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { monthRangeTimestamptz } from '@/lib/sqlDate';
 
 async function handler(req, res) {
   if (req.method === 'GET') {
@@ -10,7 +11,7 @@ async function handler(req, res) {
             `SELECT b.*, x.name AS xodim_nomi
              FROM bonus b
              LEFT JOIN xodim x ON b.xodim_id = x.id
-             WHERE TO_CHAR(b.created_at, 'YYYY-MM') = $1
+             WHERE ${monthRangeTimestamptz('b.created_at', 1)}
              ORDER BY b.id DESC`,
             [month]
           )
